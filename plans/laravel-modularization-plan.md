@@ -1,3 +1,9 @@
+> ⚠️ **DEPRECATED — versi ringkas.** Dokumen ini digantikan oleh rencana detail di
+> [`laravel-modularization/`](laravel-modularization/README.md) yang berisi mapping file eksplisit per fase,
+> mekanisme alias, mitigasi morph/factory, dan progress ledger untuk eksekusi lintas sesi.
+> Perbedaan utama: shared code memakai **`app/Shared/`** (bukan `app/Core/`), model dipindah di **Fase 7**
+> (bukan Fase 0), dan `Audit`/`DataRetention` sudah dipetakan. Baca folder baru; dokumen ini hanya arsip.
+
 # Rencana Modularisasi Laravel Backend Finlite
 
 ## Context
