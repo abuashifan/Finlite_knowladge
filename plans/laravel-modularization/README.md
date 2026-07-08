@@ -2,6 +2,13 @@
 
 > **Agent: baca file ini PERTAMA setiap sesi.** Ia menentukan fase mana yang sedang berjalan.
 > Dokumen ini menggantikan `plans/laravel-modularization-plan.md` yang lama (versi ringkas, kurang detail).
+>
+> ✅ **MODULARISASI SELESAI 2026-07-08.** Semua 9 fase (0–8) hijau di branch
+> `claude/backend-modular-refactor-plan-o1fu69`. Alias bridge dihapus, morphMap
+> dipertahankan permanen, architecture tests menjaga batas modul. Coupling nyata
+> yang belum dilepas tercatat sebagai baseline known-coupling di
+> `tests/Feature/Architecture/ModuleBoundariesTest.php` (bukan blocker; target
+> jangka panjang: kurangi via kontrak/event).
 
 Rencana ini memecah refactor backend Laravel menjadi arsitektur modular ke dalam **9 fase yang berdiri sendiri**. Tiap fase dirancang bisa dikerjakan di **sesi terpisah (cold start)** — agent tidak perlu mengingat pekerjaan fase sebelumnya, cukup membaca ledger ini + file fase yang relevan.
 
@@ -28,7 +35,7 @@ Rencana ini memecah refactor backend Laravel menjadi arsitektur modular ke dalam
 | 5 | Inventory · Sales · Purchase | `phase-5-inventory-sales-purchase.md` | ✅ Selesai | `545effc` |
 | 6 | FixedAssets · Reports · Dashboard | `phase-6-fixedassets-reports-dashboard.md` | ✅ Selesai | `f9608dc` |
 | 7 | Model Migration (central + tenant) | `phase-7-model-migration.md` | ✅ Selesai | `9fb77cf` |
-| 8 | Cleanup + Architecture Tests | `phase-8-cleanup-archtests.md` | ⬜ Belum | — |
+| 8 | Cleanup + Architecture Tests | `phase-8-cleanup-archtests.md` | ✅ Selesai | `0335c5c` |
 
 > Status yang boleh: `⬜ Belum`, `🔄 Berjalan`, `✅ Selesai`. Kalau `🔄 Berjalan` tertinggal dari sesi sebelumnya, jalankan Prasyarat fase itu untuk menentukan seberapa jauh sudah dikerjakan sebelum melanjutkan.
 
