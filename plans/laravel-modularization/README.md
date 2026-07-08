@@ -22,7 +22,7 @@ Rencana ini memecah refactor backend Laravel menjadi arsitektur modular ke dalam
 |------|-------|------|--------|--------|
 | 0 | Shared Foundation (tanpa Model) | `phase-0-shared.md` | ✅ Selesai | `d1ab6b7` |
 | 1 | Auth · Companies · Tenant | `phase-1-auth-companies-tenant.md` | ✅ Selesai | `27ab9e5` |
-| 2 | Access · Settings · Setup | `phase-2-access-settings-setup.md` | ⬜ Belum | — |
+| 2 | Access · Settings · Setup | `phase-2-access-settings-setup.md` | ✅ Selesai | `05ee6b1` |
 | 3 | MasterData · Accounting · Journal | `phase-3-masterdata-accounting-journal.md` | ⬜ Belum | — |
 | 4 | CashBank · OpeningBalance · Budget | `phase-4-cashbank-openingbalance-budget.md` | ⬜ Belum | — |
 | 5 | Inventory · Sales · Purchase | `phase-5-inventory-sales-purchase.md` | ⬜ Belum | — |
