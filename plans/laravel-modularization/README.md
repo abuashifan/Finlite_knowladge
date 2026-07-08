@@ -26,7 +26,7 @@ Rencana ini memecah refactor backend Laravel menjadi arsitektur modular ke dalam
 | 3 | MasterData · Accounting · Journal | `phase-3-masterdata-accounting-journal.md` | ✅ Selesai | `cf56669` |
 | 4 | CashBank · OpeningBalance · Budget | `phase-4-cashbank-openingbalance-budget.md` | ✅ Selesai | `dc2f36e` |
 | 5 | Inventory · Sales · Purchase | `phase-5-inventory-sales-purchase.md` | ✅ Selesai | `545effc` |
-| 6 | FixedAssets · Reports · Dashboard | `phase-6-fixedassets-reports-dashboard.md` | ⬜ Belum | — |
+| 6 | FixedAssets · Reports · Dashboard | `phase-6-fixedassets-reports-dashboard.md` | ✅ Selesai | `f9608dc` |
 | 7 | Model Migration (central + tenant) | `phase-7-model-migration.md` | ⬜ Belum | — |
 | 8 | Cleanup + Architecture Tests | `phase-8-cleanup-archtests.md` | ⬜ Belum | — |
 
