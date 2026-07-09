@@ -70,10 +70,40 @@ GROUP BY product_id dari lines → `{ rows: [{ product_id, product_code, product
 - **Dokumentasikan kontrak response** (contoh JSON) di bawah — Fase 6 mengandalkannya.
 - Update ledger Fase 5 → ✅.
 
-## Kontrak response (isi setelah implementasi)
+## Kontrak response (terisi — Fase 6 mengandalkannya)
 
+Semua endpoint dibungkus `ApiResponse::successResponse` → `{ success, message, data }`.
+Hanya bill `status = 'posted'` yang dihitung (draft/void di-exclude). Sumber:
+`vendor_bills` (kolom `bill_date`, `vendor_id`, `subtotal_after_discount`, `tax_total`,
+`grand_total`) + `vendor_bill_lines` (`quantity`, `subtotal_after_discount`, `line_total`,
+`product_id`, `product_code`).
+
+**`GET /reports/purchase/summary`** — param: `start_date`, `end_date`, `group_by` (day|month, default month), `department_id`, `project_id`.
+```json
+{ "data": {
+  "rows": [ { "period": "2026-06", "bill_count": 2, "subtotal": 250.0, "tax": 0.0, "total": 250.0 } ],
+  "totals": { "bill_count": 2, "subtotal": 250.0, "tax": 0.0, "total": 250.0 }
+} }
 ```
-GET /reports/purchase/summary     → { data: { rows: [...], totals: {...} } }
-GET /reports/purchase/by-vendor   → { data: { rows: [...], totals: {...} } }
-GET /reports/purchase/by-product  → { data: { rows: [...], totals: {...} } }
+`period` = `YYYY-MM` (month) atau `YYYY-MM-DD` (day). Empty period → `rows: []`.
+
+**`GET /reports/purchase/by-vendor`** — param: date + dimensi + `vendor_id` (opsional). Urut `total` desc.
+```json
+{ "data": {
+  "rows": [ { "vendor_id": 1, "vendor_name": "Vendor Alpha", "bill_count": 2, "subtotal": 250.0, "tax": 0.0, "total": 250.0 } ],
+  "totals": { "bill_count": 3, "subtotal": 450.0, "tax": 0.0, "total": 450.0 }
+} }
 ```
+
+**`GET /reports/purchase/by-product`** — param: date + dimensi + `product_id` (opsional). Hanya line dengan `product_id` non-null (join `products`). Urut `total` desc.
+```json
+{ "data": {
+  "rows": [ { "product_id": 1, "product_code": "PRD-A", "product_name": "Product Alpha", "qty": 5.0, "subtotal": 500.0, "total": 500.0 } ],
+  "totals": { "qty": 6.0, "subtotal": 700.0, "total": 700.0 }
+} }
+```
+
+### Catatan implementasi
+- **Simetris Fase 3** (sales). Service pakai driver-detect SQLite/MySQL untuk `strftime`/`DATE_FORMAT` di summary; `groupByRaw`/`orderByRaw` dengan ekspresi penuh (alias tidak jalan di SQLite).
+- **Feature test seed langsung** `VendorBill`/`VendorBillLine` via model (bukan lewat HTTP create). Alasan: di branch modular ini `VendorBillService::withDraftPurchaseExpenseSnapshots()` mewajibkan setiap line = inventory stock (butuh warehouse) atau fixed_asset — expense line polos ditolak, jadi jalur create+post HTTP tak bisa menghasilkan bill sederhana untuk uji agregasi (VendorBillTest existing pun merah karena aturan ini). Seed langsung ke tabel = deterministik & tepat sasaran untuk laporan.
+- `product_name`/`product_code` (bukan `name`/`code`) — kolom aktual `products`.

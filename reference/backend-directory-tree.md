@@ -1,11 +1,3 @@
-<!-- =====================================================================
-     MIRROR — SUMBER KEBENARAN: laravel_backend/docs/backend-directory-tree.md
-     File ini SALINAN untuk knowledge base Finlite_Knowladge.
-     Jangan edit di sini saja: update dulu file kanonik di repo backend,
-     lalu salin ulang ke sini. Lihat reference/README.md untuk aturan sync.
-     Terakhir disinkronkan: 2026-07-08
-===================================================================== -->
-
 # Backend Directory Tree
 
 Generated: 2026-07-08 (regenerated setelah modularisasi DDD Fase 0–8)
@@ -118,11 +110,17 @@ Excluded intentionally: `.git`, `vendor`, `node_modules`, `storage`, `bootstrap/
 │   │   │       └── Concerns
 │   │   ├── Reports
 │   │   │   ├── Controllers
+│   │   │   │   ├── Purchase
+│   │   │   │   └── Sales
 │   │   │   ├── Providers
 │   │   │   ├── Requests
-│   │   │   │   └── Concerns
+│   │   │   │   ├── Concerns
+│   │   │   │   ├── Purchase
+│   │   │   │   └── Sales
 │   │   │   ├── Routes
 │   │   │   └── Services
+│   │   │       ├── Purchase
+│   │   │       └── Sales
 │   │   ├── Sales
 │   │   │   ├── Controllers
 │   │   │   ├── Models
