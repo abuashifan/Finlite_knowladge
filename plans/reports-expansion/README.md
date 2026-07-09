@@ -38,7 +38,7 @@ ledger ini + `00-conventions.md` + file fase yang relevan.
 | 3 | Backend Agregasi Penjualan | `phase-3-backend-sales-aggregation.md` | B | ✅ Selesai | — |
 | 4 | Frontend Laporan Penjualan | `phase-4-frontend-sales-reports.md` | B | ✅ Selesai | a3150e9 |
 | 5 | Backend Agregasi Pembelian | `phase-5-backend-purchase-aggregation.md` | B | ✅ Selesai | 22d56a5 |
-| 6 | Frontend Laporan Pembelian | `phase-6-frontend-purchase-reports.md` | B | ⬜ Belum | — |
+| 6 | Frontend Laporan Pembelian | `phase-6-frontend-purchase-reports.md` | B | ✅ Selesai | 019c0a3 |
 | 7 | Buku Besar: Pisah Ringkasan/Rincian + Jurnal per Modul | `phase-7-gl-detail-journals.md` | B | ⬜ Belum | — |
 | 8 | Inventory: Umur Persediaan, Jurnal Persediaan, Kertas Kerja Opname | `phase-8-inventory-reports.md` | B | ⬜ Belum | — |
 | 9 | Laporan Keuangan Lanjutan (Laba Ditahan, Ekuitas, Arus Kas Langsung) | `phase-9-advanced-financial.md` | C | ⬜ Belum | — |
