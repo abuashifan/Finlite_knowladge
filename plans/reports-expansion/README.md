@@ -46,6 +46,7 @@ ledger ini + `00-conventions.md` + file fase yang relevan.
 | 11 | Laporan Pajak PPN (Masukan/Keluaran) | `phase-11-tax-ppn.md` | C | ⬜ Belum | — |
 | 12 | Ekspor E-Faktur DJP (CSV) | `phase-12-efaktur-export.md` | C | ⬜ Belum | — |
 | 13 | Laporan Tersimpan (Saved Reports) | `phase-13-saved-reports.md` | C | ⬜ Belum | — |
+| 14 | Modal Parameter Laporan (Filter Data + Column Selection) | `phase-14-report-parameter-modal.md` | B | ⬜ Belum | — |
 
 > Status yang boleh: `⬜ Belum`, `🔄 Berjalan`, `✅ Selesai`. Kalau `🔄 Berjalan` tertinggal dari sesi sebelumnya, jalankan Prasyarat fase itu untuk menentukan seberapa jauh sudah dikerjakan sebelum melanjutkan.
 
