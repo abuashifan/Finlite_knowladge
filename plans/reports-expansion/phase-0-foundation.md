@@ -51,6 +51,47 @@ Fase 3–8 akan butuh type/adapter untuk laporan "rows + totals". Siapkan pola r
 **🗑️ Hapus**
 - Tidak ada.
 
+## T0.4 — Hasil Mapping Laporan design-I2 → Fase
+
+> Tabel ini dibuat saat Fase 0 dijalankan (2026-07-09). Status kolom Finlite diambil dari design-I2 §3–4.
+
+| Domain | Laporan (representatif) | Status Finlite | Fase yang Menangani |
+|---|---|---|---|
+| **Keuangan** | Neraca, Laba Rugi, Arus Kas, Ringkasan | ✅ ada | — (sudah selesai) |
+| **Keuangan** | Laba Ditahan, Ekuitas, Arus Kas Langsung | ❌ belum | Fase 9 |
+| **Keuangan** | Neraca/L&R Multi Periode & Perbandingan | ❌ belum | Fase 10 |
+| **Buku Besar** | Buku Besar (ringkasan per akun) | ✅ ada | — |
+| **Buku Besar** | Buku Besar per Akun (drill-down) | ✅ ada | — |
+| **Buku Besar** | Neraca Saldo | ✅ ada | — |
+| **Buku Besar** | Semua Jurnal / Jurnal per Modul / Jurnal Transaksi | ❌ belum | Fase 7 |
+| **Penjualan** | Ringkasan Penjualan per Periode | ❌ belum | Fase 3 (BE) → Fase 4 (FE) |
+| **Penjualan** | Penjualan per Pelanggan | ❌ belum | Fase 3 (BE) → Fase 4 (FE) |
+| **Penjualan** | Penjualan per Barang | ❌ belum | Fase 3 (BE) → Fase 4 (FE) |
+| **Pembelian** | Ringkasan Pembelian per Periode | ❌ belum | Fase 5 (BE) → Fase 6 (FE) |
+| **Pembelian** | Pembelian per Supplier | ❌ belum | Fase 5 (BE) → Fase 6 (FE) |
+| **Pembelian** | Pembelian per Barang | ❌ belum | Fase 5 (BE) → Fase 6 (FE) |
+| **AR / Piutang** | AR Aging | ✅ ada | — |
+| **AR / Piutang** | Faktur Belum Lunas, Subledger Agregat | ❌ belum | Fase 2 |
+| **AP / Hutang** | AP Aging | ✅ ada | — |
+| **AP / Hutang** | Hutang Belum Lunas, Subledger Agregat | ❌ belum | Fase 2 |
+| **Rekonsiliasi** | Rekonsiliasi AR/AP/Inventory/GRNI/Deposit | ✅ ada (6 tab di ReconciliationPage) | — (halaman sudah ada, katalog diisi Fase 0) |
+| **Persediaan** | Laporan Stok, Analisis Inventori | ✅ ada | — |
+| **Persediaan** | Umur Persediaan, Jurnal Persediaan, Kertas Kerja Opname | ❌ belum | Fase 8 |
+| **Aktiva Tetap** | Register, Penyusutan, Pelepasan, Rekonsiliasi | ✅ ada (4 halaman) | — (Fase 1 verifikasi) |
+| **Kas & Bank** | Mutasi Rekening | ✅ ada | — |
+| **Pajak** | PPN Masukan / PPN Keluaran | ❌ belum | Fase 11 (BE+FE) |
+| **E-Faktur** | Export E-Faktur DJP CSV | ❌ belum | Fase 12 |
+| **Laporan Tersimpan** | Saved Reports (user custom) | ❌ belum | Fase 13 |
+| **Modal Parameter** | Floating modal filter + column selection | ❌ belum | Fase 14 |
+
+**Audit temuan lain (2026-07-09):**
+- Kategori `reconciliation` di `REPORT_DOMAINS` sebelumnya `reports: []` → diisi 1 entri menunjuk `/reports/reconciliation` (ReconciliationPage sudah ada dengan 6 tab).
+- Semua `path` non-`comingSoon` di katalog sudah punya route di `routes.tsx` ✅
+- Ribbon `reports` di `moduleConfig.ts`: 10 kategori, sesuai dengan 10 domain di `REPORT_DOMAINS` ✅
+- FA 4 entri sudah ada di routes dan halaman ✅; tidak ada `comingSoon` pada FA ✅
+- Route `/reports/budget/comparison` ada di `routes.tsx` tapi tidak di `REPORT_DOMAINS` — ini disengaja, budget comparison diakses dari modul Budget, bukan dari katalog Reports.
+- Helper `num/str/asArray/asRecord` ada di `reportsApi.ts` sebagai fungsi lokal (tidak diekspor) — sesuai keputusan T0.3 konservatif, dibiarkan lokal.
+
 ## Checklist Verifikasi
 
 - [ ] `npm run build` 0 error, `npm run lint` 0 error.

@@ -32,7 +32,7 @@ ledger ini + `00-conventions.md` + file fase yang relevan.
 
 | Fase | Judul | File | Prioritas | Status | Commit |
 |------|-------|------|-----------|--------|--------|
-| 0 | Fondasi & Audit Nav Shell | `phase-0-foundation.md` | — | ⬜ Belum | — |
+| 0 | Fondasi & Audit Nav Shell | `phase-0-foundation.md` | — | ✅ Selesai | 256a476 |
 | 1 | Quick Wins Frontend-Only (backend siap) | `phase-1-quick-wins-frontend.md` | A | ⬜ Belum | — |
 | 2 | AR/AP Outstanding + Subledger Agregat | `phase-2-ar-ap-outstanding.md` | A/B | ⬜ Belum | — |
 | 3 | Backend Agregasi Penjualan | `phase-3-backend-sales-aggregation.md` | B | ⬜ Belum | — |
