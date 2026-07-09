@@ -36,7 +36,7 @@ ledger ini + `00-conventions.md` + file fase yang relevan.
 | 1 | Quick Wins Frontend-Only (backend siap) | `phase-1-quick-wins-frontend.md` | A | ✅ Selesai | 64f6264 |
 | 2 | AR/AP Outstanding + Subledger Agregat | `phase-2-ar-ap-outstanding.md` | A/B | ✅ Selesai | bc07c7a |
 | 3 | Backend Agregasi Penjualan | `phase-3-backend-sales-aggregation.md` | B | ✅ Selesai | — |
-| 4 | Frontend Laporan Penjualan | `phase-4-frontend-sales-reports.md` | B | ⬜ Belum | — |
+| 4 | Frontend Laporan Penjualan | `phase-4-frontend-sales-reports.md` | B | ✅ Selesai | a3150e9 |
 | 5 | Backend Agregasi Pembelian | `phase-5-backend-purchase-aggregation.md` | B | ⬜ Belum | — |
 | 6 | Frontend Laporan Pembelian | `phase-6-frontend-purchase-reports.md` | B | ⬜ Belum | — |
 | 7 | Buku Besar: Pisah Ringkasan/Rincian + Jurnal per Modul | `phase-7-gl-detail-journals.md` | B | ⬜ Belum | — |
