@@ -81,8 +81,41 @@ Bangun 3 endpoint inti (design-I2 §3.3 prioritas):
 
 > Tempel contoh JSON aktual tiap endpoint di sini setelah selesai, agar Fase 4 punya sumber kebenaran shape tanpa menjalankan backend.
 
+```json
+// GET /api/reports/sales/summary?start_date=2026-01-01&end_date=2026-12-31&group_by=month
+{
+  "data": {
+    "rows": [
+      { "period": "2026-01", "invoice_count": 5, "subtotal": 10000000, "tax": 1000000, "total": 11000000 }
+    ],
+    "totals": { "invoice_count": 5, "subtotal": 10000000, "tax": 1000000, "total": 11000000 }
+  }
+}
+
+// GET /api/reports/sales/by-customer?start_date=2026-01-01&end_date=2026-12-31
+{
+  "data": {
+    "rows": [
+      { "customer_id": 1, "customer_name": "PT ABC", "invoice_count": 3, "subtotal": 5000000, "tax": 500000, "total": 5500000 }
+    ],
+    "totals": { "invoice_count": 3, "subtotal": 5000000, "tax": 500000, "total": 5500000 }
+  }
+}
+
+// GET /api/reports/sales/by-product?start_date=2026-01-01&end_date=2026-12-31
+{
+  "data": {
+    "rows": [
+      { "product_id": 10, "product_code": "P-001", "product_name": "Widget A", "qty": 25.0, "subtotal": 2500000, "total": 2500000 }
+    ],
+    "totals": { "qty": 25.0, "subtotal": 2500000, "total": 2500000 }
+  }
+}
 ```
-GET /reports/sales/summary        → { data: { rows: [...], totals: {...} } }
-GET /reports/sales/by-customer    → { data: { rows: [...], totals: {...} } }
-GET /reports/sales/by-product     → { data: { rows: [...], totals: {...} } }
-```
+
+**Catatan implementasi:**
+- Hanya faktur status `posted` yang dihitung (draft/approved/void dikecualikan)
+- `SalesByProductReportService` join ke `sales_invoice_lines` — hanya lines yang punya `product_id` (excludes description-only lines)
+- `SalesSummaryReportService` deteksi driver untuk kompatibilitas SQLite (test) & MySQL (prod): `strftime` vs `DATE_FORMAT`
+- Cross-module read: `SalesInvoice`, `SalesInvoiceLine` dibaca dari modul Sales; tidak ada perubahan di model Sales
+- Model Sales yang sebelumnya missing cross-module imports (`Contact`, `ChartOfAccount`, `JournalEntry`, `Product`, `Unit`, dll) sudah ditambahkan imports-nya sebagai side fix
