@@ -21,25 +21,25 @@ Menutup gap inventory design-I2 §3.7 di luar yang sudah ada (stock balance/move
 ## Daftar tugas
 
 ### T8.1 — Umur Persediaan — `GET /inventory/reports/aging` (backend baru)
-- [ ] Service: hitung umur stok per produk/gudang berdasarkan tanggal penerimaan terakhir / rata-rata, bucket (0-30, 31-60, 61-90, >90 hari). Return `{ rows: [{ product_id, product_name, warehouse_name, qty, buckets:{...}, value }], totals }`. **Klarifikasi metode aging dengan data** (received date vs last movement) — dokumentasikan asumsi.
-- [ ] FormRequest (as_of_date, warehouse_id opsional), controller, route `permission:inventory.stock.view` atau `reports.view`, feature test.
-- [ ] Frontend: type `InventoryAgingReport`, adapter, `InventoryAgingReportPage.tsx`, route `/reports/inventory-aging`, katalog `inventory`.
+- [x] Service: hitung umur stok per produk/gudang berdasarkan tanggal penerimaan terakhir / rata-rata, bucket (0-30, 31-60, 61-90, >90 hari). Return `{ rows: [{ product_id, product_name, warehouse_name, qty, buckets:{...}, value }], totals }`. **Klarifikasi metode aging dengan data** (received date vs last movement) — dokumentasikan asumsi.
+- [x] FormRequest (as_of_date, warehouse_id opsional), controller, route `permission:inventory.stock.view` atau `reports.view`, feature test.
+- [x] Frontend: type `InventoryAgingReport`, adapter, `InventoryAgingReportPage.tsx`, route `/reports/inventory-aging`, katalog `inventory`.
 
 ### T8.2 — Jurnal Persediaan — `GET /inventory/reports/journal` (atau reuse journal report Fase 7)
-- [ ] Bila Fase 7 sudah membuat journal report dengan filter source, **reuse** dengan filter source inventory (movement/adjustment). Tambah entri katalog `inventory` yang membuka `JournalListReportPage` dengan filter inventory. Tidak perlu backend baru bila Fase 7 memadai.
-- [ ] Bila Fase 7 belum jalan, buat endpoint kecil khusus jurnal inventory ATAU tandai `comingSoon` sampai Fase 7. Default: **depend on Fase 7 bila sudah selesai; else comingSoon**.
+- [x] Bila Fase 7 sudah membuat journal report dengan filter source, **reuse** dengan filter source inventory (movement/adjustment). Tambah entri katalog `inventory` yang membuka `JournalListReportPage` dengan filter inventory. Tidak perlu backend baru bila Fase 7 memadai.
+- [x] Bila Fase 7 belum jalan, buat endpoint kecil khusus jurnal inventory ATAU tandai `comingSoon` sampai Fase 7. Default: **depend on Fase 7 bila sudah selesai; else comingSoon**.
 
 ### T8.3 — Kertas Kerja Fisikal (Opname Worksheet) — `GET /inventory/reports/opname-worksheet` (backend baru)
-- [ ] Service dari data `StockOpname`: qty sistem vs qty fisik vs selisih per produk/gudang untuk satu sesi opname. Return `{ opname_id, rows: [{ product, warehouse, system_qty, physical_qty, difference, value_difference }], totals }`.
-- [ ] FormRequest (opname_id atau periode), controller, route, feature test.
-- [ ] Frontend: type, adapter, `OpnameWorksheetReportPage.tsx`, route `/reports/inventory-opname`, katalog `inventory`.
+- [x] Service dari data `StockOpname`: qty sistem vs qty fisik vs selisih per produk/gudang untuk satu sesi opname. Return `{ opname_id, rows: [{ product, warehouse, system_qty, physical_qty, difference, value_difference }], totals }`.
+- [x] FormRequest (opname_id atau periode), controller, route, feature test.
+- [x] Frontend: type, adapter, `OpnameWorksheetReportPage.tsx`, route `/reports/inventory-opname`, katalog `inventory`.
 
 ### T8.4 — Valuasi Rincian
-- [ ] Cek apakah endpoint `valuation` bisa mode detail (per movement/lot). Bila mudah, tambah mode `detail`; bila tidak, tandai `comingSoon` (average cost membuat "rincian FIFO" tidak relevan — dokumentasikan bahwa rincian = per-warehouse breakdown, bukan lot).
+- [~] **DITUNDA (bukan comingSoon di katalog).** Finlite memakai average cost — tidak ada lot/layer, sehingga "rincian valuasi per lot/FIFO" tidak relevan. Rincian per-gudang sudah tersedia lewat Laporan Stok (saldo per produk×gudang) + Analisis Inventori (valuasi). Tidak ada entri katalog baru ditambah agar tidak menyesatkan. Bila kelak diperlukan breakdown per-movement, dapat memakai Kartu Stok existing. Keputusan didokumentasikan di sini.
 
 ### T8.5 — Katalog & struktur
-- [ ] Tambah entri kategori `inventory`: "Umur Persediaan", "Jurnal Persediaan", "Kertas Kerja Opname", (opsional "Valuasi Rincian").
-- [ ] `struktur_frontend.md` daftarkan page baru.
+- [x] Tambah entri kategori `inventory`: "Umur Persediaan", "Jurnal Persediaan", "Kertas Kerja Opname", (opsional "Valuasi Rincian").
+- [x] `struktur_frontend.md` daftarkan page baru.
 
 ## Peta File
 
@@ -76,9 +76,9 @@ Menutup gap inventory design-I2 §3.7 di luar yang sudah ada (stock balance/move
 
 ## Checklist Verifikasi
 
-- [ ] `npm run build` 0 error, `npm run lint` 0 error.
-- [ ] Backend: `php artisan test --filter=InventoryAging`/`OpnameWorksheet` hijau; `pint --test` hijau; route count naik.
-- [ ] Runtime company 2: umur persediaan bucket masuk akal; opname worksheet selisih = fisik − sistem.
+- [x] `npm run build` 0 error, `npm run lint` 0 error.
+- [x] Backend: `php artisan test --filter=InventoryAging`/`OpnameWorksheet` hijau; `pint --test` hijau; route count naik.
+- [x] Runtime company 2: umur persediaan bucket masuk akal; opname worksheet selisih = fisik − sistem.
 
 ## Git Checkpoint
 
