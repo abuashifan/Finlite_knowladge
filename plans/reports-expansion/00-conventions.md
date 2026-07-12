@@ -70,9 +70,9 @@ export default function XxxReportPage() {
   // ...
   return (
     <WorkspaceLayout title="..." breadcrumb={[{ label: 'Laporan', path: '/reports' }, { label: '...' }]}>
-      {showFilter
-        ? <ReportFilterParameter params={params} onChange={...} onSubmit={handleSubmit} isLoading={isLoading} />
-        : <ReportCompactBar params={activeParams!} onEdit={() => setShowFilter(true)} />}
+      {activeParams && <ReportCompactBar params={activeParams} onOpenModal={() => setShowFilter(true)} />}
+      <ReportParameterModal open={showFilter} onClose={() => setShowFilter(false)} params={params} onChange={...} onSubmit={handleSubmit} isLoading={isLoading}
+        /* opsional Fase 14: dimensions / extras / contextFilters / columns+visibleColumns+onColumnsChange */ />
       {isLoading && <Loading/>}
       {isError && <ReportError onRetry={() => refetch()} />}
       {/* tabel + TablePagination + tombol exportCsv */}
@@ -83,8 +83,8 @@ export default function XxxReportPage() {
 
 Komponen wajib dipakai (JANGAN buat baru bila sudah ada):
 - `WorkspaceLayout` — shell halaman + breadcrumb.
-- `ReportFilterParameter` — panel filter (date range + `dimensions`/`extras` props).
-- `ReportCompactBar` — bar ringkas setelah submit.
+- `ReportParameterModal` — modal parameter (Periode + Filter Data + Kolom). Props: `open`/`onClose`, `params`/`onChange`/`onSubmit`, `mode`, `isLoading`, `dimensions`, `extras`, `contextFilters` (customer/supplier/vendor/product/account/contact/status — filter backend-side lewat query param), `columns`/`visibleColumns`/`onColumnsChange` (column selection, state di page). Menggantikan `ReportFilterParameter` (dihapus, Fase 14).
+- `ReportCompactBar` — bar ringkas setelah submit; props `onOpenModal` (buka modal), opsional `filterSummary`/`columnSummary`.
 - `ReportError` — error state + retry.
 - `TablePagination` (`@/components/shared/table/TablePagination`) — pagination client-side.
 - `exportCsv` (`@/lib/exportCsv`) — tombol Export CSV.
