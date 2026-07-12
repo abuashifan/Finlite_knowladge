@@ -19,20 +19,20 @@ Laporan perbandingan antar-periode design-I2 §3.2: Neraca Multi-Periode, L&R Mu
 ## Daftar tugas
 
 ### T10.1 — Backend: dukung multi-periode (bila opsi a)
-- [ ] Extend `ProfitLossService` & `BalanceSheetService` untuk menerima `periods[]` (mis. `[{start,end,label}, ...]`) → return sections dengan nilai per periode. Atau endpoint baru `/reports/profit-loss/multi-period` & `/reports/balance-sheet/multi-period`.
-- [ ] FormRequest validasi array periode (max N, format tanggal). Controller/route/feature test.
+- [x] Extend `ProfitLossService` & `BalanceSheetService` untuk menerima `periods[]` (mis. `[{start,end,label}, ...]`) → return sections dengan nilai per periode. Atau endpoint baru `/reports/profit-loss/multi-period` & `/reports/balance-sheet/multi-period`.
+- [x] FormRequest validasi array periode (max N, format tanggal). Controller/route/feature test.
 
 ### T10.2 — Frontend: Neraca Multi-Periode
-- [ ] Type + adapter (sections dengan nilai per kolom periode). Page `BalanceSheetMultiPeriodPage.tsx` — tabel dengan kolom per periode. Selector periode (2–4 kolom). Route `/reports/balance-sheet-multi`, katalog `financial`.
+- [x] Type + adapter (sections dengan nilai per kolom periode). Page `BalanceSheetMultiPeriodPage.tsx` — tabel dengan kolom per periode. Selector periode (2–4 kolom). Route `/reports/balance-sheet-multi`, katalog `financial`.
 
 ### T10.3 — Frontend: L&R Multi-Periode
-- [ ] Simetris T10.2: `ProfitLossMultiPeriodPage.tsx`, route `/reports/profit-loss-multi`, katalog `financial`.
+- [x] Simetris T10.2: `ProfitLossMultiPeriodPage.tsx`, route `/reports/profit-loss-multi`, katalog `financial`.
 
 ### T10.4 — Perbandingan Bulan (side-by-side)
-- [ ] Varian dari multi-periode dengan preset bulan Jan..Des tahun berjalan. Bisa mode di halaman multi-periode (preset "12 bulan") daripada halaman terpisah. Default: **mode preset**, bukan halaman baru.
+- [x] Varian dari multi-periode dengan preset bulan Jan..Des tahun berjalan. Bisa mode di halaman multi-periode (preset "12 bulan") daripada halaman terpisah. Default: **mode preset**, bukan halaman baru.
 
 ### T10.5 — Katalog & struktur
-- [ ] Entri `financial`: "Neraca Multi-Periode", "Laba Rugi Multi-Periode". `struktur_frontend.md`.
+- [x] Entri `financial`: "Neraca Multi-Periode", "Laba Rugi Multi-Periode". `struktur_frontend.md`.
 
 ## Peta File
 
@@ -64,10 +64,10 @@ Laporan perbandingan antar-periode design-I2 §3.2: Neraca Multi-Periode, L&R Mu
 
 ## Checklist Verifikasi
 
-- [ ] `npm run build`/`lint` 0 error.
-- [ ] Backend (bila opsi a): test multi-period hijau; `pint --test` hijau; route naik.
-- [ ] Runtime: kolom per periode benar; total tiap kolom = laporan single-period untuk periode itu (sanity vs Fase existing).
-- [ ] Performa: N periode tidak menyebabkan timeout (bila opsi b, batasi N).
+- [x] `npm run build`/`lint` 0 error.
+- [x] Backend (bila opsi a): test multi-period hijau; `pint --test` hijau; route naik.
+- [x] Runtime: kolom per periode benar; total tiap kolom = laporan single-period untuk periode itu (sanity vs Fase existing).
+- [x] Performa: N periode tidak menyebabkan timeout (bila opsi b, batasi N).
 
 ## Git Checkpoint
 
@@ -75,6 +75,30 @@ Laporan perbandingan antar-periode design-I2 §3.2: Neraca Multi-Periode, L&R Mu
 - Commit frontend: `feat(reports): multi-period comparison pages (phase 10)`.
 - Update ledger Fase 10 → ✅.
 
-## Kontrak API multi-periode (isi setelah diputuskan)
+## Kontrak API multi-periode (DIPUTUSKAN)
 
-> Catat keputusan (a)/(b) + shape request/response di sini sebelum coding frontend.
+**Keputusan: Opsi (a)** — backend menerima `periods[]`, kembalikan kolom per periode dalam 1 request (user, 2026-07-12). Implementasi: `MultiPeriodReportService` MEMANGGIL ULANG `ProfitLossService`/`BalanceSheetService` per periode lalu menggabung `sections[].accounts[]` di-align per akun → tiap kolom dijamin identik dengan laporan single-period (dibuktikan test).
+
+**Endpoint** (permission `reports.view`):
+- `GET /reports/profit-loss/multi-period` — kolom = rentang `start_date..end_date` per periode.
+- `GET /reports/balance-sheet/multi-period` — kolom = as_of `end_date` per periode (Neraca bersifat point-in-time).
+
+**Request** (query, `periods[]` bracket-notation; maks 12 periode):
+```
+periods[0][start_date]=2026-01-01&periods[0][end_date]=2026-01-31&periods[0][label]=Jan
+periods[1][start_date]=2026-02-01&periods[1][end_date]=2026-02-28&periods[1][label]=Feb
+[&department_id=..&project_id=..]
+```
+
+**Response** (`data`):
+```
+{ valid, report_type: 'profit_loss'|'balance_sheet',
+  periods: [{ label, start_date, end_date }],
+  sections: [{ key, label,
+    rows: [{ account_id, account_code, account_name, account_type, values: number[] }],  // values sejajar periods[]
+    totals: number[] }],                                                                   // per periode
+  summary_totals: [ per periode ] }
+    // P&L:   { total_revenue, total_expense, net_profit_or_loss }
+    // Neraca: { total_assets, total_liabilities, total_equity, total_liabilities_and_equity, current_year_profit_or_loss, is_balanced }
+```
+Frontend serialisasi via `buildMultiPeriodQuery()` di `reportsApi.ts` (axios default tidak men-serialize nested array-of-object). Baris sintetis (mis. "Laba/Rugi Tahun Berjalan" di ekuitas) punya `account_id: null`.

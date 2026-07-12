@@ -42,7 +42,7 @@ ledger ini + `00-conventions.md` + file fase yang relevan.
 | 7 | Buku Besar: Pisah Ringkasan/Rincian + Jurnal per Modul | `phase-7-gl-detail-journals.md` | B | ✅ Selesai | BE cb36441 / FE 399848c |
 | 8 | Inventory: Umur Persediaan, Jurnal Persediaan, Kertas Kerja Opname | `phase-8-inventory-reports.md` | B | ✅ Selesai | BE b0bf6a6 / FE f3fa293 |
 | 9 | Laporan Keuangan Lanjutan (Laba Ditahan, Ekuitas, Arus Kas Langsung) | `phase-9-advanced-financial.md` | C | ✅ Selesai | BE 45365fe / FE 278c343 |
-| 10 | Multi-Periode (Neraca/L&R Perbandingan) | `phase-10-multi-period.md` | C | ⬜ Belum | — |
+| 10 | Multi-Periode (Neraca/L&R Perbandingan) | `phase-10-multi-period.md` | C | ✅ Selesai | BE 31573b6 / FE 748433c |
 | 11 | Laporan Pajak PPN (Masukan/Keluaran) | `phase-11-tax-ppn.md` | C | ⬜ Belum | — |
 | 12 | Ekspor E-Faktur DJP (CSV) | `phase-12-efaktur-export.md` | C | ⬜ Belum | — |
 | 13 | Laporan Tersimpan (Saved Reports) | `phase-13-saved-reports.md` | C | ⬜ Belum | — |
