@@ -21,21 +21,21 @@ Menutup gap terbesar design-I2 §3.1 (Buku Besar, 15 dari 17 belum ada). Fokus i
 
 ### T7.1 — Buku Besar Rincian (semua akun)
 Keputusan: `/reports/general-ledger` saat ini = ringkasan per akun. "Rincian" = daftar baris jurnal per akun.
-- [ ] Cek apakah backend GL bisa mengembalikan mode rincian (param `mode=detail`). Jika perlu, tambah dukungan `mode` di `GeneralLedgerQueryService` + FormRequest (backend kecil). Bila tidak, arahkan user ke `AccountLedgerPage` per akun dan tandai "rincian semua akun" sebagai `comingSoon` dengan alasan.
-- [ ] Frontend: bila mode rincian didukung, tambah toggle di `GeneralLedgerPage` (Ringkasan/Rincian) atau halaman terpisah `GeneralLedgerDetailPage`. Adapter menormalkan lines.
+- [x] Cek apakah backend GL bisa mengembalikan mode rincian (param `mode=detail`). Jika perlu, tambah dukungan `mode` di `GeneralLedgerQueryService` + FormRequest (backend kecil). Bila tidak, arahkan user ke `AccountLedgerPage` per akun dan tandai "rincian semua akun" sebagai `comingSoon` dengan alasan.
+- [x] Frontend: bila mode rincian didukung, tambah toggle di `GeneralLedgerPage` (Ringkasan/Rincian) atau halaman terpisah `GeneralLedgerDetailPage`. Adapter menormalkan lines.
 
 ### T7.2 — Semua Jurnal / Jurnal Transaksi — `GET /reports/journals` (atau reuse `/journals`)
-- [ ] Bila endpoint list journal entries sudah ada & bisa difilter periode → buat halaman `JournalListReportPage` (read-only) yang konsumsi endpoint itu via adapter. Kolom: no jurnal, tanggal, deskripsi, total debit, total kredit, sumber.
-- [ ] Bila belum ada endpoint yang cocok, tambah `GET /reports/journals` di modul Reports (service query journal_entries + lines, filter periode + source_type opsional). FormRequest + controller + route + feature test.
-- [ ] Route frontend `/reports/journals`; katalog kategori `gl`.
+- [x] Bila endpoint list journal entries sudah ada & bisa difilter periode → buat halaman `JournalListReportPage` (read-only) yang konsumsi endpoint itu via adapter. Kolom: no jurnal, tanggal, deskripsi, total debit, total kredit, sumber.
+- [x] Bila belum ada endpoint yang cocok, tambah `GET /reports/journals` di modul Reports (service query journal_entries + lines, filter periode + source_type opsional). FormRequest + controller + route + feature test.
+- [x] Route frontend `/reports/journals`; katalog kategori `gl`.
 
 ### T7.3 — Jurnal Penjualan / Pembelian / Umum
-- [ ] Reuse endpoint T7.2 dengan filter `source_type` (mis. sales_invoice → Jurnal Penjualan, vendor_bill → Jurnal Pembelian, manual → Jurnal Umum). Bisa satu halaman dengan filter, ATAU 3 entri katalog yang pre-set filter.
-- [ ] Default: **satu halaman `JournalListReportPage` dengan filter sumber**, 3 entri katalog `gl` yang membuka halaman itu dengan query param sumber berbeda (mis. `/reports/journals?source=sales`). Halaman baca query param → set filter awal.
+- [x] Reuse endpoint T7.2 dengan filter `source_type` (mis. sales_invoice → Jurnal Penjualan, vendor_bill → Jurnal Pembelian, manual → Jurnal Umum). Bisa satu halaman dengan filter, ATAU 3 entri katalog yang pre-set filter.
+- [x] Default: **satu halaman `JournalListReportPage` dengan filter sumber**, 3 entri katalog `gl` yang membuka halaman itu dengan query param sumber berbeda (mis. `/reports/journals?source=sales`). Halaman baca query param → set filter awal.
 
 ### T7.4 — Katalog & struktur
-- [ ] Tambah entri kategori `gl`: "Buku Besar - Rincian" (bila didukung), "Semua Jurnal", "Jurnal Penjualan", "Jurnal Pembelian", "Jurnal Umum".
-- [ ] `struktur_frontend.md` daftarkan page baru.
+- [x] Tambah entri kategori `gl`: "Buku Besar - Rincian" (bila didukung), "Semua Jurnal", "Jurnal Penjualan", "Jurnal Pembelian", "Jurnal Umum".
+- [x] `struktur_frontend.md` daftarkan page baru.
 
 ## Peta File
 
@@ -68,9 +68,9 @@ Keputusan: `/reports/general-ledger` saat ini = ringkasan per akun. "Rincian" = 
 
 ## Checklist Verifikasi
 
-- [ ] `npm run build` 0 error, `npm run lint` 0 error.
-- [ ] Bila backend diubah: `php artisan test --filter=Journal` (atau nama test baru) hijau; `pint --test` hijau; route count naik.
-- [ ] Runtime company 2: daftar jurnal render, total debit=kredit per jurnal; filter sumber mempersempit hasil dengan benar.
+- [x] `npm run build` 0 error, `npm run lint` 0 error.
+- [x] Bila backend diubah: `php artisan test --filter=Journal` (atau nama test baru) hijau; `pint --test` hijau; route count naik.
+- [x] Runtime company 2: daftar jurnal render, total debit=kredit per jurnal; filter sumber mempersempit hasil dengan benar.
 
 ## Git Checkpoint
 
