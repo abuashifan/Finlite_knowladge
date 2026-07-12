@@ -22,23 +22,23 @@ Menutup laporan keuangan lanjutan design-I2 §3.2 yang butuh logika akuntansi ba
 ## Daftar tugas
 
 ### T9.1 — Laba Ditahan — `GET /reports/retained-earnings` (backend baru)
-- [ ] Service: akumulasi laba/rugi tahun-tahun sebelumnya + laba tahun berjalan, per periode. Butuh definisi akun retained earnings di COA + hasil period-end closing. Cek modul period-end/fiscal-year closing.
-- [ ] FormRequest (as_of_date / fiscal_year), controller, route, feature test.
-- [ ] Frontend: type, adapter, `RetainedEarningsReportPage.tsx`, route, katalog `financial`.
+- [x] Service: akumulasi laba/rugi tahun-tahun sebelumnya + laba tahun berjalan, per periode. Butuh definisi akun retained earnings di COA + hasil period-end closing. Cek modul period-end/fiscal-year closing.
+- [x] FormRequest (as_of_date / fiscal_year), controller, route, feature test.
+- [x] Frontend: type, adapter, `RetainedEarningsReportPage.tsx`, route, katalog `financial`.
 
 ### T9.2 — Perubahan Ekuitas — `GET /reports/equity-changes` (backend baru)
-- [ ] Service: saldo ekuitas awal + setoran/penarikan + laba/rugi periode → saldo akhir, per komponen ekuitas. 
-- [ ] Request/controller/route/test + frontend page `EquityChangesReportPage.tsx`, katalog `financial`.
+- [x] Service: saldo ekuitas awal + setoran/penarikan + laba/rugi periode → saldo akhir, per komponen ekuitas. 
+- [x] Request/controller/route/test + frontend page `EquityChangesReportPage.tsx`, katalog `financial`.
 
 ### T9.3 — Arus Kas Metode Langsung — `GET /reports/cash-flow-direct` (backend baru)
-- [ ] Service: klasifikasi penerimaan/pembayaran kas aktual (dari cash/bank movements) ke operasi/investasi/pendanaan. Berbeda dari metode tidak langsung (yang menyesuaikan laba).
-- [ ] Request/controller/route/test + frontend page atau mode tambahan di `CashFlowPage` (toggle Langsung/Tidak Langsung).
+- [x] Service: klasifikasi penerimaan/pembayaran kas aktual (dari cash/bank movements) ke operasi/investasi/pendanaan. Berbeda dari metode tidak langsung (yang menyesuaikan laba).
+- [x] Request/controller/route/test + frontend page atau mode tambahan di `CashFlowPage` (toggle Langsung/Tidak Langsung).
 
 ### T9.4 — Arus Kas Tidak Langsung - Rincian
-- [ ] Extend `CashFlowService` response dengan breakdown per akun bila belum lengkap; frontend tampilkan detail per akun di `CashFlowPage` (accounts sudah ada di adapter — mungkin tinggal render).
+- [x] **Sudah lengkap tanpa perubahan.** `CashFlowService` sudah mengembalikan `sections` (per-seksi) + `accounts` (per akun kas), dan `CashFlowPage.tsx` existing sudah merender KEDUANYA (tabel klasifikasi seksi + tabel rincian per akun kas/bank). Tidak ada backend/adapter yang perlu diubah.
 
 ### T9.5 — Katalog & struktur
-- [ ] Entri kategori `financial`: "Laba Ditahan", "Perubahan Ekuitas", "Arus Kas (Langsung)". `struktur_frontend.md`.
+- [x] Entri kategori `financial`: "Laba Ditahan", "Perubahan Ekuitas", "Arus Kas (Langsung)". `struktur_frontend.md`.
 
 ## Peta File
 
@@ -79,10 +79,10 @@ Menutup laporan keuangan lanjutan design-I2 §3.2 yang butuh logika akuntansi ba
 
 ## Checklist Verifikasi
 
-- [ ] `npm run build`/`lint` 0 error.
-- [ ] Backend test per endpoint hijau; `pint --test` hijau; route naik.
-- [ ] Runtime company 2 + validasi akuntansi: laba ditahan konsisten dengan neraca (ekuitas), arus kas langsung ≈ perubahan saldo kas periode.
-- [ ] **Angka divalidasi terhadap audit-07 / laporan existing** (ini laporan akuntansi sensitif — salah angka = bug serius).
+- [x] `npm run build`/`lint` 0 error.
+- [x] Backend test per endpoint hijau; `pint --test` hijau; route naik.
+- [x] Runtime company 2 + validasi akuntansi: laba ditahan konsisten dengan neraca (ekuitas), arus kas langsung ≈ perubahan saldo kas periode.
+- [x] **Angka divalidasi terhadap audit-07 / laporan existing** (ini laporan akuntansi sensitif — salah angka = bug serius).
 
 ## Git Checkpoint
 
