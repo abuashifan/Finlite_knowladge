@@ -16,23 +16,23 @@ Bangun **Daftar PPN Masukan** (input VAT dari pembelian) & **Daftar PPN Keluaran
 ## Daftar tugas
 
 ### T11.1 — Backend: PPN Keluaran — `GET /reports/tax/output-vat`
-- [ ] Service: daftar faktur penjualan dengan komponen PPN dalam periode → `{ rows: [{ invoice_number, invoice_date, customer_name, dpp (base), ppn (tax), total }], totals: { dpp, ppn } }`. Sumber: sales_invoices tax fields ATAU journal entries akun PPN keluaran.
-- [ ] FormRequest (periode), controller, route `permission:reports.view` (atau granular `reports.tax.view` bila diputuskan), feature test.
+- [x] Service: daftar faktur penjualan dengan komponen PPN dalam periode → `{ rows: [{ invoice_number, invoice_date, customer_name, dpp (base), ppn (tax), total }], totals: { dpp, ppn } }`. Sumber: sales_invoices tax fields ATAU journal entries akun PPN keluaran.
+- [x] FormRequest (periode), controller, route `permission:reports.view` (atau granular `reports.tax.view` bila diputuskan), feature test.
 
 ### T11.2 — Backend: PPN Masukan — `GET /reports/tax/input-vat`
-- [ ] Simetris: vendor_bills tax fields / akun PPN masukan. `{ rows: [{ bill_number, bill_date, vendor_name, dpp, ppn, total }], totals }`.
+- [x] Simetris: vendor_bills tax fields / akun PPN masukan. `{ rows: [{ bill_number, bill_date, vendor_name, dpp, ppn, total }], totals }`.
 
 ### T11.3 — Frontend: 2 halaman
-- [ ] Types `OutputVatReport`/`InputVatReport`, adapters, methods.
-- [ ] `OutputVatReportPage.tsx` & `InputVatReportPage.tsx` (pola §3, CSV + pagination). Kolom DPP, PPN, Total.
+- [x] Types `OutputVatReport`/`InputVatReport`, adapters, methods.
+- [x] `OutputVatReportPage.tsx` & `InputVatReportPage.tsx` (pola §3, CSV + pagination). Kolom DPP, PPN, Total.
 
 ### T11.4 — Kategori navigasi BARU `tax`
-- [ ] `reportCategories.ts`: tambah domain `{ id: 'tax', label: 'Pajak', categoryPath: 'tax', reports: [ppn-keluaran, ppn-masukan] }`.
-- [ ] `router/moduleConfig.ts` grup `reports`: tambah item ribbon `{ id: 'tax', label: 'Pajak', icon: <ikon>, path: '/reports/tax', permission: 'reports.view' }`. (Ini satu-satunya fase yang menyentuh ribbon — lihat 00-conventions §5.)
-- [ ] Routes `/reports/tax/output-vat`, `/reports/tax/input-vat`.
+- [x] `reportCategories.ts`: tambah domain `{ id: 'tax', label: 'Pajak', categoryPath: 'tax', reports: [ppn-keluaran, ppn-masukan] }`.
+- [x] `router/moduleConfig.ts` grup `reports`: tambah item ribbon `{ id: 'tax', label: 'Pajak', icon: <ikon>, path: '/reports/tax', permission: 'reports.view' }`. (Ini satu-satunya fase yang menyentuh ribbon — lihat 00-conventions §5.)
+- [x] Routes `/reports/tax/output-vat`, `/reports/tax/input-vat`.
 
 ### T11.5 — struktur_frontend.md
-- [ ] Daftarkan 2 page baru.
+- [x] Daftarkan 2 page baru.
 
 ## Peta File
 
@@ -67,10 +67,10 @@ Bangun **Daftar PPN Masukan** (input VAT dari pembelian) & **Daftar PPN Keluaran
 
 ## Checklist Verifikasi
 
-- [ ] `npm run build`/`lint` 0 error.
-- [ ] Backend test PPN hijau; `pint --test` hijau; route naik (2).
-- [ ] Kategori "Pajak" muncul di ribbon Reports; klik → halaman kategori dengan 2 kartu.
-- [ ] Runtime company 2: total PPN keluaran/masukan cocok dengan saldo akun PPN di neraca (sanity).
+- [x] `npm run build`/`lint` 0 error.
+- [x] Backend test PPN hijau; `pint --test` hijau; route naik (2).
+- [x] Kategori "Pajak" muncul di ribbon Reports; klik → halaman kategori dengan 2 kartu.
+- [x] Runtime company 2: total PPN keluaran/masukan cocok dengan saldo akun PPN di neraca (sanity).
 
 ## Git Checkpoint
 
