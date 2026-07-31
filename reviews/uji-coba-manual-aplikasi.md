@@ -34,10 +34,10 @@
 
 Data dasar yang dipakai semua modul lain. Kalau ini salah, semua transaksi ikut salah — cek teliti.
 
-- [ ] **Kontak (Customer & Vendor)**: tambah kontak baru sebagai Customer, isi semua field (alamat, NPWP, termin bayar) → simpan → muncul di daftar dengan data lengkap.
-- [ ] Tambah kontak baru sebagai Vendor → simpan → cek muncul di dropdown pemilihan vendor saat nanti buat Purchase Order.
-- [ ] Edit kontak yang sudah ada → ubah salah satu field → simpan → cek perubahan benar-benar tersimpan (reload halaman untuk pastikan).
-- [ ] Coba nonaktifkan/hapus kontak yang **sudah pernah dipakai** di transaksi (kalau ada) — pastikan sistem kasih peringatan, bukan malah data transaksi lama jadi rusak.
+- [✅] **Kontak (Customer & Vendor)**: tambah kontak baru sebagai Customer, isi semua field (alamat, NPWP, termin bayar) → simpan → muncul di daftar dengan data lengkap.
+- [✅] Tambah kontak baru sebagai Vendor → simpan → cek muncul di dropdown pemilihan vendor saat nanti buat Purchase Order.
+- [✅] Edit kontak yang sudah ada → ubah salah satu field → simpan → cek perubahan benar-benar tersimpan (reload halaman untuk pastikan).
+- [✅] Coba nonaktifkan/hapus kontak yang **sudah pernah dipakai** di transaksi (kalau ada) — pastikan sistem kasih peringatan, bukan malah data transaksi lama jadi rusak.
 - [ ] **Produk**: tambah produk baru (barang & jasa kalau ada bedanya), isi satuan, kategori, harga jual/beli → simpan → muncul di daftar.
 - [ ] Edit stok minimum / harga produk → cek berubah di halaman lain yang menampilkan produk itu (misal form Sales Order).
 - [ ] **Chart of Account (COA)**: buka daftar akun, coba tambah akun baru dengan tipe yang benar (Aset/Liabilitas/Modal/Pendapatan/Beban) → simpan → cek muncul di dropdown akun saat buat Jurnal Manual.
