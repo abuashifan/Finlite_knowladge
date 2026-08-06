@@ -1,0 +1,239 @@
+# Konvensi — List Query Pushdown
+
+> Wajib dibaca sebelum mengerjakan fase mana pun. Berisi pola kode, kontrak
+> response, daftar kolom pencarian, dan definition-of-done.
+
+## 1. Bentuk akhir yang dituju
+
+**Sebelum** (semua baris ke memori, lalu dipotong):
+
+```php
+// Controller
+return $this->listResponse($this->service->list($request->query()), $request, '...');
+
+// Service
+public function list(array $filters = []): Collection
+{
+    $query = SalesInvoice::query()->with('customer', 'paymentTerm');
+    if (! empty($filters['status'])) { $query->where('status', (string) $filters['status']); }
+
+    return $query->orderByDesc('invoice_date')->orderByDesc('id')->get();
+}
+```
+
+**Sesudah** (semua kerja di SQL, satu halaman keluar):
+
+```php
+// Controller — TIDAK BERUBAH
+return $this->listResponse($this->service->list($request->query()), $request, '...');
+
+// Service
+use App\Shared\Api\AppliesListQuery;
+
+class SalesInvoiceService
+{
+    use AppliesListQuery;
+
+    /** Kolom yang boleh dicari lewat kotak pencarian. Lihat 00-conventions §4. */
+    protected array $listSearchable = ['invoice_number'];
+
+    /** Relasi + kolomnya yang ikut dicari. */
+    protected array $listSearchableRelations = ['customer' => ['name', 'contact_code']];
+
+    protected string $listDateColumn = 'invoice_date';
+
+    /** @var array<int,string> Urutan default bila `sort_by` tidak dikirim. */
+    protected array $listDefaultSort = ['invoice_date' => 'desc', 'id' => 'desc'];
+
+    public function list(array $filters = []): LengthAwarePaginator
+    {
+        $query = SalesInvoice::query()->with('customer', 'paymentTerm');
+
+        // Filter khusus modul tetap di sini.
+        if (! empty($filters['customer_id'])) {
+            $query->where('customer_id', (int) $filters['customer_id']);
+        }
+
+        return $this->applyListQuery($query, $filters);
+    }
+}
+```
+
+`applyListQuery()` mengerjakan search, status, rentang tanggal, sort, lalu
+`->paginate()`. Semua di SQL.
+
+## 2. Kontrak `listResponse` selama transisi
+
+`listResponse` harus menerima **dua bentuk**:
+
+| Masukan | Perlakuan |
+|---|---|
+| `LengthAwarePaginator` | Sudah terfilter & terpaginasi di SQL — langsung dipetakan ke bentuk response. **Tidak boleh** difilter ulang. |
+| `Collection` | Jalur lama: filter in-memory + `slice` seperti sekarang. |
+
+Cabang "tanpa `page`/`per_page` → kirim semua" (`$request->hasAny([...])`)
+**wajib dipertahankan** — dipakai beberapa pemanggil internal.
+
+Bentuk response **wajib identik** dengan sekarang:
+
+```json
+{ "data": [...], "current_page": 1, "per_page": 25, "total": 33,
+  "last_page": 2, "from": 1, "to": 25 }
+```
+
+`from`/`to` bernilai `null` saat `total === 0`. Uji ini di tiap fase.
+
+## 3. Perilaku lama yang harus disadari (dan diputuskan)
+
+Tiga perilaku jalur in-memory yang **tidak** akan terbawa apa adanya:
+
+1. **Pencarian memindai semua field.** `listItemValues()` mengubah record jadi
+   array lalu mencocokkan substring ke setiap nilai skalar — termasuk `id`,
+   `metadata`, `notes`, semua kolom tanggal. Setelah pushdown, hanya kolom di
+   `$listSearchable` (+ relasi) yang dicari.
+2. **Filter tanggal melewatkan record tanpa kolom tanggal dikenal.**
+   `applyListDateRange` mengembalikan `true` bila `listDateValue()` kosong —
+   record itu lolos filter periode apa pun. Setelah pushdown, `whereBetween`
+   pada `$listDateColumn` akan **mengecualikan** baris `NULL`.
+   → Untuk modul yang kolom tanggalnya nullable, putuskan eksplisit:
+   `orWhereNull` atau memang dikecualikan. Catat keputusannya di file fase.
+3. **Filter status berhenti di kunci pertama.** `applyListStatus` melakukan
+   `return` di dalam loop `['status','state','is_active']`, jadi tidak bisa
+   jatuh ke kunci berikutnya. Setelah pushdown, tiap service menyebut kolomnya
+   sendiri (`status` untuk transaksi, `is_active` untuk master data).
+
+Perbedaan **1** terlihat pengguna → butuh persetujuan (§4).
+Perbedaan **2** dan **3** adalah perbaikan bug; catat di commit message.
+
+## 4. Usulan kolom pencarian per modul — ⚠️ BUTUH PERSETUJUAN
+
+Daftar di bawah adalah **usulan**, bukan keputusan. Konfirmasi ke pemilik produk
+sebelum Fase 1. Prinsipnya: kolom yang **terlihat di tabel daftar** + nomor dokumen.
+
+### Transaksi
+
+| Modul | Kolom sendiri | Lewat relasi |
+|---|---|---|
+| Jurnal Umum | `journal_number`, `description` | — |
+| Quotation | `quotation_number` | customer: `name`, `contact_code` |
+| Sales Order | `order_number`, `customer_po_number` | customer: `name`, `contact_code` |
+| Proforma | `proforma_number` | customer: `name`, `contact_code` |
+| Delivery Order | `delivery_number` | customer: `name`, `contact_code` |
+| Invoice Penjualan | `invoice_number` | customer: `name`, `contact_code` |
+| Retur Penjualan | `return_number` | customer: `name`, `contact_code` |
+| Deposit Customer | `deposit_number` | customer: `name`, `contact_code` |
+| Penerimaan Penjualan | `receipt_number` | customer: `name`, `contact_code` |
+| Purchase Request | `request_number` | — |
+| Purchase Order | `order_number`, `vendor_quote_number` | vendor: `name`, `contact_code` |
+| Penerimaan Barang | `receipt_number` | vendor: `name`, `contact_code` |
+| Tagihan Vendor | `bill_number`, `vendor_invoice_number` | vendor: `name`, `contact_code` |
+| Retur Pembelian | `return_number` | vendor: `name`, `contact_code` |
+| Deposit Vendor | `deposit_number` | vendor: `name`, `contact_code` |
+| Pembayaran Vendor | `payment_number` | vendor: `name`, `contact_code` |
+| Penerimaan Kas | `receipt_number`, `description` | — |
+| Pengeluaran Kas | `payment_number`, `description` | — |
+| Transfer Bank | `transfer_number`, `notes` | — |
+| Rekonsiliasi Bank | `reconciliation_number` | — |
+| Mutasi Stok | `movement_number`, `description` | — |
+| Penyesuaian Stok | `adjustment_number` | — |
+| Opname Stok | `opname_number` | — |
+
+### Master Data
+
+| Modul | Kolom |
+|---|---|
+| Akun (COA) | `account_code`, `account_name` |
+| Kontak | `contact_code`, `name`, `email`, `phone` |
+| Produk | `product_code`, `product_name` |
+| Satuan | `code`, `name` |
+| Gudang | `code`, `name` |
+| Departemen | `code`, `name` |
+| Proyek | `code`, `name` |
+| Syarat Bayar | `name` |
+| Kategori Produk | `name` |
+
+**Catatan:** pencarian lewat relasi memakai `whereHas`, yang menjadi subquery.
+Pastikan kolom relasi yang dicari ber-index (`contacts.name`, `contacts.contact_code`).
+Bila belum, tambahkan di migrasi Fase 0.
+
+## 5. Index yang dibutuhkan
+
+Audit 2026-08-06 pada `company_000001.sqlite`. **15 tabel belum punya index pada
+kolom tanggal utamanya** — ini wajib ditambal di Fase 0, karena sort default
+seluruh modul transaksi memakai kolom itu.
+
+Sudah punya index tanggal: `cash_receipts`, `cash_payments`, `bank_transfers`,
+`stock_movements`, `stock_adjustments`, `stock_opnames`, `journal_entries`.
+
+Belum punya (perlu migrasi):
+
+```
+sales_quotations.quotation_date      purchase_requests.request_date
+sales_orders.order_date              purchase_orders.order_date
+proforma_invoices.proforma_date      goods_receipts.receipt_date
+delivery_orders.delivery_date        vendor_bills.bill_date
+sales_invoices.invoice_date          purchase_returns.return_date
+sales_returns.return_date            vendor_deposits.deposit_date
+customer_deposits.deposit_date       vendor_payments.payment_date
+sales_receipts.receipt_date          bank_reconciliations.created_at
+```
+
+`purchase_requests` juga belum punya index `status`.
+
+> `sales_invoices` punya komposit `customer_id,invoice_date`, tapi kolom
+> pertamanya `customer_id` — tidak terpakai untuk sort tanggal saja. Tetap perlu
+> index `invoice_date` berdiri sendiri.
+
+## 6. Definition of Done per fase
+
+Sebuah fase selesai bila **semua** ini terpenuhi:
+
+- [ ] Service modul mengembalikan `LengthAwarePaginator`, bukan `Collection`
+- [ ] Tidak ada `->get()` tersisa di `list()` modul itu
+- [ ] Controller **tidak berubah**
+- [ ] Bentuk response identik — dibuktikan dengan tes perbandingan (§7)
+- [ ] `php artisan test tests/Feature/{Modul}` hijau
+- [ ] `./vendor/bin/pint --test <file yang diubah>` hijau
+- [ ] Frontend **tidak diubah sama sekali**; `npm run build` tetap hijau
+- [ ] Ledger di `README.md` diperbarui + commit
+
+## 7. Cara membuktikan response tidak berubah
+
+Sebelum mengubah service, rekam baseline:
+
+```bash
+TOK=$(curl -s -X POST http://localhost:8000/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"admin@example.com","password":"password"}' \
+  | python3 -c 'import sys,json;print(json.load(sys.stdin)["data"]["token"])')
+
+curl -s "http://localhost:8000/api/journals?page=1&per_page=25" \
+  -H "Authorization: Bearer $TOK" -H 'X-Company-Id: 1' > /tmp/before.json
+```
+
+Sesudah diubah, ambil `/tmp/after.json` dengan perintah sama lalu:
+
+```bash
+python3 -c "
+import json
+a=json.load(open('/tmp/before.json')); b=json.load(open('/tmp/after.json'))
+for k in ['current_page','per_page','total','last_page','from','to']:
+    assert a['data'][k]==b['data'][k], (k, a['data'][k], b['data'][k])
+ida=[r['id'] for r in a['data']['data']]; idb=[r['id'] for r in b['data']['data']]
+assert ida==idb, ('urutan berubah', ida[:5], idb[:5])
+print('identik:', len(ida), 'baris')
+"
+```
+
+Ulangi untuk kombinasi: tanpa filter, `search=`, `status=`, rentang tanggal,
+`sort_by=` + `sort_direction=`, halaman terakhir, dan halaman kosong
+(`page=999` → `from`/`to` harus `null`).
+
+## 8. Yang TIDAK boleh dilakukan
+
+- ❌ Mengubah bentuk response atau nama field — frontend bergantung padanya
+- ❌ Menambah `->limit()` sebagai peredam tanpa paginasi jujur
+- ❌ Menyentuh `/{resource}/adjacent` — sudah efisien, di luar scope
+- ❌ Merapikan modul lain "sekalian" — lihat `laravel_backend/AGENTS.md`:
+  *"Do not refactor unrelated modules unless the task explicitly requires it"*
+- ❌ Menghapus jalur `Collection` di `listResponse` sebelum Fase 7
