@@ -196,8 +196,16 @@ punya istilah status "Lunas/Belum Lunas/Belum Dibayar" yang sama):
 
 - Filter = nama lawan transaksi (customer/vendor) + rentang tanggal **dokumen**
   (`invoice_date`/`bill_date`), **bukan** filter akun GL terpisah.
-- Filter customer/vendor **sudah bekerja** hari ini — dikirim sebagai
-  `customer_id`/`vendor_id` dan sudah dipakai service. Bukan bagian yang rusak.
+- ⚠️ **Koreksi (Fase 2 & 3, 2026-08-06).** Baris ini semula berbunyi *"filter
+  customer/vendor sudah bekerja hari ini — bukan bagian yang rusak"*. **Salah**,
+  dan baru ketahuan saat membaca kedelapan service satu per satu. Faktanya:
+  `customer_id` hanya dipakai `SalesQuotationService`; **7 dari 8** service Sales
+  mengabaikannya walau kedelapan halaman frontend mengirimkannya — dropdown
+  filter Customer diam-diam tidak berpengaruh. Di Purchase lebih baik tapi tidak
+  utuh: `vendor_id` diabaikan `PurchaseReturnService` dan `VendorPaymentService`.
+  Sudah diseragamkan di commit `3d44803` dan `c4a67f2`.
+  **Pelajaran**: klaim "sudah bekerja" tentang modul yang belum dibaca
+  baris-per-baris tidak boleh masuk rencana. Cek dulu, baru tulis.
 - Tanggal dokumen, bukan `created_at` — konsisten dengan `$listDateColumn` yang
   sudah dipilih tiap fase sejak awal. Tidak ada perubahan desain di sini.
 - Search satu kotak gabungan, kolom dibatasi (bukan field terpisah per kolom
@@ -288,7 +296,19 @@ sales_receipts.receipt_date          bank_reconciliations.created_at
 Sebuah fase selesai bila **semua** ini terpenuhi:
 
 - [ ] Service modul mengembalikan `LengthAwarePaginator`, bukan `Collection`
-- [ ] Tidak ada `->get()` tersisa di `list()` modul itu
+- [ ] Tidak ada `->get()` tersisa di `list()` modul itu — **cek mekanis, jangan
+      andalkan mata**:
+
+      ```bash
+      for f in app/Modules/{Modul}/Services/*.php; do
+        awk '/public function list\(/{p=1} p&&/->get\(\)/{print FILENAME": "NR": "$0} p&&/^    }/{p=0}' $f
+      done   # harus tidak keluar apa-apa
+      ```
+
+      Di Fase 3 satu service (`PurchaseRequestService`) lolos review dengan
+      `->get()` tertinggal di ujung `list()` yang sudah bertipe union: tidak
+      error, tidak warning, cuma diam-diam kembali ke jalur in-memory. Gejala
+      satu-satunya `from` = offset alih-alih `null` di halaman kosong.
 - [ ] Controller **tidak berubah**
 - [ ] Bentuk response identik — dibuktikan dengan tes perbandingan (§7)
 - [ ] `php artisan test tests/Feature/{Modul}` hijau
