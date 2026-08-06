@@ -14,7 +14,7 @@ rtk grep -rl "AppliesListQuery" app/Modules/Purchase/Services/ | wc -l   # harus
 | `CashReceiptService` | `receipt_number`, `description` | `receipt_date` | ✅ sudah ada |
 | `CashPaymentService` | `payment_number`, `description` | `payment_date` | ✅ sudah ada |
 | `BankTransferService` | `transfer_number`, `notes` | `transfer_date` | ✅ sudah ada |
-| `BankReconciliationService` | `reconciliation_number` | `created_at` | ❌ ditambah Fase 0 |
+| `BankReconciliationService` | `reconciliation_number` | `statement_end_date` | ✅ ditambah Fase 0 |
 
 Tidak ada pencarian lewat relasi di modul ini.
 
@@ -24,17 +24,10 @@ Ikuti pola Fase 1 untuk tiap service.
 
 ### Perhatian khusus
 
-**`BankReconciliationService`** — kolom tanggalnya `created_at`, bukan kolom
-tanggal dokumen. Cek dulu apakah tabel punya kolom tanggal periode
-(`statement_date`, `period_end`, atau sejenis) yang lebih tepat untuk filter:
-
-```bash
-php -r '$d=new PDO("sqlite:database/tenants/company_000001.sqlite");
-foreach($d->query("PRAGMA table_info(bank_reconciliations)") as $c) echo $c["name"],"\n";'
-```
-
-Kalau ada, itu yang dipakai sebagai `$listDateColumn` — dan index Fase 0 perlu
-disesuaikan. Catat temuannya.
+**`BankReconciliationService`** — `$listDateColumn = 'statement_end_date'`,
+sudah diverifikasi & diberi index di Fase 0 (bukan `created_at`; tabel punya
+`statement_start_date` dan `statement_end_date`, dipilih yang akhir periode
+karena itu yang biasanya dipakai untuk "rekonsiliasi periode Juni").
 
 **`BankReconciliationService`** juga satu-satunya di modul ini yang punya
 `update()`; `list()`-nya memakai signature filter berbeda

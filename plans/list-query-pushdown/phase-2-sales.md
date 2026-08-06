@@ -18,12 +18,19 @@ Fase ini menyalin pola yang sama ke 8 endpoint sekaligus.
 | `SalesOrderService` | `order_number`, `customer_po_number` | customer | `order_date` |
 | `ProformaInvoiceService` | `proforma_number` | customer | `proforma_date` |
 | `DeliveryOrderService` | `delivery_number` | customer | `delivery_date` |
-| `SalesInvoiceService` | `invoice_number` | customer | `invoice_date` |
+| `SalesInvoiceService` | `invoice_number`, `notes` | customer | `invoice_date` |
 | `SalesReturnService` | `return_number` | customer | `return_date` |
 | `CustomerDepositService` | `deposit_number` | customer | `deposit_date` |
 | `SalesReceiptService` | `receipt_number` | customer | `receipt_date` |
 
 Relasi customer dicari lewat `['name', 'contact_code']`.
+
+> **SalesInvoiceService** (AR) — `notes` ditambahkan setelah dikonfirmasi
+> 2026-08-06: modul AR cukup dicari lewat nomor + catatan; tabel tidak punya
+> kolom `description` (hanya `notes`/`internal_notes` — yang disertakan cuma
+> `notes`, `internal_notes` tetap privat). Filter customer **sudah** dikirim
+> dan dipakai backend hari ini (`customer_id` di query) — bukan bagian yang
+> rusak, tidak perlu disentuh fase ini.
 
 ## Tugas
 

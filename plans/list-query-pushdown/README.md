@@ -54,8 +54,8 @@ lewat `listResponse` — sudah `LIMIT 1` sejak commit `57fc710`. Tidak perlu dis
 
 | Fase | Judul | File | Endpoint | Status | Commit |
 |------|-------|------|----------|--------|--------|
-| 0 | Fondasi: trait + kontrak dua-bentuk + index tanggal | `phase-0-foundation.md` | — | ⬜ Belum | — |
-| 1 | Pilot: Jurnal Umum | `phase-1-journal.md` | 1 | ⬜ Belum | — |
+| 0 | Fondasi: trait + kontrak dua-bentuk + index tanggal | `phase-0-foundation.md` | — | ✅ Selesai | 987a629 |
+| 1 | Pilot: Jurnal Umum | `phase-1-journal.md` | 1 | ✅ Selesai | e6b2466 |
 | 2 | Sales | `phase-2-sales.md` | 8 | ⬜ Belum | — |
 | 3 | Purchase | `phase-3-purchase.md` | 7 | ⬜ Belum | — |
 | 4 | Kas & Bank | `phase-4-cash-bank.md` | 4 | ⬜ Belum | — |

@@ -45,7 +45,8 @@ class SalesInvoiceService
     /** @var array<int,string> Urutan default bila `sort_by` tidak dikirim. */
     protected array $listDefaultSort = ['invoice_date' => 'desc', 'id' => 'desc'];
 
-    public function list(array $filters = []): LengthAwarePaginator
+    /** @return LengthAwarePaginator|Collection<int,SalesInvoice> */
+    public function list(array $filters = []): LengthAwarePaginator|Collection
     {
         $query = SalesInvoice::query()->with('customer', 'paymentTerm');
 
@@ -59,8 +60,36 @@ class SalesInvoiceService
 }
 ```
 
-`applyListQuery()` mengerjakan search, status, rentang tanggal, sort, lalu
-`->paginate()`. Semua di SQL.
+`applyListQuery()` mengerjakan search, status, rentang tanggal, sort — semua
+di SQL — lalu memutuskan `->paginate()` atau `->get()` (lihat ⚠️ di bawah).
+
+> ⚠️ **Wajib deklarasikan SEMUA properti, termasuk yang nilainya sama di semua
+> modul** (mis. `$listStatusColumn = 'status'`). Trait `AppliesListQuery`
+> sengaja **tidak** memberi nilai default apa pun — PHP menolak kalau trait dan
+> kelas pemakai mendeklarasikan properti bertipe sama dengan default berbeda
+> (fatal error: *"definition differs and is considered incompatible"*),
+> bahkan kalau trait-nya sendiri tidak punya default. Diverifikasi Fase 0
+> lewat reproduksi minimal — lihat `tests/Feature/Shared/AppliesListQueryTest.php`.
+> Kalau satu properti lupa dideklarasikan, errornya baru muncul saat runtime
+> ("Typed property must not be accessed before initialization"), bukan saat
+> menulis kode — jadi jangan copy-paste sebagian dari service lain.
+
+> ⚠️ **`applyListQuery()` mengembalikan `LengthAwarePaginator` ATAU
+> `Collection`, tergantung `$filters`.** Ditemukan di Fase 1 lewat 2 test yang
+> gagal (`JournalEntryTest::test_journal_index_hides_void_by_default`,
+> `JournalVoidTest::test_void_journal_not_visible_in_index_by_default`) —
+> keduanya memanggil `/api/journals` **tanpa** `page`/`per_page`, mengandalkan
+> kontrak lama "tidak ada page/per_page = kirim semua tanpa paginasi"
+> (§2 di bawah). Draft awal trait ini selalu memanggil `->paginate()` apa pun
+> isi `$filters`, sehingga `listResponse`'s early-return branch menerima objek
+> `LengthAwarePaginator` mentah alih-alih array — Laravel men-JSON-kan objek
+> itu dengan ~13 key metanya sendiri (`current_page`, `data`, `links`, ...),
+> bukan daftar record. Perbaikannya: `applyListQuery()` mengecek
+> `array_key_exists('page', $filters) || array_key_exists('per_page', $filters)`
+> — kalau tidak ada satupun, `->get()` (Collection, konsisten dengan
+> `listResponse`'s `$request->hasAny(['page','per_page'])`); kalau ada,
+> `->paginate()`. **Tipe balik `list()` di tiap service wajib union**
+> (`LengthAwarePaginator|Collection`), bukan `LengthAwarePaginator` saja.
 
 ## 2. Kontrak `listResponse` selama transisi
 
@@ -69,10 +98,12 @@ class SalesInvoiceService
 | Masukan | Perlakuan |
 |---|---|
 | `LengthAwarePaginator` | Sudah terfilter & terpaginasi di SQL — langsung dipetakan ke bentuk response. **Tidak boleh** difilter ulang. |
-| `Collection` | Jalur lama: filter in-memory + `slice` seperti sekarang. |
+| `Collection` | Jalur lama: filter in-memory + `slice` seperti sekarang — tapi kalau `Collection` ini datang dari `applyListQuery()` (bukan `->get()` mentah tanpa filter), search/status/tanggal/sort-nya **sudah** benar dari SQL; filter in-memory di atasnya jadi no-op, bukan re-filter yang salah. |
 
 Cabang "tanpa `page`/`per_page` → kirim semua" (`$request->hasAny([...])`)
-**wajib dipertahankan** — dipakai beberapa pemanggil internal.
+**wajib dipertahankan** — dipakai beberapa pemanggil internal, dan **wajib
+disimetriskan** dengan pengecekan yang sama persis di `applyListQuery()`
+(lihat ⚠️ di atas) supaya kedua sisi sepakat kapan paginasi terjadi.
 
 Bentuk response **wajib identik** dengan sekarang:
 
@@ -140,11 +171,30 @@ Pushdown **bukan** pengurangan cakupan pencarian, melainkan perbaikan:
 Karena itu risiko "pengguna kehilangan sesuatu" jauh lebih kecil dari dugaan
 awal. Tetap konfirmasikan daftar di bawah, tapi ini bukan lagi keputusan berat.
 
-### Daftar kolom
+### Daftar kolom — ✅ DIKONFIRMASI 2026-08-06
 
 Prinsipnya: **tepati apa yang dijanjikan placeholder**, karena itulah kontrak
 yang sudah dilihat pengguna. Placeholder aktual per halaman ada di
-`*ListPage.tsx` (`<ListSearchBar placeholder=...>`).
+`*ListPage.tsx` (`<ListSearchBar placeholder=...>`). Tabel lengkap per modul
+ada di tiap file fase (`phase-N-*.md`); prinsip di atas berlaku ke semuanya.
+
+**Keputusan filter AP/AR** (Vendor Bill = AP, Sales Invoice = AR — dua-duanya
+punya istilah status "Lunas/Belum Lunas/Belum Dibayar" yang sama):
+
+- Filter = nama lawan transaksi (customer/vendor) + rentang tanggal **dokumen**
+  (`invoice_date`/`bill_date`), **bukan** filter akun GL terpisah.
+- Filter customer/vendor **sudah bekerja** hari ini — dikirim sebagai
+  `customer_id`/`vendor_id` dan sudah dipakai service. Bukan bagian yang rusak.
+- Tanggal dokumen, bukan `created_at` — konsisten dengan `$listDateColumn` yang
+  sudah dipilih tiap fase sejak awal. Tidak ada perubahan desain di sini.
+- Search satu kotak gabungan, kolom dibatasi (bukan field terpisah per kolom
+  seperti nomor faktur/nomor PO dua kotak beda) — konsisten dengan
+  `$listSearchable` yang sudah dirancang. Tidak ada perubahan desain di sini.
+
+**Yang tidak disentuh rencana ini** (lihat §8): filter status & tanggal yang
+sekarang cuma berlaku ke 1 halaman karena frontend tidak mengirimnya ke
+server. Backend menyiapkan; perbaikan frontend-nya ada di
+`plans/list-filters-frontend/README.md`.
 
 ### Transaksi
 

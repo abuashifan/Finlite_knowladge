@@ -14,12 +14,17 @@ rtk grep -rl "AppliesListQuery" app/Modules/Sales/Services/ | wc -l   # harus 8
 | `PurchaseRequestService` | `request_number` | — | `request_date` |
 | `PurchaseOrderService` | `order_number`, `vendor_quote_number` | vendor | `order_date` |
 | `GoodsReceiptService` | `receipt_number` | vendor | `receipt_date` |
-| `VendorBillService` | `bill_number`, `vendor_invoice_number` | vendor | `bill_date` |
+| `VendorBillService` | `bill_number`, `vendor_invoice_number`, `notes` | vendor | `bill_date` |
 | `PurchaseReturnService` | `return_number` | vendor | `return_date` |
 | `VendorDepositService` | `deposit_number` | vendor | `deposit_date` |
 | `VendorPaymentService` | `payment_number` | vendor | `payment_date` |
 
 Relasi vendor dicari lewat `['name', 'contact_code']`.
+
+> **VendorBillService** (AP) — `notes` ditambahkan setelah dikonfirmasi
+> 2026-08-06, simetris dengan `SalesInvoiceService` di Fase 2 (lihat catatan
+> di sana). Filter vendor sudah bekerja server-side hari ini, tidak perlu
+> disentuh fase ini.
 
 ## Tugas
 
