@@ -85,20 +85,32 @@ lewat `listResponse` — sudah `LIMIT 1` sejak commit `57fc710`. Tidak perlu dis
   berbahaya daripada daftar yang lambat di sistem akuntansi. Paginasi harus jujur
   (`total` benar), bukan pemotongan senyap.
 
-## ⚠️ Keputusan produk yang dibutuhkan sebelum Fase 1
+## Cakupan pencarian ikut berubah — dan itu perbaikan
 
-**Cakupan pencarian akan berubah, dan ini terlihat oleh pengguna.**
+Diukur 2026-08-06 pada daftar Invoice: kotak pencarian mencocokkan **50 field
+skalar**, termasuk `id`, `grand_total`, `created_at`, `internal_notes`, `metadata`.
+Mengetik `2026` mengembalikan **semua** invoice (cocok ke kolom tanggal);
+mengetik `16000` mengembalikan 4 (cocok ke nominal).
 
-Sekarang kotak pencarian mencocokkan **setiap field** tiap record — termasuk id,
-`metadata`, alamat, catatan, dan semua tanggal. Mengetik `2026` bisa memunculkan
-dokumen yang tidak dimaksud karena angka itu ada di kolom tanggal.
+Sebaliknya, mengetik nama customer mengembalikan **0** — relasi ter-eager-load
+muncul sebagai array bersarang dan `applyListSearch` hanya mencocokkan nilai
+skalar, jadi selalu dilewati. Padahal placeholder di 14 halaman Sales & Purchase
+menjanjikan `"Cari nomor invoice, customer..."`.
 
-Setelah pushdown, tiap modul harus menyebut kolom mana yang dicari. Hasilnya lebih
-tepat, tapi siapa pun yang terbiasa mencari lewat kolom di luar daftar akan merasa
-fiturnya hilang.
+Jadi pushdown bukan mengurangi cakupan, melainkan merapikannya: berhenti
+mencocokkan field yang tidak seharusnya dicari, dan **mulai** mencocokkan
+relasi lewat `whereHas`. Daftar kolom per modul di `00-conventions.md` §4 —
+konfirmasikan ke pemilik produk sebelum Fase 1, tapi ini bukan keputusan berat.
 
-**Usulan daftar kolom ada di `00-conventions.md` §4 dan harus disetujui pemilik
-produk sebelum Fase 1 dieksekusi.** Agent tidak boleh menebak sendiri.
+## Yang TIDAK diselesaikan rencana ini
+
+**Filter status & tanggal hanya berlaku pada halaman yang sedang tampil**
+(frontend menyaring 25 baris di browser; parameternya tidak pernah dikirim ke
+server). Itu masalah **cakupan filter**, bukan **beban**, dan perbaikannya ada
+di sisi frontend. Detail + kode buktinya di `00-conventions.md` §8.
+
+Urutannya sengaja: backend dulu supaya siap menerima parameternya, frontend
+menyusul.
 
 ## Referensi
 

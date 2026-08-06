@@ -105,10 +105,46 @@ Tiga perilaku jalur in-memory yang **tidak** akan terbawa apa adanya:
 Perbedaan **1** terlihat pengguna → butuh persetujuan (§4).
 Perbedaan **2** dan **3** adalah perbaikan bug; catat di commit message.
 
-## 4. Usulan kolom pencarian per modul — ⚠️ BUTUH PERSETUJUAN
+## 4. Kolom pencarian per modul
 
-Daftar di bawah adalah **usulan**, bukan keputusan. Konfirmasi ke pemilik produk
-sebelum Fase 1. Prinsipnya: kolom yang **terlihat di tabel daftar** + nomor dokumen.
+### Apa yang sebenarnya dicari sekarang (diukur 2026-08-06)
+
+Pada daftar Invoice, kotak pencarian mencocokkan **50 field skalar** — termasuk
+`id`, `grand_total`, `paid_amount`, `created_at`, `internal_notes`, `metadata`,
+dan semua kolom `*_id`. Bukti empiris pada data demo (6 invoice):
+
+| Ketik | Hasil | Sebab |
+|---|---|---|
+| `SI-2026` | 4 | benar — cocok `invoice_number` |
+| `2026` | 6 (semua) | cocok kolom tanggal |
+| `16000` | 4 | cocok `grand_total` |
+| `posted` | 3 | cocok kolom `status` |
+| `Warung` | **0** | ← relasi tidak pernah dicocokkan |
+
+**Temuan penting: pencarian lewat nama customer/vendor TIDAK berfungsi hari ini.**
+`applyListSearch` hanya mencocokkan nilai `is_scalar()`; relasi ter-eager-load
+muncul sebagai array bersarang di `toArray()` sehingga selalu dilewati.
+
+Padahal placeholder di UI menjanjikan sebaliknya — mis. `"Cari nomor invoice,
+customer..."` di 14 halaman Sales & Purchase. Janji itu tidak ditepati.
+
+### Konsekuensinya untuk rencana ini
+
+Pushdown **bukan** pengurangan cakupan pencarian, melainkan perbaikan:
+
+- Yang hilang: pencocokan ke field yang memang tidak seharusnya dicari
+  (id, nominal, timestamp, `internal_notes`, `metadata`).
+- Yang bertambah: pencarian relasi mulai bekerja lewat `whereHas` — menepati
+  janji placeholder yang selama ini bohong.
+
+Karena itu risiko "pengguna kehilangan sesuatu" jauh lebih kecil dari dugaan
+awal. Tetap konfirmasikan daftar di bawah, tapi ini bukan lagi keputusan berat.
+
+### Daftar kolom
+
+Prinsipnya: **tepati apa yang dijanjikan placeholder**, karena itulah kontrak
+yang sudah dilihat pengguna. Placeholder aktual per halaman ada di
+`*ListPage.tsx` (`<ListSearchBar placeholder=...>`).
 
 ### Transaksi
 
@@ -229,7 +265,41 @@ Ulangi untuk kombinasi: tanpa filter, `search=`, `status=`, rentang tanggal,
 `sort_by=` + `sort_direction=`, halaman terakhir, dan halaman kosong
 (`page=999` → `from`/`to` harus `null`).
 
-## 8. Yang TIDAK boleh dilakukan
+## 8. Di luar scope — pekerjaan terpisah
+
+Saat menyusun rencana ini ditemukan **masalah berbeda** yang tidak diselesaikan
+di sini. Jangan dicampur; catat di sini supaya tidak hilang.
+
+**Filter status & tanggal hanya berlaku pada halaman yang sedang tampil.**
+Frontend tidak mengirim `status`/`date_from`/`date_to` ke server sama sekali —
+ia menyaring 25 baris hasil di browser:
+
+```ts
+// SalesInvoiceListPage.tsx
+const { data } = useSalesInvoiceList({ page, per_page: 25, search, customer_id })
+const visibleRows = rows.filter((invoice) => {
+  const matchesStatus = filterStatuses.length === 0 || filterStatuses.includes(invoice.status)
+  const matchesDate = isDateInRange(invoice.date, dateRange.from, dateRange.to)
+  return matchesStatus && matchesDate
+})
+```
+
+Tercatat jujur di UI sebagai `FILTER_HINT` — *"Filter multi-select dan tanggal
+berlaku pada data halaman yang sedang dimuat."* — muncul di **9 halaman daftar**.
+
+Akibatnya: mencentang "Posted" tidak menampilkan dokumen posted di halaman lain.
+
+**Kenapa terpisah:** pushdown backend memperbaiki **beban**, dan itu selesai
+tanpa menyentuh frontend. Memperbaiki **cakupan filter** butuh frontend mulai
+mengirim parameternya — perubahan UI tersendiri, dengan desain filter/search
+per-field (referensi: panel Pencarian/Pelanggan/Tanggal/Status bergaya Accurate
+yang diberikan pemilik produk).
+
+Urutannya benar: backend dulu (rencana ini), baru frontend menyusul. Setelah
+Fase 2 & 3 selesai, backend sudah **siap** menerima `status`/tanggal — frontend
+tinggal mengirimnya.
+
+## 9. Yang TIDAK boleh dilakukan
 
 - ❌ Mengubah bentuk response atau nama field — frontend bergantung padanya
 - ❌ Menambah `->limit()` sebagai peredam tanpa paginasi jujur
