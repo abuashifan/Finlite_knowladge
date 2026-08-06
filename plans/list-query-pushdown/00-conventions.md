@@ -132,9 +132,22 @@ Tiga perilaku jalur in-memory yang **tidak** akan terbawa apa adanya:
    `return` di dalam loop `['status','state','is_active']`, jadi tidak bisa
    jatuh ke kunci berikutnya. Setelah pushdown, tiap service menyebut kolomnya
    sendiri (`status` untuk transaksi, `is_active` untuk master data).
+4. **Exclusion default (hide status X) bentrok dengan filter status eksplisit.**
+   Ditemukan dari laporan user nyata di Fase 1 (2026-08-06), bukan dari audit
+   awal — bukti bahwa daftar ini tidak lengkap sampai tiap fase benar-benar
+   dites lewat UI, bukan cuma curl. `JournalEntryService::list()` menyembunyikan
+   jurnal `void` dengan `where('status','!=','void')` tanpa syarat kecuali
+   `include_void=true` — tapi UI filter status "Void" cuma mengirim
+   `status=void`, tidak pernah `include_void=true`. Hasilnya kontradiksi SQL
+   (`status != 'void' AND status = 'void'`), selalu 0 baris, walau jurnalnya
+   memang ada. **Perbaikan**: exclusion default hanya berlaku saat
+   `empty($filters['status'])` — begitu ada filter status eksplisit (apa pun
+   nilainya), itu yang menang. **Cek tiap modul di Fase 2-6** untuk pola serupa
+   (kolom yang disembunyikan default kecuali flag khusus: `cancelled`,
+   `obsolete`, dokumen di-void/dibatalkan) dan terapkan aturan yang sama.
 
 Perbedaan **1** terlihat pengguna → butuh persetujuan (§4).
-Perbedaan **2** dan **3** adalah perbaikan bug; catat di commit message.
+Perbedaan **2**, **3**, dan **4** adalah perbaikan bug; catat di commit message.
 
 ## 4. Kolom pencarian per modul
 

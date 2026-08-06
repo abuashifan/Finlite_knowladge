@@ -41,10 +41,27 @@ public function list(array $filters = []): Collection
 Dua filter khusus ini (`include_void`, `include_obsolete`) **tetap tinggal di
 service** — hanya search/status/tanggal/sort/paginate yang pindah ke trait.
 
-⚠️ **Perhatikan interaksi `status`.** Service sudah memasang
-`where('status', '!=', 'void')`. Bila klien juga mengirim `status=void`,
-hasilnya kosong. Perilaku ini **sama seperti sekarang** (jalur in-memory juga
-menyaring void lebih dulu) — pastikan tidak berubah, dan tulis test-nya.
+⚠️ **Interaksi `status` — INI BUG, BUKAN PERILAKU YANG DIPERTAHANKAN.**
+Draf awal rencana ini menganggap "status=void selalu kosong tanpa
+include_void" sebagai perilaku lama yang harus dipertahankan apa adanya.
+**Salah** — ditemukan dari laporan user nyata (2026-08-06): void satu jurnal
+lewat UI, filter status "Void" di sidebar, jurnalnya tidak muncul. Root
+cause: `where('status', '!=', 'void')` diterapkan tanpa syarat, lalu
+`AppliesListQuery` menambah `whereIn('status', ['void'])` di atasnya —
+kontradiksi SQL yang selalu 0 baris. UI tidak pernah mengirim
+`include_void=true`, cuma `status=void`.
+
+**Perbaikan yang benar**: exclusion default HANYA berlaku saat tidak ada
+filter status sama sekali (`empty($filters['status'])`). Begitu user
+memfilter status secara eksplisit — apa pun nilainya, termasuk `void` —
+filter itu yang menang. Lihat implementasi final di
+`JournalEntryService::list()` dan test
+`test_status_void_filter_works_without_include_void_flag`.
+
+**Untuk fase 2-6**: cek tiap modul apakah punya pola serupa (kolom status
+yang disembunyikan default kecuali flag khusus — mis. `cancelled`,
+`obsolete`, dokumen yang di-void/dibatalkan). Kalau ada, terapkan aturan
+yang sama: exclusion default hanya jalan saat filter status kosong.
 
 ## Tugas
 
