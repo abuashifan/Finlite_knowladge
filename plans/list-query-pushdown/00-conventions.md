@@ -215,7 +215,8 @@ punya istilah status "Lunas/Belum Lunas/Belum Dibayar" yang sama):
 **Yang tidak disentuh rencana ini** (lihat §8): filter status & tanggal yang
 sekarang cuma berlaku ke 1 halaman karena frontend tidak mengirimnya ke
 server. Backend menyiapkan; perbaikan frontend-nya ada di
-`plans/list-filters-frontend/README.md`.
+`plans/list-filters-frontend/README.md` (ditulis 2026-08-07, setelah rencana
+ini selesai).
 
 ### Transaksi
 
@@ -380,11 +381,13 @@ const visibleRows = rows.filter((invoice) => {
 Tercatat jujur di UI sebagai `FILTER_HINT` — *"Filter multi-select dan tanggal
 berlaku pada data halaman yang sedang dimuat."* — muncul di **9 halaman daftar**.
 
-> ⚠️ **Angka 9 itu belum diverifikasi ulang.** Fase 5 menemukan ketiga halaman
-> Persediaan (Mutasi, Penyesuaian, Opname) **sudah** mengirim
-> `status`/`date_from`/`date_to` ke server, jadi tidak pernah punya masalah ini.
-> Hitung ulang daftarnya sebelum memulai perbaikan frontend — kemungkinan
-> scope-nya lebih kecil dari yang dicatat di sini.
+> ✅ **Sudah diverifikasi ulang 2026-08-07.** Angka 9 **benar** untuk halaman
+> ber-`FILTER_HINT`, tapi menyesatkan sebagai gambaran keseluruhan: audit
+> lengkap menemukan 22 halaman daftar terbagi tiga kelompok — 5 sudah benar
+> (termasuk ketiga Persediaan), 8 mengirim status tapi belum punya UI filter
+> tanggal sama sekali, dan 9 inilah yang menyaring di browser. Peta lengkapnya
+> di `plans/list-filters-frontend/README.md` §Peta keadaan; pakai itu, bukan
+> angka di sini.
 
 Akibatnya: mencentang "Posted" tidak menampilkan dokumen posted di halaman lain.
 
