@@ -259,6 +259,16 @@ server. Backend menyiapkan; perbaikan frontend-nya ada di
 | Syarat Bayar | `name` |
 | Kategori Produk | `name` |
 
+> ⚠️ **Verifikasi kolom ke skema sebelum mengerjakan tiap fase.** Tabel di atas
+> ditulis sebagian dari ingatan dan sudah salah tiga kali: `description` di
+> Penerimaan/Pengeluaran Kas tidak pernah ada (yang ada `notes` — ketahuan Fase
+> 4), plus dua dugaan lain yang meleset di Fase 2 & 3. Jalankan ini dulu:
+>
+> ```bash
+> php -r '$d=new PDO("sqlite:database/tenants/company_000001.sqlite");
+> foreach($d->query("PRAGMA table_info(NAMA_TABEL)") as $c) echo $c["name"],"\n";'
+> ```
+
 **Catatan:** pencarian lewat relasi memakai `whereHas`, yang menjadi subquery.
 Pastikan kolom relasi yang dicari ber-index (`contacts.name`, `contacts.contact_code`).
 Bila belum, tambahkan di migrasi Fase 0.

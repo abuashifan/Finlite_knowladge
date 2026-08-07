@@ -58,7 +58,7 @@ lewat `listResponse` — sudah `LIMIT 1` sejak commit `57fc710`. Tidak perlu dis
 | 1 | Pilot: Jurnal Umum | `phase-1-journal.md` | 1 | ✅ Selesai | e6b2466 |
 | 2 | Sales | `phase-2-sales.md` | 8 | ✅ Selesai | 3d44803 |
 | 3 | Purchase | `phase-3-purchase.md` | 7 | ✅ Selesai | c4a67f2 |
-| 4 | Kas & Bank | `phase-4-cash-bank.md` | 4 | ⬜ Belum | — |
+| 4 | Kas & Bank | `phase-4-cash-bank.md` | 4 | ✅ Selesai | 138ca61 |
 | 5 | Persediaan | `phase-5-inventory.md` | 3 | ⬜ Belum | — |
 | 6 | Master Data | `phase-6-master-data.md` | 9 | ⬜ Belum | — |
 | 7 | Pembersihan: buang jalur in-memory | `phase-7-cleanup.md` | — | ⬜ Belum | — |
