@@ -241,8 +241,8 @@ server. Backend menyiapkan; perbaikan frontend-nya ada di
 | Pengeluaran Kas | `payment_number`, `description` | — |
 | Transfer Bank | `transfer_number`, `notes` | — |
 | Rekonsiliasi Bank | `reconciliation_number` | — |
-| Mutasi Stok | `movement_number`, `description` | — |
-| Penyesuaian Stok | `adjustment_number` | — |
+| Mutasi Stok | `movement_number`, `source_number`, `description` | — |
+| Penyesuaian Stok | `adjustment_number`, `reason` | — |
 | Opname Stok | `opname_number` | — |
 
 ### Master Data
@@ -379,6 +379,12 @@ const visibleRows = rows.filter((invoice) => {
 
 Tercatat jujur di UI sebagai `FILTER_HINT` — *"Filter multi-select dan tanggal
 berlaku pada data halaman yang sedang dimuat."* — muncul di **9 halaman daftar**.
+
+> ⚠️ **Angka 9 itu belum diverifikasi ulang.** Fase 5 menemukan ketiga halaman
+> Persediaan (Mutasi, Penyesuaian, Opname) **sudah** mengirim
+> `status`/`date_from`/`date_to` ke server, jadi tidak pernah punya masalah ini.
+> Hitung ulang daftarnya sebelum memulai perbaikan frontend — kemungkinan
+> scope-nya lebih kecil dari yang dicatat di sini.
 
 Akibatnya: mencentang "Posted" tidak menampilkan dokumen posted di halaman lain.
 
