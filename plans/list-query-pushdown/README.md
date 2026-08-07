@@ -60,7 +60,7 @@ lewat `listResponse` — sudah `LIMIT 1` sejak commit `57fc710`. Tidak perlu dis
 | 3 | Purchase | `phase-3-purchase.md` | 7 | ✅ Selesai | c4a67f2 |
 | 4 | Kas & Bank | `phase-4-cash-bank.md` | 4 | ✅ Selesai | 138ca61 |
 | 5 | Persediaan | `phase-5-inventory.md` | 3 | ✅ Selesai | 9749b35 |
-| 6 | Master Data | `phase-6-master-data.md` | 9 | ⬜ Belum | — |
+| 6 | Master Data | `phase-6-master-data.md` | 9 | ✅ Selesai | b874a45 |
 | 7 | Pembersihan: buang jalur in-memory | `phase-7-cleanup.md` | — | ⬜ Belum | — |
 
 > Status yang boleh: `⬜ Belum`, `🔄 Berjalan`, `✅ Selesai`.
