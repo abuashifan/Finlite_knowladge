@@ -61,7 +61,9 @@ lewat `listResponse` — sudah `LIMIT 1` sejak commit `57fc710`. Tidak perlu dis
 | 4 | Kas & Bank | `phase-4-cash-bank.md` | 4 | ✅ Selesai | 138ca61 |
 | 5 | Persediaan | `phase-5-inventory.md` | 3 | ✅ Selesai | 9749b35 |
 | 6 | Master Data | `phase-6-master-data.md` | 9 | ✅ Selesai | b874a45 |
-| 7 | Pembersihan: buang jalur in-memory | `phase-7-cleanup.md` | — | ⬜ Belum | — |
+| 7 | Pembersihan: buang jalur in-memory | `phase-7-cleanup.md` | — | ✅ Selesai | a72edf7 |
+
+> **✅ RENCANA SELESAI 2026-08-07.** Angka penutup ada di §Hasil akhir di bawah.
 
 > Status yang boleh: `⬜ Belum`, `🔄 Berjalan`, `✅ Selesai`.
 > Kalau `🔄 Berjalan` tertinggal dari sesi sebelumnya, jalankan Prasyarat fase itu
@@ -111,6 +113,53 @@ di sisi frontend. Detail + kode buktinya di `00-conventions.md` §8.
 
 Urutannya sengaja: backend dulu supaya siap menerima parameternya, frontend
 menyusul.
+
+## Hasil akhir (2026-08-07)
+
+Diukur ulang pada **3000 jurnal** lewat `tests/Feature/Journal/ListQueryBenchmarkTest.php`
+(jalankan dengan `BENCHMARK_OUT=/path/laporan.txt php artisan test tests/Feature/Journal/ListQueryBenchmarkTest.php`):
+
+| Permintaan | Waktu | Baris dikirim | Memori tambahan |
+|---|---|---|---|
+| `per_page=1` | 35,1 ms | 1 | 2 MB |
+| `per_page=25` | 17,0 ms | 25 | 0 MB |
+| `per_page=25` + `search=` | 9,5 ms | 1 | 0 MB |
+| halaman terakhir (`page=120`) | 19,1 ms | 25 | 0 MB |
+| tanpa paginasi | 723,2 ms | 3000 | 20 MB |
+
+**Cara membacanya.** Sebelum rencana ini, setiap permintaan daftar menghidrasi
+seluruh tabel lalu memotongnya di PHP — jadi baris terakhir (723 ms, 20 MB)
+adalah biaya yang dibayar **bahkan untuk meminta satu halaman**, ditambah
+biaya penyaringan in-memory di atasnya. Sekarang satu halaman 25 baris
+berbiaya 17 ms dan 0 MB tambahan: **~42× lebih cepat**, dan konsumsi memorinya
+tidak lagi tumbuh mengikuti besar tabel — itulah yang dulu berakhir sebagai
+`Allowed memory size exhausted` → 500.
+
+Bandingkan dengan tabel "Bukti terukur" di atas (33 jurnal), yang justru
+menunjukkan gejalanya: dulu ketiga permintaan berbiaya **sama**, tanda paginasi
+tidak terjadi di SQL. Sekarang biayanya mengikuti seberapa banyak yang diminta.
+
+⚠️ Baris `per_page=1` (35 ms) lebih lambat dari `per_page=25` bukan karena
+meminta 1 baris lebih mahal, melainkan karena ia permintaan pertama di proses
+itu dan menanggung pemanasan. Jangan dibaca sebagai anomali.
+
+### Bug yang ikut terperbaiki
+
+Empat, semuanya ditemukan karena kodenya dibaca baris per baris — bukan dari
+audit awal:
+
+1. `customer_id` diabaikan 7 dari 8 service Sales, `vendor_id` 2 dari 7
+   Purchase. Dropdown filter di 9 halaman tidak berpengaruh sama sekali.
+2. Pencarian nama/kode customer & vendor tidak pernah bekerja di 14 halaman,
+   padahal placeholder-nya menjanjikan itu.
+3. Filter status "Void" di Jurnal selalu kosong (kontradiksi SQL).
+4. Status comma-separated (`draft,posted`) selalu 0 hasil.
+
+### Yang TIDAK diselesaikan
+
+Frontend masih menyaring status & tanggal di browser pada 9 halaman daftar —
+masalah **cakupan filter**, bukan **beban**. Backend sudah siap menerima
+parameternya sejak Fase 2–5. Detail di `00-conventions.md` §8.
 
 ## Referensi
 
