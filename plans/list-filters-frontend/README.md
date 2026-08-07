@@ -79,6 +79,18 @@ Punya UI filter status **dan** tanggal, tapi tidak mengirim satu pun ke server.
 `GoodsReceiptListPage`, `VendorDepositListPage`, `VendorPaymentListPage`,
 `CashReceiptListPage`, `CashPaymentListPage`, `BankTransferListPage`
 
+### Terpisah — 9 halaman master data dengan Aktif/Nonaktif
+
+Ketiga kelompok di atas soal **status dokumen** (draft/posted/void) dan rentang
+tanggal. Master data punya sumbu yang berbeda: `is_active`, tanpa siklus
+dokumen. Fiturnya ada di 9 halaman dengan 9 bentuk berbeda, diseragamkan ke
+format `KontakListPage` di [Fase 4](phase-4-active-status.md).
+
+Tiga di antaranya (COA, Kontak, Produk) juga masuk hitungan 22 halaman di atas;
+enam sisanya (Satuan, Gudang, Departemen, Proyek, Syarat Bayar, Kategori
+Produk) halaman sederhana tanpa filter status dokumen, jadi tidak masuk
+kelompok A/B/C.
+
 ## Kabar baik dari audit
 
 Tiga hal membuat pekerjaan ini jauh lebih kecil dari dugaan awal:
@@ -88,10 +100,20 @@ Tiga hal membuat pekerjaan ini jauh lebih kecil dari dugaan awal:
    `date_to`. Tidak perlu mengubah kontrak API client.
 2. **Backend sudah menerima dan menghormatinya**, termasuk status
    comma-separated (`draft,posted`) — diperbaiki di Fase 1 `list-query-pushdown`.
-3. **Pola D tidak ada lagi.** Filter Aktif/Nonaktif master data yang dulu
-   direncanakan sebagai "tahap 3" ternyata **sudah bekerja server-side** di
-   ketiga halaman (COA, Kontak, Produk), lengkap dengan opsi "Semua".
-   Diverifikasi 2026-08-07 — bukan asumsi.
+3. **Filter Aktif/Nonaktif sudah server-side di tiga halaman utama** (COA,
+   Kontak, Produk), lengkap dengan opsi "Semua". Diverifikasi 2026-08-07.
+
+> ⚠️ **Koreksi.** Poin 3 semula berbunyi *"Pola D tidak ada lagi — sudah
+> selesai"*. **Terlalu cepat disimpulkan.** Audit lanjutan atas permintaan
+> pemilik produk menemukan bahwa fitur aktif/nonaktif ada di **9 halaman**,
+> bukan 3, dan tidak ada dua yang bentuknya sama: Produk bahkan tidak bisa
+> mengubah status sama sekali dari daftar, sementara enam halaman lain tidak
+> punya filter statusnya. Yang benar: tiga halaman utama sudah **memfilter**
+> server-side; penyeragaman fiturnya belum dikerjakan. Lihat
+> [Fase 4](phase-4-active-status.md).
+>
+> Pelajarannya sama dengan rencana sebelumnya: memeriksa satu aspek (di sini
+> "apakah `is_active` dikirim?") lalu menyimpulkan seluruh fitur beres.
 
 ## Progress Ledger
 
@@ -101,6 +123,7 @@ Tiga hal membuat pekerjaan ini jauh lebih kecil dari dugaan awal:
 | 1 | Kelompok C → server-side | `phase-1-group-c.md` | 9 | ⬜ Belum | — |
 | 2 | Kelompok B → tambah filter tanggal | `phase-2-group-b.md` | 8 | ⬜ Belum | — |
 | 3 | Paginasi COA + sisa temuan | `phase-3-leftovers.md` | 1 | ⬜ Belum | — |
+| 4 | Seragamkan Aktif/Nonaktif ke format Kontak | `phase-4-active-status.md` | 9 | ⬜ Belum | — |
 
 > Status yang boleh: `⬜ Belum`, `🔄 Berjalan`, `✅ Selesai`.
 

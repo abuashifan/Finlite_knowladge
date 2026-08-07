@@ -129,6 +129,27 @@ Jadi dua field itu janji kosong. Pilihannya:
 
 Diputuskan di Fase 0. Jangan diam-diam dipakai.
 
+## 6b. `is_active` adalah sumbu yang berbeda dari `status`
+
+Jangan dicampur. Dua hal berbeda yang kebetulan sama-sama "status":
+
+| | `status` (dokumen) | `is_active` (master data) |
+|---|---|---|
+| Nilai | `draft`, `posted`, `void`, … | boolean |
+| Siklus | ada — dokumen berpindah status | tidak ada — sekadar dipakai/tidak |
+| Halaman | 22 halaman daftar transaksi | 9 halaman master data |
+| Fase | 0–3 | 4 |
+
+Backend menerima **dua-duanya** untuk master data: `?is_active=1` langsung, dan
+`?status=active|inactive` yang dipetakan ke boolean di
+`AppliesListQuery::applyListStatusQuery()`. **Pakai `is_active`** — itu yang
+sudah dipakai halaman acuan dan paling sedikit menimbulkan kebingungan.
+
+⚠️ Satu pengecualian: **Proyek punya kolom `status` string sendiri** di samping
+`is_active`, jadi di sana `?status=` menyaring status proyek, bukan aktif/
+nonaktif. Ini disengaja dan sudah dikunci test di backend — lihat
+`plans/list-query-pushdown/phase-6-master-data.md` §Hasil.
+
 ## 7. Definition of Done per fase
 
 - [ ] Halaman mengirim `status`/`date_from`/`date_to` ke server
