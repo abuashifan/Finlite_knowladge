@@ -107,6 +107,14 @@ Semuanya menerima `note?` untuk keterangan kecil di bawah judul.
 > Filter **harus** dikirim ke server sebagai parameter query, bukan dipakai menyaring
 > array hasil di browser. Menyaring di browser hanya mengenai baris halaman yang sedang
 > tampil — ini pernah terjadi di 9 halaman sekaligus (`plans/list-filters-frontend/`).
+>
+> **Mengirimnya belum cukup.** `AppliesListQuery` hanya menangani `search`, `status`,
+> `date_from`/`date_to`, dan sort. **Filter khusus modul harus dipasang sendiri oleh
+> service-nya** sebelum `applyListQuery()` dipanggil — kalau tidak, parameternya
+> diabaikan tanpa error. Persis ini yang terjadi pada filter kategori di daftar produk
+> (2026-08-08): frontend mengirim `product_category_id` dengan benar selama berbulan-bulan,
+> `ProductService::list()` tidak pernah membacanya. Tanda pengenalnya: parameter terlihat
+> di tab Network, tapi `meta.total` tidak bergerak saat filter diubah.
 
 ---
 

@@ -131,6 +131,60 @@ Tiga hal membuat pekerjaan ini jauh lebih kecil dari dugaan awal:
 > §3.3 (filter akun Kas & Bank) ditandai opsional dan butuh keputusan
 > pemilik produk sejak awal.
 
+## Temuan setelah rencana selesai
+
+### 2026-08-08 — filter kategori di daftar produk tidak pernah diterapkan
+
+Dilaporkan pemilik produk: *"pada halaman product list, filter by category
+belum bisa"*.
+
+**Bukan bug frontend.** `ProdukListPage` sudah mengirim `product_category_id`
+sejak lama dan mengirimnya dengan benar. Yang tidak ada adalah penerimanya:
+`ProductService::list()` hanya membaca `is_active` dan `product_type`, lalu
+meneruskan sisa `$filters` ke `applyListQuery()` — dan trait itu cuma menangani
+`search`, `status`, tanggal, dan sort. Parameter kategorinya jatuh ke lantai
+tanpa error, tanpa log.
+
+Dibuktikan pada data demo company 1 sebelum & sesudah perbaikan:
+
+| Filter | Sebelum | Sesudah |
+|---|---|---|
+| tanpa filter | 6 | 6 |
+| `product_category_id=1` (Gas LPG) | **6** | 3 |
+| `product_category_id=2` (Perlengkapan) | **6** | 3 |
+
+**Perbaikan:** `ProductService::list()` memasang `where('product_category_id')`
+di query dasar sebelum `applyListQuery()`, pola yang sama dengan
+`cash_bank_account_id`/`department_id` di modul lain. `category_id` diterima
+sebagai alias karena modul laporan persediaan memakai nama itu. Test
+`ProductTest::test_product_list_can_be_filtered_by_category`.
+Frontend ikut diseragamkan ke pola `filterKey` (sebelumnya hanya `search` yang
+mengembalikan ke halaman 1). Commit: backend `5a0b260`, frontend `a0a9718`.
+
+**Ini melanggar prinsip "Backend tidak diubah" di bawah — dan prinsip itu sudah
+menyediakan jalan keluarnya:** *"Kalau ternyata butuh perubahan backend,
+berhenti dan catat — berarti ada asumsi rencana ini yang salah."* Asumsi yang
+salah adalah poin 2 di "Kabar baik dari audit": *"Backend sudah menerima dan
+menghormatinya."* Itu benar untuk `status`/`date_from`/`date_to` — parameter
+yang memang ditangani `AppliesListQuery` — tapi **tidak berlaku untuk filter
+khusus modul**, yang harus dipasang sendiri oleh tiap service.
+
+**Pelajaran yang bisa dipakai ulang:** ada dua cara sebuah filter gagal, dan
+keduanya terlihat sama persis dari layar —
+
+1. frontend tidak mengirim parameternya (masalah rencana ini), atau
+2. frontend mengirim, backend tidak membacanya (kasus ini).
+
+Memeriksa tab Network saja hanya menyingkirkan kemungkinan pertama. Uji yang
+membedakan keduanya sama seperti di "Cara membuktikan perbaikannya bekerja":
+**lihat apakah `total` ikut menyusut.** Kalau parameter terkirim tapi `total`
+tidak bergerak, penyebabnya nomor 2.
+
+**Belum diaudit:** filter khusus modul lain yang dikirim frontend tapi mungkin
+tidak dibaca service-nya. Rencana ini hanya mengaudit `status` dan tanggal.
+
+---
+
 **Fase 0 wajib lebih dulu** — Fase 1 mengirim status multi-pilih sebagai
 `"draft,posted"`, dan tipe saat ini (`status?: SalesInvoiceStatus`) tidak
 mengizinkannya tanpa `as` yang berbohong ke type checker.
