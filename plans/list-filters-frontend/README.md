@@ -121,7 +121,7 @@ Tiga hal membuat pekerjaan ini jauh lebih kecil dari dugaan awal:
 |------|-------|------|---------|--------|--------|
 | 0 | Fondasi: tipe status multi-nilai | `phase-0-types.md` | — | ✅ Selesai | 2cdee59 |
 | 1 | Kelompok C → server-side | `phase-1-group-c.md` | 9 | ✅ Selesai | 58f6551 |
-| 2 | Kelompok B → tambah filter tanggal | `phase-2-group-b.md` | 8 | ⬜ Belum | — |
+| 2 | Kelompok B → tambah filter tanggal | `phase-2-group-b.md` | 8 | ✅ Selesai | cf4ec72 |
 | 3 | Paginasi COA + sisa temuan | `phase-3-leftovers.md` | 1 | ⬜ Belum | — |
 | 4 | Seragamkan Aktif/Nonaktif ke format Kontak | `phase-4-active-status.md` | 9 | ✅ Selesai | 36712f6 |
 

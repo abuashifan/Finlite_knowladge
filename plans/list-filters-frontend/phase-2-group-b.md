@@ -1,5 +1,7 @@
 # Fase 2 — Kelompok B: tambah filter tanggal (8 halaman)
 
+> **✅ Selesai 2026-08-08 — commit `cf4ec72`.** Lihat [§Hasil](#hasil).
+
 **Ini penambahan fitur, bukan perbaikan bug.** Kedelapan halaman sudah mengirim
 `status` ke server dengan benar dan tidak menyaring apa pun di browser. Yang
 belum ada: UI filter rentang tanggal.
@@ -77,6 +79,47 @@ rentang tanggal sama sekali. Backend sudah menerima date_from/date_to sejak
 list-query-pushdown; ini melengkapi sisi UI-nya.
 ```
 
+## Hasil
+
+Selesai 2026-08-08, commit `cf4ec72`. Kedelapan halaman punya filter rentang
+tanggal.
+
+**Komponen yang dipilih: `DateRangeFilterSection`**, bukan pola `<Input
+type="date">` mentah ala `JournalListPage`. Alasannya ia sudah dipakai 13
+halaman lain termasuk seluruh kelompok C, jadi ini yang mayoritas — memilih
+pola Journal justru akan menambah varian ketiga.
+
+**Nol perubahan backend**, sesuai prinsip rencana. `$listDateColumn` sudah
+diset per modul dan kolomnya ber-index sejak `list-query-pushdown` Fase 0.
+
+**Reset halaman ikut diperluas** ke seluruh kombinasi filter lewat `filterKey`,
+sama seperti yang Fase 1 lakukan untuk kelompok C. Rencana tidak memintanya
+eksplisit di fase ini, tapi tanpa itu halaman baru saja mewarisi masalah yang
+sama.
+
+### Verifikasi
+
+Request yang benar-benar dikirim, 4 halaman lintas dua modul:
+
+| Halaman | Query |
+|---|---|
+| Penawaran | `sales/quotations?page=1&per_page=25&date_from=2026-01-01` |
+| Sales Order | `sales/orders?…&date_from=2026-01-01` |
+| Permintaan | `purchase/requests?…&date_from=2026-01-01` |
+| Purchase Order | `purchase/orders?…&date_from=2026-01-01` |
+
+**`activeCount` dan Reset diuji khusus** — ini yang ditandai "paling mudah
+terlupa" di §Perhatian khusus. Hasilnya: badge `0 → 2` saat dua tanggal diisi,
+kembali kosong setelah Reset, dan kedua input benar-benar dikosongkan.
+
+### Catatan desain yang sengaja dibiarkan
+
+Badge menghitung `from` dan `to` sebagai **dua** filter terpisah, bukan satu
+rentang. Secara semantik satu rentang tanggal lebih tepat dihitung 1. Tapi 9
+halaman kelompok C sudah berperilaku begitu sejak lama, jadi konsistensi
+didahulukan — mengubahnya berarti menyentuh 17 halaman untuk perkara kosmetik.
+Kalau mau diseragamkan jadi 1, kerjakan sekaligus di semuanya, jangan sebagian.
+
 ## Setelah selesai
 
-Update ledger `README.md`: Fase 2 → `✅ Selesai` + hash commit.
+- [x] Update ledger `README.md`: Fase 2 → `✅ Selesai` + hash commit.
