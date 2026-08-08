@@ -147,22 +147,68 @@ Diuji di browser dengan memantau request yang benar-benar dikirim:
 Sebelum fase ini ketiganya hanya mengirim `page` & `per_page`. Tanpa console
 error.
 
-### ⚠️ Yang belum bisa diuji
+### Uji penentu — ✅ TERPENUHI 2026-08-08
 
-**Uji penentu di README §Cara membuktikan — "filter menjangkau halaman ≥ 2 dan
-`total` ikut menyusut" — belum dilakukan.** Data demo hanya 1–6 baris per
-modul kelompok C, jauh di bawah 25, jadi halaman 2 tidak pernah ada.
+Rencana menuntut bukti bahwa filter **menjangkau halaman ≥ 2 dan `total` ikut
+menyusut**. Data demo (1–6 baris per modul) tidak cukup, jadi dibuat kondisi
+ujinya:
 
-Yang diuji sebagai gantinya adalah sinyal penyusunnya: parameter benar-benar
-sampai ke server, dan jumlah baris berubah mengikutinya. Itu cukup untuk
-menyatakan filternya server-side, tapi **bukan** bukti langsung atas gejala
-yang dilaporkan pemilik produk.
+**Perusahaan buangan `ZZ Uji Filter (dummy)` (company 3)** dibuat lewat
+`tenant:create` + `tenant:migrate`. **Sengaja bukan PT Maju Jaya atau CV Sumber
+Rejeki** supaya tidak ada data nyata yang terganggu. Isinya 60 sales invoice:
 
-Untuk menutupnya: buat > 25 dokumen di satu modul (mis. Sales Invoice) dengan
-status campur, lalu ikuti lima langkah di README.
+- 57 berstatus `draft`, tanggal 2026-03-02 ke atas
+- 3 berstatus `approved`, tanggal **tertua** (2026-01-01..03)
+
+Dengan urutan default (`invoice_date desc`) dan `per_page=25`, ketiga
+`approved` mendarat di **posisi 58–60, yaitu halaman 3**. Hanya `draft` dan
+`approved` yang dipakai karena keduanya belum memposting jurnal — neraca saldo
+tenant uji tetap nol, tidak ada angka akuntansi palsu.
+
+**Hasil dari halaman 1, tanpa berpindah halaman:**
+
+| Langkah | Tampilan | Request ke server |
+|---|---|---|
+| tanpa filter | `Menampilkan 1–25 dari 60 data` | `page=1&per_page=25` |
+| centang `approved` | `Menampilkan 1–3 dari 3 data` | `page=1&per_page=25&status=approved` |
+
+Dokumen yang muncul: `INV-UJI-A003`, `A002`, `A001` — **tepat ketiga dokumen
+yang berada di halaman 3**.
+
+`total` menyusut 60 → 3. Itu poin ke-5 di README §Cara membuktikan, dan itulah
+yang menentukan. **Sebelum perbaikan, interaksi yang sama menghasilkan 0 baris**
+(browser menyaring 25 draft yang sudah termuat, tidak ada satu pun approved)
+sementara `total` tetap 60.
+
+Diverifikasi juga lewat API langsung, hasil sama.
+
+### Bug yang hanya ketahuan dari menjalankan UI
+
+Commit `58f6551` menghapus konstanta `FILTER_HINT`, dan `grep` bilang bersih.
+Tapi layar masih menampilkan *"Berlaku pada data halaman yang sedang dimuat."*
+— **salinan kedua**, kali ini prop `note=` pada `DateRangeFilterSection` berisi
+string literal, bukan konstanta. Grep untuk `FILTER_HINT` tidak mungkin
+menemukannya.
+
+Dihapus dari kesembilan halaman di commit `32e7d2a`.
+
+Pelajarannya: `grep` membuktikan sesuatu **tidak ada di kode**, bukan bahwa
+sesuatu **tidak tampil di layar**. Untuk teks yang dilihat pengguna, bacalah
+layarnya.
+
+### Membersihkan data uji
+
+Tenant uji sengaja dipisah supaya mudah dibuang:
+
+```bash
+# hapus perusahaan uji beserta tenant DB-nya
+rm /workspace/laravel_backend/database/tenants/company_000003.sqlite
+# lalu hapus baris company id=3 + company_users + tenant_databases di DB pusat
+```
+
+Backup kedua tenant asli diambil sebelum pekerjaan ini dimulai.
 
 ## Setelah selesai
 
 - [x] Update ledger `README.md`: Fase 1 → `✅ Selesai` + hash commit.
-- [ ] **Minta pemilik produk mencoba salah satu halaman** dengan data > 25
-      baris — belum terpenuhi, lihat §Yang belum bisa diuji.
+- [x] Uji penentu dengan data > 25 baris — **terpenuhi**, lihat §Uji penentu.
