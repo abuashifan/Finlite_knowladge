@@ -75,6 +75,27 @@ ada entri di `moduleConfig.ts`. Hanya terjangkau lewat URL langsung.
 Delapan master data lain punya entri menu. Perlu keputusan pemilik produk:
 tambahkan entri ribbon, atau memang disengaja dikelola dari form produk saja.
 
+## 3.1d — Hapus perusahaan uji `ZZ Uji Filter (dummy)`
+
+Dibuat saat Fase 1 untuk memenuhi uji penentu (butuh > 25 baris; data demo cuma
+1–6 per modul). **Company 3**, tenant `company_000003.sqlite`, berisi 60 sales
+invoice dummy bernomor `INV-UJI-*`.
+
+Dibiarkan hidup atas keputusan pemilik produk — masih berguna untuk menguji
+Fase 2 dan 3 yang juga butuh data banyak. **Hapus setelah Fase 2 dan 3 selesai
+diuji**, jangan sebelum itu.
+
+Ia muncul di daftar pilih perusahaan, jadi jangan lupa — kalau tertinggal,
+pengguna akan melihat perusahaan bernama "dummy" di produksi.
+
+```bash
+rm /workspace/laravel_backend/database/tenants/company_000003.sqlite
+# lalu hapus baris terkait di DB pusat: companies id=3, company_users, tenant_databases
+```
+
+Backup kedua tenant asli (company 1 & 2) diambil sebelum Fase 1 dimulai; kalau
+perlu dipulihkan, lihat commit log Fase 1.
+
 ## 3.2 — Searchbox Persediaan belum memakai `ListSearchBar`
 
 Tiga halaman Persediaan (Mutasi, Penyesuaian, Opname Stok) sudah menaruh kotak
