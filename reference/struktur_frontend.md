@@ -1,11 +1,3 @@
-<!-- =====================================================================
-     MIRROR — SUMBER KEBENARAN: react_frontend/docs/struktur_frontend.md
-     File ini SALINAN untuk knowledge base Finlite_Knowladge.
-     Jangan edit di sini saja: update dulu file kanonik di repo frontend,
-     lalu salin ulang ke sini. Lihat reference/README.md untuk aturan sync.
-     Terakhir disinkronkan: 2026-07-08
-===================================================================== -->
-
 # Struktur Frontend
 
 Peta ringkas untuk AI agent di `/workspace/frontend`.
@@ -264,13 +256,17 @@ Gunakan file ini dulu saat mencari lokasi file. Fokus ke file yang ditulis di ba
 | | | | |____EmptyState.tsx
 | | | | |____ErrorBoundary.tsx
 | | | | |____SessionWarningDialog.tsx
+| | | | |____UnsavedFormsDialog.tsx
 | | | |____form/
+| | | | |____FieldError.tsx
 | | | | |____FormSection.tsx
 | | | | |____FormSummary.tsx
 | | | | |____LineItemsTable.tsx
+| | | | |____RecordNavButtons.tsx
 | | | | |____SearchableSelect.tsx
 | | | |____filter/
 | | | | |____DateRangeFilterSection.tsx
+| | | | |____ListSearchBar.tsx
 | | | | |____MultiCheckboxFilter.tsx
 | | | | |____dateRangeUtils.ts
 | | | |____layout/
@@ -278,6 +274,7 @@ Gunakan file ini dulu saat mencari lokasi file. Fokus ke file yang ditulis di ba
 | | | | |____FilterSidebar.tsx
 | | | | |____FixedBottomBar.tsx
 | | | | |____FormLayout.tsx
+| | | | |____FormSaveActions.tsx
 | | | | |____PrimaryTabs.tsx
 | | | | |____RibbonPanel.tsx
 | | | | |____SecondaryTabs.tsx
@@ -313,18 +310,28 @@ Gunakan file ini dulu saat mencari lokasi file. Fokus ke file yang ditulis di ba
 | | | |____tooltip.tsx
 | |____hooks/
 | | |____use-toast.ts
+| | |____useCompanySession.ts
 | | |____useCompanySettings.ts
 | | |____useDocumentActions.ts
+| | |____useOpenPrimaryTab.ts
 | | |____usePermission.ts
 | | |____usePersistentFormDraft.ts
+| | |____useRecordFormNavigation.ts
+| | |____useRecordSequence.ts
+| | |____useRecordTab.ts
 | | |____useSessionTimeout.ts
+| | |____useTabFormState.ts
 | | |____useToast.ts
+| | |____useUnsavedFormTracker.ts
 | | |____useViewMode.ts
 | |____index.css
 | |____lib/
 | | |____apiError.ts
+| | |____companyScope.ts
+| | |____companySession.ts
 | | |____constants.ts
 | | |____exportCsv.ts
+| | |____formDraftStorage.ts
 | | |____utils.ts
 | |____main.tsx
 | |____modules/
@@ -614,18 +621,51 @@ Gunakan file ini dulu saat mencari lokasi file. Fokus ke file yang ditulis di ba
 | | | |____components/
 | | | | |____ReportCompactBar.tsx
 | | | | |____ReportDomainPanel.tsx
-| | | | |____ReportFilterParameter.tsx
+| | | | |____ReportParameterModal.tsx
+| | | | |____PeriodSelector.tsx
+| | | | |____SavedReportsPanel.tsx
+| | | | |____SaveReportButton.tsx
+| | | | |____ReportToolButton.tsx
+| | | | |____PageSetupControl.tsx
+| | | | |____ReportPrintToolbar.tsx
+| | | | |____ReportPrintDocument.tsx
+| | | | |____ReportPrintSection.tsx
 | | | |____constants/
 | | | | |____reportCategories.ts
+| | | | |____reportDomainIcons.ts
+| | | | |____reportKeyRoutes.ts
+| | | | |____pageSizes.ts
+| | | |____stores/
+| | | | |____useReportPageSetupStore.ts
+| | | |____hooks/
+| | | | |____useSavedReports.ts
+| | | | |____useInitialReportParams.ts
+| | | | |____useReportParams.ts
+| | | | |____useReportFilterSummary.ts
 | | | |____pages/
 | | | | |____ApAgingReportPage.tsx
+| | | | |____ApOutstandingReportPage.tsx
+| | | | |____ApVendorSummaryPage.tsx
 | | | | |____ArAgingReportPage.tsx
+| | | | |____ArCustomerSummaryPage.tsx
+| | | | |____ArOutstandingReportPage.tsx
 | | | | |____AccountLedgerPage.tsx
 | | | | |____BalanceSheetPage.tsx
 | | | | |____CashFlowPage.tsx
+| | | | |____CashFlowDirectReportPage.tsx
+| | | | |____RetainedEarningsReportPage.tsx
+| | | | |____EquityChangesReportPage.tsx
+| | | | |____ProfitLossMultiPeriodPage.tsx
+| | | | |____BalanceSheetMultiPeriodPage.tsx
+| | | | |____OutputVatReportPage.tsx
+| | | | |____InputVatReportPage.tsx
+| | | | |____EfakturExportPage.tsx
 | | | | |____FinancialSummaryPage.tsx
 | | | | |____GeneralLedgerPage.tsx
+| | | | |____JournalListReportPage.tsx
 | | | | |____InventoryAnalysisPage.tsx
+| | | | |____InventoryAgingReportPage.tsx
+| | | | |____OpnameWorksheetReportPage.tsx
 | | | | |____ProfitLossPage.tsx
 | | | | |____ReconciliationPage.tsx
 | | | | |____CashBankStatementPage.tsx
@@ -633,13 +673,23 @@ Gunakan file ini dulu saat mencari lokasi file. Fokus ke file yang ditulis di ba
 | | | | |____FixedAssetDisposalsReportPage.tsx
 | | | | |____FixedAssetReconciliationReportPage.tsx
 | | | | |____FixedAssetRegisterReportPage.tsx
+| | | | |____SalesByCustomerReportPage.tsx
+| | | | |____SalesByProductReportPage.tsx
+| | | | |____SalesSummaryReportPage.tsx
+| | | | |____PurchaseByProductReportPage.tsx
+| | | | |____PurchaseByVendorReportPage.tsx
+| | | | |____PurchaseSummaryReportPage.tsx
 | | | | |____ReportCategoryPage.tsx
-| | | | |____ReportIndexPage.tsx
+| | | | |____ReportListPage.tsx
+| | | | |____SavedReportsPage.tsx
+| | | | |____legacy/
+| | | | | |____ReportIndexPage.legacy.tsx
 | | | | |____StockReportPage.tsx
 | | | | |____TrialBalancePage.tsx
 | | | |____routes.tsx
 | | | |____services/
 | | | | |____reportsApi.ts
+| | | | |____savedReportsApi.ts
 | | | |____types/
 | | | | |____reports.types.ts
 | | |____sales/
@@ -734,12 +784,15 @@ Gunakan file ini dulu saat mencari lokasi file. Fokus ke file yang ditulis di ba
 | | |____index.tsx
 | | |____moduleConfig.ts
 | | |____placeholders.tsx
+| | |____legacy/
+| | | |____reportsRibbon.legacy.ts
 | |____services/
 | | |____http.ts
 | |____stores/
 | | |____useAuthStore.ts
 | | |____useCompanyStore.ts
 | | |____useTabStore.ts
+| | |____useUnsavedFormsStore.ts
 | |____types/
 | | |____api.types.ts
 | | |____auth.types.ts

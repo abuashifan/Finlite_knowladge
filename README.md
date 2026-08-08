@@ -5,16 +5,29 @@ Dokumentasi perencanaan dan knowledge base untuk project Finlite ERP.
 ## Struktur
 
 ```
-Finlite_Knowladge/
-  plans/          ← Dokumen perencanaan implementasi
-  reference/      ← Peta direktori backend & frontend (mirror; jaga sinkron)
-  architecture/   ← (future) Diagram dan keputusan arsitektur
-  decisions/      ← (future) Architecture Decision Records (ADR)
+Finlite_knowladge/
+  reference/      ← Pengetahuan lengkap aplikasi — MULAI DI SINI
+  plans/          ← Dokumen perencanaan implementasi + riwayat keputusan
+  reviews/        ← Catatan review
 ```
 
-## Reference
+## Reference — mulai di sini
 
-- **[reference/](reference/README.md)** — Salinan peta direktori (`backend-directory-tree.md`, `struktur_frontend.md`) supaya agent bisa menavigasi struktur project dari knowledge base. **Mirror, bukan sumber kebenaran** — sumber ada di `laravel_backend/docs/` & `react_frontend/docs/`. Lihat `reference/README.md` untuk aturan sinkronisasi.
+**[reference/](reference/README.md)** berisi pengetahuan lengkap backend + frontend,
+disusun supaya **agent AI baru tidak perlu memindai seluruh folder project**.
+
+| File | Isi |
+|---|---|
+| `00-mulai-di-sini.md` | orientasi, angka kunci, aturan yang paling sering dilanggar, cara menjalankan |
+| `01-arsitektur.md` | multi-tenancy (satu database per perusahaan), kontrak API, siklus dokumen |
+| `02-backend.md` | 18 modul, 429 endpoint, `app/Shared/`, konvensi service & test |
+| `03-frontend.md` | 15 modul, 145 halaman, memory router, shell tab, state, form |
+| `04-komponen-reusable.md` | katalog 37 komponen bersama + pola halaman standar |
+| `05-role-permission-guard.md` | 8 role, 240 permission, guard rute & UI |
+
+Plus mirror peta direktori (`backend-directory-tree.md`, `struktur_frontend.md`) —
+**mirror, bukan sumber kebenaran**; sumbernya di `laravel_backend/docs/` &
+`frontend/docs/`. Aturan sinkronisasi ada di `reference/README.md`.
 
 ## Plans
 

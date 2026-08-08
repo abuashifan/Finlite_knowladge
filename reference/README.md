@@ -1,33 +1,66 @@
-# Reference — Peta Direktori (Mirror)
+# Reference — Pengetahuan Lengkap Finlite ERP
 
-Folder ini menyimpan **salinan peta direktori** backend & frontend agar agent yang bekerja dari knowledge base `Finlite_Knowladge` bisa membaca struktur project tanpa membuka repo kode. **Ini mirror, bukan sumber kebenaran.**
+Folder ini dibuat supaya **agent AI mana pun bisa langsung bekerja tanpa memindai
+seluruh folder project**. Baca `00` → `05` berurutan, lalu buka file kode yang benar-benar
+relevan dengan tugas.
 
-| File di sini | Sumber kebenaran (kanonik) | Isi |
+## Urutan baca
+
+| File | Isi | Baca kalau… |
+|------|-----|-------------|
+| **[00-mulai-di-sini.md](00-mulai-di-sini.md)** | orientasi produk, angka kunci, aturan yang paling sering dilanggar, cara menjalankan & memverifikasi | **selalu, pertama** |
+| **[01-arsitektur.md](01-arsitektur.md)** | multi-tenancy (satu DB per perusahaan), kontrak API, siklus hidup dokumen, penomoran, alur sesi | menyentuh apa pun yang lintas modul |
+| **[02-backend.md](02-backend.md)** | 18 modul, 429 endpoint, `app/Shared/`, konvensi service & test, database | mengubah backend |
+| **[03-frontend.md](03-frontend.md)** | 15 modul, 145 halaman, memory router, shell tab, state, alur data, form | mengubah frontend |
+| **[04-komponen-reusable.md](04-komponen-reusable.md)** | katalog 37 komponen bersama + pola halaman daftar & form standar | membangun halaman/tabel/form |
+| **[05-role-permission-guard.md](05-role-permission-guard.md)** | 8 role, 240 permission, resolusi override, guard rute & UI | apa pun yang menyangkut hak akses |
+
+## Mirror peta direktori
+
+Dua file berikut adalah **salinan**, bukan sumber kebenaran:
+
+| File di sini | Sumber kebenaran |
+|---|---|
+| `backend-directory-tree.md` | `/workspace/laravel_backend/docs/backend-directory-tree.md` |
+| `struktur_frontend.md` | `/workspace/frontend/docs/struktur_frontend.md` |
+
+Menyalin ulang:
+
+```bash
+cd /workspace
+cp laravel_backend/docs/backend-directory-tree.md Finlite_knowladge/reference/
+cp frontend/docs/struktur_frontend.md             Finlite_knowladge/reference/
+```
+
+**Kapan menyalin ulang:**
+- **Backend** — setiap ada direktori ditambah/dihapus/dipindah (modul baru, subfolder
+  `Services/`, `Requests/Concerns/`, …).
+- **Frontend** — setiap ada **file baru** (page/service/type/component/hook/schema).
+  Ini sudah jadi hard rule frontend: "WAJIB update `docs/struktur_frontend.md` jika ada
+  file baru". Update file kanonik dulu, baru salin ke sini.
+
+## Batas berlaku dokumen ini
+
+Ditulis **2026-08-08** dengan membaca kode nyata. Semua angka hasil hitung, dan perintah
+untuk menghitung ulang ada di `00-mulai-di-sini.md` §7.
+
+Kalau ada pertentangan, urutan otoritasnya:
+
+1. **Kode** — selalu menang
+2. `CLAUDE.md` / `AGENTS.md` di repo masing-masing — aturan kerja yang mengikat
+3. `plans/*/README.md` — riwayat keputusan besar beserta alasannya
+4. File reference ini — ringkasan; bisa basi
+
+Sudah ada satu pertentangan yang diketahui: `CLAUDE.md` dan `AGENTS.md` frontend
+menyebut **React 18**, sedangkan `package.json` menyatakan **React 19.2**. Percayai
+`package.json`.
+
+## Riwayat keputusan besar (di `../plans/`)
+
+| Rencana | Status | Inti |
 |---|---|---|
-| `backend-directory-tree.md` | `laravel_backend/docs/backend-directory-tree.md` | Peta direktori backend Laravel (struktur modular DDD: `app/Modules/*` + `app/Shared/*`) |
-| `struktur_frontend.md` | `react_frontend/docs/struktur_frontend.md` | Peta file frontend React (`src/modules/*`, `components/`, dll) |
-
-## ⚠️ WAJIB: jaga file ini tetap sinkron
-
-Kedua file ini **mudah basi**. Bila dibiarkan basi, agent akan mencari file di lokasi yang salah. Aturan:
-
-1. **Sumber kebenaran ada di repo kode**, bukan di sini. Edit file kanonik dulu (kolom "Sumber kebenaran" di atas), lalu **salin ulang** ke folder ini:
-   ```bash
-   cd /home/tiny/Desktop/finlite
-   cp laravel_backend/docs/backend-directory-tree.md   Finlite_Knowladge/reference/backend-directory-tree.md
-   cp react_frontend/docs/struktur_frontend.md          Finlite_Knowladge/reference/struktur_frontend.md
-   ```
-   Setelah menyalin, pertahankan (atau perbarui tanggal) banner `MIRROR` di baris atas tiap file.
-
-2. **Kapan meng-update:**
-   - **Backend** (`backend-directory-tree.md`): setiap kali ada **direktori** backend yang ditambah/dihapus/dipindah (modul baru, subfolder `Services/`/`Requests/Concerns/`, dll). Ini bagian dari Definition of Done task backend yang mengubah struktur folder. Cara regenerasi ada di dalam file itu (§"WAJIB: jaga file ini tetap terbaru").
-   - **Frontend** (`struktur_frontend.md`): setiap kali ada **file baru** (page/service/type/component/hook/schema) — ini sudah jadi hard rule frontend (`react_frontend/AGENTS.md` §10B & `CLAUDE.md`: "WAJIB update docs/struktur_frontend.md jika ada file baru"). Update file kanonik, lalu salin ke sini.
-
-3. **Bila membaca file ini dan ragu apakah sudah basi**, verifikasi cepat terhadap repo (mis. `ls laravel_backend/app/Modules` atau cek beberapa path di `react_frontend/src/modules`) sebelum mengandalkannya. Cek juga tanggal "Terakhir disinkronkan" di banner tiap file.
-
-## Catatan untuk plan reports-expansion
-
-Rencana `plans/reports-expansion/` menambah banyak file baru di `react_frontend/src/modules/reports/` dan `laravel_backend/app/Modules/Reports/`. **Tiap fase** yang membuat file/direktori baru wajib:
-- update `struktur_frontend.md` (kanonik) — sudah tercantum di "Peta File" tiap fase, dan
-- (bila menambah **direktori** backend, mis. `Services/Sales/`, `Requests/Tax/`) update `backend-directory-tree.md` (kanonik),
-lalu **salin ulang keduanya ke `reference/` ini**. Tambahkan langkah salin-ulang ini ke checklist "Git Checkpoint" fase saat mengeksekusi.
+| `laravel-modularization/` | ✅ 2026-07-08 | backend jadi modular monolith (`app/Modules` + `app/Shared`) |
+| `list-query-pushdown/` | ✅ 2026-08-07 | search/filter/sort/paginate 32 endpoint pindah ke SQL — 723 ms/20 MB → 17 ms/0 MB |
+| `list-filters-frontend/` | ✅ 2026-08-08 | filter halaman daftar berlaku ke seluruh data, bukan 25 baris yang tampil |
+| `company-session-layer/` | ✅ 2026-08-08 | Tutup Database vs Keluar, cache query ber-scope perusahaan |
+| `reports-expansion/` | berjalan | mengisi ~91 laporan sesuai visi `design-I2` |
