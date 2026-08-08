@@ -194,6 +194,73 @@ PERUBAHAN PERILAKU: enam halaman itu kini default hanya menampilkan baris
 aktif, sebelumnya semua. Pilih "Semua" di filter Status untuk kembali.
 ```
 
+## Hasil
+
+Selesai 2026-08-07, commit `36712f6`. Kesembilan halaman kini seragam.
+
+**Keputusan pemilik produk sebelum mulai:** (1) tetap diseragamkan penuh
+termasuk menambah `FilterSidebar` ke lima halaman yang belum punya; (2)
+perubahan perilaku default "hanya aktif" bukan masalah karena aplikasi belum
+dipakai siapa pun.
+
+### Temuan terbesar tidak ada di rencana
+
+Rencana menyebut tiga celah. Yang **paling merugikan** justru yang keempat, dan
+baru ketahuan saat membuka `useSimpleLists.ts`:
+
+**Keenam hook hanya mengekspos `deactivate`, tidak `activate`** — padahal
+keenam API service punya endpoint `activate` dan backend menyediakannya.
+Akibatnya baris yang sudah dinonaktifkan **tidak bisa diaktifkan lagi dari UI
+mana pun**. Penonaktifan efektif tidak bisa dibatalkan.
+
+Ini lebih parah dari "format tidak seragam", dan tidak akan pernah muncul dari
+membaca halaman saja — hanya dari membaca lapisan hook-nya.
+
+### Perubahan berlapis
+
+1. **API service (6 file)** — `list` menerima `is_active`, `page`, `per_page`.
+2. **`useSimpleLists.ts`** — `use*List(params)` menggantikan `use*List(search?)`,
+   dan tiap `use*Mutations()` kini mengekspos `activate`.
+3. **9 halaman** — `FilterSidebar` + `ListSearchBar` + `SingleCheckboxFilter`
+   Status + badge + `bulkActions`. Lima halaman mendapat sidebar pertamanya.
+
+### `ProyekPage` — satu-satunya yang butuh penanganan tangan
+
+Punya **dua sumbu status**: `status` (siklus proyek: aktif/selesai/batal) dan
+`is_active` (dipakai/tidak). Keduanya kini filter terpisah; judul section lama
+"Status" diubah jadi "Status Proyek" supaya tidak tertukar dengan
+"Aktif/Nonaktif" di bawahnya, dan kolom badge-nya diberi header "Aktif".
+
+Tipe `Proyek` juga **tidak pernah mendeklarasikan `is_active`** walau kolomnya
+sudah lama ada di backend — ditambahkan.
+
+### Verifikasi
+
+Diuji di browser sungguhan untuk 8 halaman (Kategori Produk tidak punya entri
+menu — lihat catatan di bawah): kotak pencarian di sidebar, filter
+Aktif/Nonaktif/Semua muncul, seleksi baris aktif, tanpa console error.
+
+Uji fungsional penuh di Satuan: nonaktifkan satu baris → hilang dari tampilan
+default → muncul lagi saat memilih "Semua". Angkanya 3 aktif → 2 aktif →
+6 semua, yang sekaligus membuktikan perubahan perilakunya: halaman itu dulu
+menampilkan keenam baris, kini hanya yang aktif.
+
+### ⚠️ Temuan baru yang belum dikerjakan
+
+**`KategoriProdukPage` tidak punya entri di menu ribbon.** Ia ikut
+diseragamkan, tapi hanya terjangkau lewat URL langsung
+(`/master-data/product-categories`) — tidak ada jalan masuk dari UI. Delapan
+master data lain punya entri menu. Perlu keputusan: tambahkan entri, atau
+memang disengaja dikelola dari form produk saja.
+
+**Paginasi palsu di lima halaman.** `SatuanPage`, `GudangPage`,
+`DepartemenPage`, `PaymentTermsPage`, dan `ProyekPage` memakai
+`pagination={{ pageIndex: 0, pageSize: 25 }}` dengan `onPaginationChange={() => {}}`
+— tombol halaman tidak melakukan apa pun. Sekerabat dengan masalah COA di
+Fase 3.1, tapi bentuknya berbeda: COA membatasi 100 baris, kelima ini
+menampilkan apa pun yang dikirim server tanpa cara pindah halaman. Belum
+diperbaiki; masukkan ke Fase 3 saat dikerjakan.
+
 ## Setelah selesai
 
-Update ledger `README.md`: Fase 4 → `✅ Selesai` + hash commit.
+- [x] Update ledger `README.md`: Fase 4 → `✅ Selesai` + hash commit.

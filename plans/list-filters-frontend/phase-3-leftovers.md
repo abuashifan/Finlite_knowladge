@@ -46,6 +46,35 @@ tidak dikirim sama sekali — lihat kontrak di
 seluruh pohon, **hilangkan** `page`/`per_page`, jangan naikkan `per_page` jadi
 angka besar.
 
+## 3.1b — Paginasi palsu di lima halaman master data sederhana
+
+Ditemukan saat mengerjakan Fase 4. Berbeda bentuk dari COA di atas, tapi
+sekerabat.
+
+`SatuanPage`, `GudangPage`, `DepartemenPage`, `PaymentTermsPage`, dan
+`ProyekPage` memakai:
+
+```tsx
+pagination={{ pageIndex: 0, pageSize: 25 }}
+onPaginationChange={() => {}}     // ← tidak melakukan apa pun
+```
+
+Tombol halaman berikutnya ada tapi mati. Halaman menampilkan apa pun yang
+dikirim server tanpa cara berpindah. `KategoriProdukPage` sudah benar
+(punya state `page`) dan bisa dipakai sebagai contoh di modul yang sama.
+
+Backend sudah memaginasi dengan benar sejak `list-query-pushdown` Fase 6, dan
+API service-nya sudah menerima `page`/`per_page` sejak Fase 4 rencana ini —
+tinggal sisi halaman.
+
+## 3.1c — `KategoriProdukPage` tidak punya entri menu
+
+Halamannya ada, route-nya ada (`/master-data/product-categories`), tapi tidak
+ada entri di `moduleConfig.ts`. Hanya terjangkau lewat URL langsung.
+
+Delapan master data lain punya entri menu. Perlu keputusan pemilik produk:
+tambahkan entri ribbon, atau memang disengaja dikelola dari form produk saja.
+
 ## 3.2 — Searchbox Persediaan belum memakai `ListSearchBar`
 
 Tiga halaman Persediaan (Mutasi, Penyesuaian, Opname Stok) sudah menaruh kotak
