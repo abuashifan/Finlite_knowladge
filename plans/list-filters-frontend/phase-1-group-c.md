@@ -1,5 +1,7 @@
 # Fase 1 — Kelompok C: 9 halaman ke server-side
 
+> **✅ Selesai 2026-08-07 — commit `58f6551`.** Lihat [§Hasil](#hasil).
+
 **Ini inti rencana.** Sembilan halaman yang filternya hanya berlaku ke 25 baris
 yang sedang tampil.
 
@@ -110,8 +112,57 @@ list-query-pushdown selesai. FILTER_HINT dihapus karena tidak lagi benar.
 Backend tidak diubah.
 ```
 
+## Hasil
+
+Selesai 2026-08-07, commit `58f6551`. Kesembilan halaman mengirim
+`status`/`date_from`/`date_to` ke server.
+
+`FILTER_HINT` **nol kemunculan** di seluruh frontend. `visibleRows` juga nol.
+
+**Reset halaman diperluas melampaui rencana.** Rencana menyebut "reset ke
+halaman 1 saat filter berubah"; implementasinya memakai satu `filterKey` yang
+merangkum search + status + rentang tanggal + filter customer/vendor, bukan
+hanya `search` seperti sebelumnya. Tanpa itu, memfilter dari halaman jauh
+mendarat di daftar kosong.
+
+**Dua bentuk pemanggilan hook**, tidak seragam seperti dugaan: enam halaman
+memanggil `use*List({...})` multi-baris, tiga halaman Kas & Bank memanggilnya
+dalam satu baris. Skrip migrasi harus menangani keduanya.
+
+`isDateInRange` jadi yatim setelah kesembilan pemanggilnya hilang → dihapus
+bersama `toDateKey` dan `DATE_INPUT_PATTERN` yang hanya melayaninya.
+`shiftDateInputValue` juga yatim **tapi sudah begitu sebelum fase ini** —
+sengaja dibiarkan, bukan urusan fase ini.
+
+### Verifikasi
+
+Diuji di browser dengan memantau request yang benar-benar dikirim:
+
+| Halaman | Query yang dikirim | Hasil |
+|---|---|---|
+| Sales Invoice | `page=1&per_page=25&status=draft` | 6 baris → 3 |
+| Penerimaan Kas | `page=1&per_page=25&date_from=2026-01-01` | — |
+| Penerimaan Brg | `page=1&per_page=25&date_from=2026-01-01` | — |
+
+Sebelum fase ini ketiganya hanya mengirim `page` & `per_page`. Tanpa console
+error.
+
+### ⚠️ Yang belum bisa diuji
+
+**Uji penentu di README §Cara membuktikan — "filter menjangkau halaman ≥ 2 dan
+`total` ikut menyusut" — belum dilakukan.** Data demo hanya 1–6 baris per
+modul kelompok C, jauh di bawah 25, jadi halaman 2 tidak pernah ada.
+
+Yang diuji sebagai gantinya adalah sinyal penyusunnya: parameter benar-benar
+sampai ke server, dan jumlah baris berubah mengikutinya. Itu cukup untuk
+menyatakan filternya server-side, tapi **bukan** bukti langsung atas gejala
+yang dilaporkan pemilik produk.
+
+Untuk menutupnya: buat > 25 dokumen di satu modul (mis. Sales Invoice) dengan
+status campur, lalu ikuti lima langkah di README.
+
 ## Setelah selesai
 
-1. Update ledger `README.md`: Fase 1 → `✅ Selesai` + hash commit.
-2. **Minta pemilik produk mencoba salah satu halaman** dengan data > 25 baris
-   sebelum lanjut ke Fase 2.
+- [x] Update ledger `README.md`: Fase 1 → `✅ Selesai` + hash commit.
+- [ ] **Minta pemilik produk mencoba salah satu halaman** dengan data > 25
+      baris — belum terpenuhi, lihat §Yang belum bisa diuji.

@@ -1,5 +1,7 @@
 # Fase 0 — Fondasi: tipe status multi-nilai
 
+> **✅ Selesai 2026-08-07 — commit `2cdee59`.** Lihat [§Hasil](#hasil).
+
 **Halaman diubah: 0.** Fase ini hanya membuka jalan supaya Fase 1 tidak perlu
 berbohong ke type checker.
 
@@ -117,6 +119,40 @@ backend menerima comma-separated. Tiga halaman Persediaan menyiasatinya dengan
 Tipe status pada dokumen tidak diubah -- di sana enum sempit memang benar.
 ```
 
+## Hasil
+
+Selesai 2026-08-07, commit `2cdee59`. **19 interface `*ListParams`**
+dilonggarkan ke `status?: string` — lebih banyak dari perkiraan rencana,
+karena daftar di §0.1 hanya menyebut 9 file sementara audit menemukan 19.
+
+`VendorBillListParams` sudah `string` sejak sebelumnya, lengkap dengan
+komentar yang sama — itu presedennya, bukan penyimpangan.
+
+`StockMovementListParams.movement_type` ikut dilonggarkan; ia kena pola cast
+yang persis sama dan tidak disebut rencana.
+
+**Empat cast bohong dihapus** (`join(',') as StockMovementStatus` dkk di tiga
+halaman Persediaan). `rtk grep -rn "join(',') as " src/modules/` kini kosong.
+
+**Yang sengaja TIDAK diubah**, walau muncul di grep `  status?:`:
+`CreateProyekPayload` (payload, bukan params), `FixedAssetListParams` (Aktiva
+Tetap di luar 22 halaman rencana ini), `reports.types.ts`, dan seluruh tipe
+`status` pada **dokumen** — di sana enum sempit memang benar dan menjaga
+`DocumentStatusBadge`.
+
+**§0.3 `due_from`/`due_to`: dihapus.** Nol pemakai di frontend (hanya
+deklarasi tipenya sendiri), dan backend tidak pernah menerimanya. Tidak perlu
+dinaikkan ke pemilik produk.
+
+### Temuan alat yang penting untuk fase berikutnya
+
+`npx tsc --noEmit` di project ini **tidak benar-benar memeriksa** — error yang
+sengaja disisipkan pun lolos tanpa keluaran. Yang valid `npm run build`, yang
+menjalankan `tsc -b` (project references). Begitu beralih, ia langsung
+menangkap tiga error nyata.
+
+**Pakai `npm run build` untuk verifikasi tipe, bukan `npx tsc --noEmit`.**
+
 ## Setelah selesai
 
-Update ledger `README.md`: Fase 0 → `✅ Selesai` + hash commit.
+- [x] Update ledger `README.md`: Fase 0 → `✅ Selesai` + hash commit.
