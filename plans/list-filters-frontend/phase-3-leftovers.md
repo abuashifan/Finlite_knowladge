@@ -5,48 +5,80 @@
 Kumpulan temuan kecil dari audit 2026-08-07 yang berhubungan dengan halaman
 daftar tapi bukan soal filter. Ditaruh di sini supaya tidak hilang.
 
-## 3.1 — `CoaListPage` membatasi diri ke 100 baris
+## 3.1 — `CoaListPage`: dari batas 100 senyap → paginasi hierarkis
 
-**Ini bug, dan diam.**
+**Diselesaikan dua kali.** Riwayatnya penting supaya tidak diputar balik.
 
-```tsx
-// src/modules/master-data/pages/CoaListPage.tsx
-const { data, isLoading } = useCoaList({
-  page: 1,          // ← di-hardcode
-  per_page: 100,    // ← di-hardcode
-  account_type: filterType,
-  is_active: filterActive,
-  search: search || undefined,
-})
-```
+**Keadaan awal (bug):** halaman terkunci `page: 1, per_page: 100` tanpa UI
+paginasi. Perusahaan dengan lebih dari 100 akun kehilangan sisanya tanpa
+pemberitahuan apa pun.
 
-Tidak ada state halaman, tidak ada `onPaginationChange`. Perusahaan dengan
-lebih dari 100 akun **kehilangan sisanya tanpa pemberitahuan** — tidak ada
-pesan, tidak ada tombol halaman berikutnya. Daftar akun perusahaan menengah
-mudah melewati 100.
+**Perbaikan pertama (commit `533c409`):** `page`/`per_page` dihapus sama sekali
+supaya backend mengirim seluruh baris, karena halaman ini merender pohon
+parent/child lewat `buildTree()` dan paginasi biasa memutusnya. Diverifikasi
+dengan 150 akun.
 
-Satu-satunya halaman daftar dengan masalah ini; `KontakListPage` dan
-`ProdukListPage` sudah berpaginasi normal (diverifikasi lewat grep
-`onPaginationChange`/`setPage`).
+⚠️ **Itu memindahkan batas, bukan menghapusnya.** Aman untuk ratusan baris,
+menurun perlahan tanpa peringatan saat menembus ribuan — persis kelas masalah
+yang dibereskan `list-query-pushdown`.
 
-**Perbaikan:** ikuti pola `ProdukListPage` — state `page`/`perPage`, kirim ke
-hook, dan `onPaginationChange` di `DataTable`.
+**Perbaikan kedua (commit backend `fc1dda1`, frontend `745f1d9`):** pemilik
+produk memberi screenshot aplikasi acuan yang melakukan **keduanya** — hierarki
+berindentasi DAN paginasi. Di acuan itu halaman 1 berakhir di `1104` dan halaman
+2 dimulai dari `1104.01`, artinya paginasi diterapkan pada daftar yang **sudah
+diratakan dan diurut pre-order**, bukan pada akun induk saja.
 
-⚠️ **Periksa dulu apakah ada yang bergantung pada "semua akun termuat".** COA
-kadang dipakai untuk membangun tampilan pohon (parent/child) yang butuh seluruh
-daftar sekaligus. Kalau iya, paginasi biasa akan merusaknya, dan solusinya
-berbeda — mungkin endpoint terpisah tanpa paginasi khusus untuk pohon:
+Itulah bentuk final sekarang:
 
-```bash
-cd /workspace/frontend
-rtk grep -rn "parent_id\|tree\|hierarch" src/modules/master-data/pages/CoaListPage.tsx
-```
+- Backend `ChartOfAccountService::hierarchicalQuery()` memakai **recursive CTE**
+  untuk menghitung `depth` dan `hierarchy_path` di query time. Tanpa migrasi,
+  tanpa kolom turunan tersimpan, tanpa backfill.
+- Tiap baris membawa `depth`-nya sendiri, jadi indentasi tetap benar walau
+  induknya berada di halaman lain.
+- `buildTree()` dan `CoaRow` rekursif **dihapus**; halaman kini memakai
+  `DataTable` bersama seperti 21 halaman lain. Tombol lipat/buka juga hilang —
+  konsekuensi yang disetujui pemilik produk, dan acuan pun tidak punya.
 
-Backend sudah mendukung "kirim semua tanpa paginasi" bila `page`/`per_page`
-tidak dikirim sama sekali — lihat kontrak di
-`app/Shared/Api/AppliesListQuery::applyListQuery()`. Jadi kalau memang butuh
-seluruh pohon, **hilangkan** `page`/`per_page`, jangan naikkan `per_page` jadi
-angka besar.
+### Tiga detail yang jangan diubah tanpa membaca alasannya
+
+1. **Pemisah path `char(1)`, bukan titik.** Dengan titik, root `1101.02`
+   menyelip **di antara** `1101` dan anaknya `1101.5`. Dibuktikan lewat
+   perbandingan langsung kedua pemisah; dikunci
+   `test_kode_berprefiks_sama_tidak_mengacaukan_urutan`.
+2. **Alias `chart_of_accounts` pada `fromRaw()`** — supaya `where()`/`orderBy()`
+   dari `AppliesListQuery` tetap resolve tanpa kualifikasi nama tabel.
+3. **`MAX_DEPTH = 10` berpasangan dengan dua penjaga tulis.** Rekursi wajib
+   punya batas (kalau tidak, siklus induk membuatnya berputar tanpa henti), dan
+   batas itu membuat baris di luarnya LENYAP senyap. Karena itu `create()` dan
+   `update()` menolak siklus (`INVALID_PARENT_ACCOUNT`) dan kedalaman berlebih
+   (`MAX_ACCOUNT_DEPTH_EXCEEDED`). Jangan naikkan salah satunya tanpa yang lain.
+
+### Kenapa BUKAN kolom `depth`/`hierarchy_path` tersimpan
+
+Ada ≥3 jalur tulis di luar service (dua seeder memakai raw `upsert()`, plus
+factory), jadi kolom turunan akan basi diam-diam. Dan `account_code` belum
+divalidasi hierarkis — menyimpan path turunan dari kode yang aturannya masih
+cair berarti menanam bug kaskade sebelum aturannya ada.
+
+### Perilaku mode datar
+
+Saat **pencarian** atau **sort kolom** aktif, CTE dilewati: daftarnya rata,
+`depth` tidak dikirim, frontend memakai indentasi 0. Disengaja — hasil
+pencarian adalah himpunan tersebar, jadi anak menjorok tanpa induknya di layar
+justru menyesatkan. Bonus: picker akun induk (`coaApi.search`) tidak pernah
+membayar biaya rekursi.
+
+### Verifikasi
+
+`tests/Feature/MasterData/ChartOfAccountHierarchyListTest.php` — 11 test,
+termasuk skenario acuan (induk halaman 1, anak halaman 2 dengan depth benar),
+jebakan prefiks, mode datar, dan kedua penjaga tulis. `tests/Feature/MasterData`
+86 hijau.
+
+Diverifikasi di browser: halaman 1 berakhir di induk `1600` (indent 0px),
+halaman 2 dimulai dari `1600.01` dan `1600.02` yang **tetap menjorok 20px**
+walau induknya tertinggal di halaman sebelumnya. Pencarian → semua indentasi
+0px.
 
 ## 3.1b — Paginasi palsu di lima halaman master data sederhana
 
