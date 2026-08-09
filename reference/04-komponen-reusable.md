@@ -115,6 +115,15 @@ Semuanya menerima `note?` untuk keterangan kecil di bawah judul.
 > (2026-08-08): frontend mengirim `product_category_id` dengan benar selama berbulan-bulan,
 > `ProductService::list()` tidak pernah membacanya. Tanda pengenalnya: parameter terlihat
 > di tab Network, tapi `meta.total` tidak bergerak saat filter diubah.
+>
+> **Filter boolean punya jebakan sendiri.** Axios mengirim `false` sebagai string
+> `"false"`, dan `(bool) "false"` di PHP bernilai **`true`** — setiap string
+> tak-kosong truthy. Service wajib memakai `toBool()` dari trait
+> `ParsesBooleanFilters`, bukan cast `(bool)`. Gejalanya khas: memilih "Aktif"
+> tampak benar (kebetulan), memilih "Nonaktif" justru menampilkan yang aktif.
+> Terjadi di enam daftar master data sekaligus (2026-08-09). Test yang memakai
+> `is_active=0` tidak menangkapnya — `"0"` memang falsy; uji dengan
+> `true`/`false` seperti yang dikirim browser.
 
 ---
 

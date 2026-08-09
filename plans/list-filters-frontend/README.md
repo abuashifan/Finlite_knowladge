@@ -183,6 +183,38 @@ tidak bergerak, penyebabnya nomor 2.
 **Belum diaudit:** filter khusus modul lain yang dikirim frontend tapi mungkin
 tidak dibaca service-nya. Rencana ini hanya mengaudit `status` dan tanggal.
 
+### 2026-08-09 — filter "Nonaktif" menampilkan baris aktif di enam daftar
+
+Dilaporkan pemilik produk: memilih **Nonaktif** di Kategori Produk, Satuan,
+Gudang, Syarat Bayar, Departemen, dan Proyek tetap menampilkan yang aktif.
+
+**Ini cara ketiga sebuah filter bisa gagal**, di luar dua yang tercatat di atas:
+parameternya terkirim, service membacanya, tapi **nilainya salah ditafsirkan.**
+
+Axios menyerialisasi boolean lewat `toString()`, jadi yang sampai ke backend
+adalah string `"false"`. Di PHP, `(bool) "false"` bernilai **`true`** — setiap
+string tak-kosong truthy. Filternya berbalik jadi `where('is_active', true)`.
+Memilih "Aktif" tampak benar hanya karena kebetulan: `(bool) "true"` juga
+`true`.
+
+Trait `ParsesBooleanFilters` sudah ada sejak lama, dan komentarnya menjelaskan
+persis jebakan ini. COA, Kontak, dan Produk memakainya; enam service ini tidak
+pernah ikut. Perbaikannya satu baris per service. Commit `4b76e8b`.
+
+**Kenapa test lama hijau:** `MasterDataListQueryTest::test_is_active_filter_still_works`
+menguji `is_active=0` dan `is_active=1`. `(bool) "0"` memang `false`, jadi
+test-nya lulus — tapi `0`/`1` bukan yang dikirim browser. **Test yang
+memakai bentuk yang tidak pernah dikirim klien tidak menguji apa pun.** Test
+baru `test_is_active_accepts_boolean_strings_from_browser` memakai
+`true`/`false` dan menutup sembilan endpoint.
+
+**Yang harus diperiksa saat menambah filter boolean baru:** buka tab Network,
+lihat nilai mentah di query string, lalu pastikan service memakai `toBool()` —
+bukan `(bool)`. Disurvei 2026-08-09: `(bool) $filters[...]` sudah tidak tersisa
+di `app/Modules/`. `InventoryValuationService` masih memakai
+`(bool) ($filters['include_zero'] ?? false)`, tapi aman karena frontend hanya
+mengirim `undefined` atau `1`/`0`, tidak pernah `false`.
+
 ---
 
 **Fase 0 wajib lebih dulu** — Fase 1 mengirim status multi-pilih sebagai
