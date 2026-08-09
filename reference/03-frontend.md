@@ -125,6 +125,13 @@ kalau tidak user yang sudah menyimpan tab itu akan terjebak di rute yang tidak a
 `MODULE_CONFIGS` → `MODULE_MAP` dan `TOP_MODULES`. Flag: `opensListDirectly`
 (modul tanpa ribbon, mis. Laporan) dan `flushContent` (toolbar sendiri menempel di tab).
 
+> ⚠️ **Menambah modul butuh dua file, bukan satu.** `ModuleConfig` tidak punya
+> field ikon — ikon tombol topbar ada di peta terpisah `MODULE_ICONS` di
+> `components/shared/layout/Topbar.tsx`, dikunci id modul. Pemakaiannya
+> `{Icon && <Icon />}`, jadi modul yang lupa didaftarkan di sana muncul sebagai
+> tombol **tanpa ikon**, tanpa error dan tanpa build gagal. (`icon` di
+> `RibbonItem` beda urusan — itu untuk isi ribbon, dan memang di moduleConfig.)
+
 ---
 
 ## 5. State — empat store, batas tanggung jawabnya tegas
