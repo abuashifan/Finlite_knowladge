@@ -128,21 +128,101 @@ penetapan departemen di modul Akses. Sampai itu diputuskan, semua pemegang
 > di tabel central berarti satu departemen per user **untuk semua perusahaan**,
 > yang kemungkinan besar salah. Butuh rancangan tersendiri.
 
+## Temuan rancangan yang belum diputuskan — bukan bagian Fase 0–3
+
+Ditemukan 2026-08-09 saat menjelaskan konsep anggaran ke pemilik produk.
+Semuanya dibaca langsung dari `BudgetWarningService` dan
+`BudgetComparisonService`, bukan dari dokumen. **Tidak dikerjakan** — keempatnya
+menyentuh perilaku bisnis, bukan pelaksanaan rancangan gap-12.
+
+Konsep dasarnya, sebagai konteks: satu baris anggaran = *departemen X boleh
+membelanjakan berapa di akun Y, [khusus proyek Z], [pada bulan tertentu]*.
+Departemen melekat di **pengajuan** (bukan baris), akun **wajib** per baris,
+proyek dan bulan **opsional**.
+
+1. **Anggaran tahunan hampir tidak pernah memicu peringatan.**
+   `BudgetWarningService` menjumlahkan realisasi **satu bulan**
+   (`strftime('%Y-%m', je.journal_date) = ?`), tapi baris anggaran yang cocok
+   bisa tahunan (`period IS NULL`). Anggaran gaji 240 juta setahun baru menyala
+   kalau satu bulan saja tembus 240 juta. Laporan perbandingannya sendiri benar
+   — setahun lawan setahun; yang timpang hanya peringatannya.
+
+2. **Transaksi bertanda proyek melewati anggaran umum.** Pencocokannya
+   asimetris: baris jurnal ber-`project_id` hanya dicocokkan dengan baris
+   anggaran berproyek sama; baris "semua proyek" (`project_id IS NULL`) tidak
+   ikut dipertimbangkan.
+
+3. **Baris jurnal tanpa departemen bisa mencocok anggaran departemen mana pun.**
+   `when($departmentId, ...)` tidak memasang filter apa pun bila null, lalu
+   `first()` mengambil baris pertama yang ketemu.
+
+4. **Modul ini dirancang untuk anggaran beban, bukan target pendapatan.**
+   `SUM(debit - credit)` mengasumsikan akun bersaldo debit; menganggarkan akun
+   pendapatan menghasilkan realisasi negatif sehingga `over_budget` tidak pernah
+   menyala.
+
+Nomor 1–3 bisa dirumuskan jadi Fase 4 kalau pemilik produk menghendaki.
+Nomor 4 lebih mendasar dan butuh keputusan lebih dulu: pada pendapatan,
+"melampaui anggaran" justru kabar baik, jadi arah perbandingannya harus
+ditetapkan sebelum ada kode yang ditulis.
+
+> Catatan portabilitas terkait: `strftime()` adalah fungsi SQLite. Kalau tenant
+> suatu saat pindah ke MySQL, `BudgetWarningService` ikut harus diubah.
+
 ## Progress Ledger
 
 | Fase | Judul | File | Status | Commit |
 |------|-------|------|--------|--------|
-| 0 | Perbaiki kontrak service `budgetApi` | `phase-0-service-contract.md` | ⬜ Belum | — |
-| 1 | Navigasi: modul topbar + katalog laporan | `phase-1-navigation.md` | ⬜ Belum | — |
-| 2 | Lubang alur kerja: buat pengajuan, penolakan, permission | `phase-2-workflow-gaps.md` | ⬜ Belum | — |
-| 3 | Samakan ke pola shell standar | `phase-3-shell-conformance.md` | ⬜ Belum | — |
+| 0 | Perbaiki kontrak service `budgetApi` | `phase-0-service-contract.md` | ✅ Selesai | fe `budget-module` |
+| 1 | Navigasi: modul topbar + katalog laporan | `phase-1-navigation.md` | ✅ Selesai | fe `budget-module` |
+| 2 | Lubang alur kerja: buat pengajuan, penolakan, permission | `phase-2-workflow-gaps.md` | ✅ Selesai | fe + be `budget-module` |
+| 3 | Samakan ke pola shell standar | `phase-3-shell-conformance.md` | ✅ Selesai | fe `budget-module` |
 
 > Status yang boleh: `⬜ Belum`, `🔄 Berjalan`, `✅ Selesai`.
 
-**Fase 0 wajib lebih dulu, tanpa kecuali.** Selama double-unwrap masih ada,
-setiap perbaikan lain tidak akan terlihat hasilnya — layarnya kosong apa pun yang
-Anda kerjakan. Fase 1 berikutnya, karena tanpa menu tidak ada cara menguji
-manual selain deep link.
+Dikerjakan 2026-08-09 dalam satu rangkaian, urut 0 → 3.
+`npm run build` + `npm run lint` hijau; `php artisan test --filter=Budget`
+**7 lulus** (6 lama + 1 baru), `pint --test` bersih.
+
+### Penyimpangan dari rencana — semuanya disengaja
+
+Empat hal dikerjakan berbeda dari yang tertulis. Tidak ada yang mengubah
+tujuannya, tapi catat supaya tidak dibaca sebagai kelalaian.
+
+1. **Fase 2.1 memakai `Dialog`, bukan `ConfirmDialog`.** `ConfirmDialog`
+   menaruh `description` di dalam `AlertDialogDescription`, yang dirender
+   sebagai `<p>`. `SearchableSelect` berbasis Popover tidak sah bersarang di
+   sana. Polanya mengikuti `DepartemenPage`/`KategoriProdukPage` — tetap
+   komponen yang sudah ada, tidak ada komponen baru.
+
+2. **Fase 3 memilih paginasi klien, bukan opsi (a) "tanpa paginasi".**
+   Rencana menganggap prop `pagination` di `DataTable` opsional; ternyata
+   wajib. Karena `GET /budget-periods` mengembalikan **seluruh** koleksi
+   sekaligus, memotong halaman di klien berlaku ke seluruh data — `total`
+   jujur, semua halaman terjangkau, filter mengenai semua baris. Ini berbeda
+   dari pola yang dibuang `list-query-pushdown`, yang menyaring 25 baris
+   teratas saja. Backend tetap tidak disentuh.
+
+3. **`Input type="number"` untuk nominal dipertahankan.** Rencana menyuruh
+   "samakan dengan format angka halaman lain"; setelah diperiksa,
+   `type="number"` + `text-right tabular-nums` **adalah** pola yang dipakai
+   `SalesInvoiceFormPage` dkk. Yang ditambahkan hanya `min={0}` yang hilang.
+
+4. **Validasi periode lebih ketat dari `^\d{4}-\d{2}$`.** Dipakai
+   `^\d{4}-(0[1-9]|1[0-2])$` supaya `2026-13` ikut ditolak. Tombol
+   **Simpan Baris** nonaktif selama ada baris yang formatnya salah.
+
+`LineItemsTable` **tidak** dipakai di `BudgetLineEditor`, sesuai izin di
+rencana: komponen itu untuk baris kuantitas × harga dengan subtotal, sedangkan
+baris anggaran punya satu nominal plus kolom `period`. Alasannya ditulis
+sebagai komentar di file.
+
+### Yang belum diverifikasi
+
+Backend tidak berjalan saat pengerjaan, jadi **prosedur manual 9 langkah di
+bawah belum dijalankan.** Yang sudah terbukti: build, lint, dan seluruh test
+backend. Yang belum: perilaku tab, dialog pengajuan, dan tampilan catatan
+penolakan di browser.
 
 ## Prinsip
 
