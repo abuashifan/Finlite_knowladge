@@ -483,7 +483,6 @@ Gunakan file ini dulu saat mencari lokasi file. Fokus ke file yang ditulis di ba
 | | | | |____useProdukList.ts
 | | | | |____useSimpleLists.ts
 | | | |____pages/
-| | | | |____AccountMappingPage.tsx
 | | | | |____CoaFormPage.tsx
 | | | | |____CoaListPage.tsx
 | | | | |____DepartemenPage.tsx
