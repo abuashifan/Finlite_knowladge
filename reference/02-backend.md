@@ -106,6 +106,31 @@ yang dipakai tombol navigasi Prev/Next di form frontend.
 6. **Jangan refactor modul yang tidak diminta.**
 7. Tambah/perbarui feature test untuk happy path **dan** failure path utama.
 
+### Penjaga penonaktifan master data
+
+Tiga master data menolak dinonaktifkan dalam keadaan tertentu:
+
+| Master | Kode galat | Syarat |
+|---|---|---|
+| COA | `ACCOUNT_HAS_ACTIVE_CHILDREN` | masih punya sub-akun aktif |
+| Gudang | `CANNOT_DEACTIVATE_DEFAULT_WAREHOUSE` | ia gudang default |
+| Produk | `PRODUCT_HAS_STOCK` | stok on-hand ≠ 0 (termasuk negatif) |
+
+> ⚠️ **Penjaga di `deactivate()` saja tidak cukup.** Selama `Update…Request`
+> menerima `is_active` dan `update()` memakai `fill()`, `PATCH /{id}` dengan
+> `{"is_active": false}` melewati penjaganya sepenuhnya — larangannya harus
+> dipasang di **kedua** method. Ditemukan pada Produk (2026-08-09); berlaku
+> untuk master data mana pun yang menambahkan penjaga serupa, dan wajib
+> dikunci test tersendiri karena test lewat endpoint `/deactivate` tetap hijau
+> meski lubangnya terbuka.
+
+Latar keputusan Produk: menonaktifkan produk berstok membuat stoknya
+**terdampar** — saldonya tetap terhitung di Neraca, tapi produknya hilang dari
+seluruh picker (`produkApi.search` selalu mengirim `is_active: true`), termasuk
+Penyesuaian Stok yang justru alat untuk menghapusbukukannya. Selama produknya
+aktif semua jalur itu berfungsi, jadi penjaganya hanya memaksa urutan yang
+benar. `activate()` sengaja tanpa penjaga — itu jalur pemulihan data lama.
+
 ### Anatomi service daftar yang benar
 
 ```php
@@ -199,7 +224,7 @@ Test tenant memakai base class per modul (mis. `MasterDataTestCase`) yang menyed
 muncul: `VALIDATION_ERROR`, `PERMISSION_DENIED`, `COMPANY_ACCESS_DENIED`,
 `X_COMPANY_ID_REQUIRED`, `TENANT_DATABASE_NOT_ACTIVE`, `DATABASE_ERROR`,
 `DUPLICATE_ACCOUNT_CODE`, `INVALID_PARENT_ACCOUNT`, `MAX_ACCOUNT_DEPTH_EXCEEDED`,
-`ACCOUNT_HAS_ACTIVE_CHILDREN`.
+`ACCOUNT_HAS_ACTIVE_CHILDREN`, `PRODUCT_HAS_STOCK` (422).
 
 Saat menambah kode galat baru, daftarkan di `ApiErrorCode` supaya punya pesan default —
 jangan mengirim string mentah dari service.
