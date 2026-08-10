@@ -665,6 +665,7 @@ Gunakan file ini dulu saat mencari lokasi file. Fokus ke file yang ditulis di ba
 | | | | |____InventoryAnalysisPage.tsx
 | | | | |____InventoryAgingReportPage.tsx
 | | | | |____OpnameWorksheetReportPage.tsx
+| | | | |____ProductHistoryReportPage.tsx
 | | | | |____ProfitLossPage.tsx
 | | | | |____ReconciliationPage.tsx
 | | | | |____CashBankStatementPage.tsx
