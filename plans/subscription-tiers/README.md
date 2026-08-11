@@ -33,7 +33,9 @@ Plus ~28 flag fitur per tier (`data_import`, `multi_warehouse`,
 | Tier Free | **Dipertahankan**, tidak dihapus dan tidak disembunyikan | Pemilik produk akan mempertimbangkannya sebagai media promosi. Juga jaring pengaman: `CompanyQuotaService::DEFAULT_PLAN_CODE = 'free'` memakainya untuk client tanpa paket. |
 | Cakupan add-on user | **Per client**, berlaku di **semua** perusahaannya | Keputusan eksplisit pemilik produk. Konsekuensi yang disadari: client Pro (3 perusahaan) yang membeli add-on 5 mendapat 15 slot tambahan secara total, padahal label harganya `per_user`. Alternatif "per perusahaan" ditawarkan dan ditolak. |
 | Halaman harga | **Di luar cakupan** | Akan dibuat di landing page terpisah yang belum ada. |
-| Siklus penagihan | **Bulanan atau tahunan saja** — enum tertutup dua nilai, tidak ada kuartalan atau seumur hidup. Kolom `plans.monthly_price` dan `yearly_price` sudah ada; yang belum ada hanya catatan langganannya ([Fase 3](phase-3-siklus-langganan.md)). |
+| Siklus penagihan | **Bulanan atau tahunan saja** — enum tertutup dua nilai, tidak ada kuartalan atau seumur hidup. Kolom `plans.monthly_price` dan `yearly_price` sudah ada. |
+| Langganan menempel di client | **`subscriptions.company_id` → `user_id`**, satu baris per periode; perpanjangan membuat baris baru sehingga riwayat penagihan terbentuk sendiri. Tabelnya efektif kosong (dua baris demo dari Juni), jadi ini waktu termurah mengubahnya. Rincian di [Fase 3](phase-3-siklus-langganan.md#2a-langganan-pindah-dari-perusahaan-ke-client). |
+| Kedaluwarsa | **Kunci penuh** setelah tenggang **7 hari**, pengingat **H-14**, perpanjangan **manual**. Diperlunak dua peredam: tombol buka kunci di area admin, dan akses penuh selama tenggang. |
 | Harga tier | **Belum ditentukan** | Skema mengirim `price: null`. Angka lama di seeder dibiarkan; Enterprise diberi 0 sebagai penampung. Kolomnya tidak nullable dan tidak dibaca kode mana pun. |
 | Isi tiap tier | **Peta baru, menggantikan daftar fitur di skema asli.** Basic: pembukuan penuh termasuk persediaan satu gudang dan aktiva tetap. Pro: + multi-gudang, jejak audit, laporan tersimpan, banding multi-periode. Enterprise: + anggaran, dimensi departemen & proyek, role kustom. **Terhalang:** impor berkas diminta masuk Pro tapi fiturnya belum ada sama sekali. Rinciannya di [Fase 2](phase-2-peta-tier-dan-peluncuran.md#peta-tier-yang-disetujui). | Skema asli membuat Pro dan Enterprise **identik secara fitur**, sementara aplikasi ternyata sudah memuat kemampuan kelas atas yang tidak disebut sama sekali (dimensi departemen/proyek dengan laporan tersegmentasi). Aktiva tetap sempat diusulkan sebagai gerbang Pro lalu dibatalkan: tanpanya penyusutan tidak tercatat dan laporan keuangan Basic jadi salah. |
 | Paket vs permission | **Dua sumbu terpisah, satu pipa.** Paket menentukan perusahaan ini punya fitur apa (mengikat semua orang, owner termasuk); permission menentukan user tambahan boleh menyentuh apa (owner & admin dikecualikan). Keduanya memakai jalur penyaluran yang sama, tapi alasan penolakannya tidak pernah dilebur. | Ditegaskan pemilik produk: *"Budget itu fitur dari tipe client, dan permission user itu tentang peran user tambahan di data perusahaan, bukan user pemilik atau administrator."* Melebur keduanya membuat pesan error salah alamat dan editor role berbohong. |
@@ -62,8 +64,13 @@ Plus ~28 flag fitur per tier (`data_import`, `multi_warehouse`,
 | [4](phase-4-kuota-penyimpanan.md) | Kuota penyimpanan per tier, menggantikan batas jumlah transaksi | ⬜ Belum |
 | [5](phase-5-kebersihan-tenant.md) | ⚠️ **Bug aktif** — 53 GB berkas tenant uji bocor di `database/tenants/` | ⬜ Belum |
 
-Fase 1–3 **belum disetujui untuk dikerjakan**. Fase 0 dikerjakan atas instruksi
-langsung; sisanya menunggu keputusan pemilik produk.
+Fase 0 sudah dikerjakan. **Fase 1–5 seluruh keputusannya sudah diambil** per
+sesi QA 2026-08-11 dan tinggal dieksekusi; belum ada yang dimulai.
+
+Fase 5 berdiri sendiri — ia bug aktif, tidak bergantung pada fase mana pun, dan
+bisa dikerjakan kapan saja. *(Isi direktorinya sudah dibersihkan manual
+2026-08-11 — 53 GB → 5,7 MB — tapi penyebabnya belum ditutup, jadi ia akan terisi
+lagi pada `php artisan test` berikutnya.)*
 
 ### Perubahan rancangan 2026-08-11 (sore)
 

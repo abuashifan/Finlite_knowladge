@@ -1,165 +1,294 @@
 # Fase 3 — Siklus Langganan
 
-**Status: ⬜ Belum dikerjakan. Belum disetujui.**
+**Status: ⬜ Belum dikerjakan. Seluruh keputusannya sudah diambil.**
 
-Skema pemilik produk memuat `price.monthly` dan `price.yearly`. Begitu ada
-periode berbayar, ada tanggal mulai, tanggal berakhir, dan pertanyaan "apa yang
-terjadi setelah lewat" — tidak satu pun yang ada hari ini.
+Skema tier memuat harga bulanan dan tahunan. Begitu ada periode berbayar, ada
+tanggal mulai, tanggal berakhir, dan pertanyaan "apa yang terjadi setelah lewat" —
+tidak satu pun yang ada hari ini.
 
-Fase ini bisa dikerjakan **tanpa** Fase 1–2; ia tegak lurus terhadap feature
-gate. Tapi ia baru mendesak ketika penagihan benar-benar dimulai.
+Fase ini **tegak lurus terhadap Fase 1–2**; ia tidak menunggu lapis paket dan
+lapis paket tidak menunggunya.
 
-## Keadaan terverifikasi 2026-08-11
+---
 
-- Paket menempel di **client**: `users.plan_id`.
-- Tabel `subscriptions` **ada** tapi ber-scope **perusahaan**, dan **tidak
-  dipakai untuk kuota sama sekali**. Ini ketidakcocokan yang sudah ditemukan
-  saat membangun kuota perusahaan — alasan kuota diikat ke user, bukan ke
-  `subscriptions`.
-- Tidak ada trial, kedaluwarsa, atau masa tenggang.
-- `companies.status` mengenal nilai `trial` (perusahaan #1 di database dev
-  berstatus itu), tapi tidak ada logika yang membacanya sebagai masa percobaan
-  berjangka. Statusnya juga di level perusahaan, sementara langganan di level
-  client — jangan pakai ini sebagai fondasi trial tanpa memikirkan ulang.
+## 1. Keadaan terverifikasi 2026-08-11
 
-## Keputusan yang sudah diambil
+- Paket menempel di **client**: `users.plan_id`. Seluruh perhitungan kuota
+  membacanya.
+- Tabel `subscriptions` ada dengan kolom yang hampir tepat — `plan_id`, `status`,
+  `trial_ends_at`, `starts_at`, `ends_at`, `cancelled_at`, `billing_cycle`,
+  `price`, `metadata` — **tapi kuncinya `company_id`**, bukan `user_id`.
+- **Tabelnya praktis mati.** Isinya dua baris, dibuat `DemoCentralSeeder`
+  2026-06-09, keduanya `status=trial` / `billing_cycle=free` tanpa `ends_at`:
 
-### Siklus penagihan: bulanan atau tahunan, tidak ada yang lain
+  ```
+  company=1  plan=1  status=trial  cycle=free  mulai=2026-06-09  akhir=-
+  company=2  plan=1  status=trial  cycle=free  mulai=2026-06-09  akhir=-
+  ```
 
-Ditetapkan pemilik produk 2026-08-11: *"client hanya bisa memilih pembayaran per
-bulan atau per tahun."*
+  Yang menyebut model `Subscription` di seluruh kode hanya **dua berkas**:
+  seeder itu sendiri dan `SharedServiceProvider`. Tidak ada logika bisnis yang
+  membacanya.
+- Tidak ada trial, kedaluwarsa, maupun masa tenggang yang berfungsi.
+- Belum ada worker antrean yang berjalan, dan **belum ada pengiriman email sama
+  sekali**.
 
-Artinya siklusnya **enum tertutup dua nilai** — `monthly` | `yearly`. Bukan
-jumlah hari, bukan jumlah bulan yang bisa diisi bebas. Tidak ada kuartalan,
-tidak ada seumur hidup.
+---
 
-Ini menyederhanakan dua hal sekaligus:
+## 2. Keputusan
 
-- **Perhitungan tanggal berakhir** cuma punya dua cabang:
-  `addMonthNoOverflow()` atau `addYear()`. Pakai varian *no-overflow*: langganan
-  bulanan yang dimulai 31 Januari harus berakhir 28/29 Februari, bukan melompat
-  ke 3 Maret.
-- **Harga sudah tersedia.** Tabel `plans` sudah punya `monthly_price` dan
-  `yearly_price` (`decimal(15,2)`, bawaan 0) sejak
-  `2026_05_15_000004_create_plans_table.php`. Tidak perlu kolom harga baru —
-  yang belum ada hanyalah catatan langganannya.
+### 2a. Langganan pindah dari perusahaan ke client
 
-Yang perlu disimpan di catatan langganan: `billing_cycle` (`monthly`/`yearly`),
-`starts_at`, `ends_at`, dan harga yang **dikunci saat berlangganan** — kalau
-harga paket naik, client yang sedang berjalan tidak boleh ikut berubah di tengah
-periode.
+Ini akar seluruh fase. Ada dua model yang bertabrakan:
 
-### Tidak ada trial, tidak ada Free
+```
+users.plan_id            →  satu paket per CLIENT
+subscriptions.company_id →  satu langganan per PERUSAHAAN
+```
 
-Ditetapkan pemilik produk 2026-08-11. Free dinonaktifkan sampai ada modal untuk
-menanggung biayanya, dan masa percobaan tidak pernah diadakan.
+Client Pro dengan 3 perusahaan: model pertama bilang dia membeli **satu**
+langganan yang mencakup ketiganya; model kedua bilang ada **tiga** baris yang
+bisa berisi tiga paket dan tiga tanggal berakhir berbeda.
 
-Akibatnya untuk fase ini: **tidak ada status "belum berlangganan" yang sah.**
-Setiap client punya paket berbayar sejak dibuat, jadi siklus langganan hanya
-punya tiga keadaan — aktif, dalam tenggang, kedaluwarsa.
+Yang berlaku adalah **model pertama** — itu sudah jadi keputusan sejak kuota
+dibangun. `subscriptions` adalah peninggalan asumsi lama.
 
-Nilai `trial` di `companies.status` (dipakai perusahaan #1 di database dev) jadi
-tidak bermakna. Tandai untuk dibersihkan.
+**Keputusan: `subscriptions.company_id` → `user_id`, satu baris per periode
+langganan.** Perpanjangan membuat baris baru, sehingga riwayat penagihan
+terbentuk sendiri — dan riwayat itu memang dibutuhkan, karena perpanjangan manual
+dengan harga terkunci menuntut jawaban atas "client ini bayar berapa, untuk
+periode mana".
 
-### Kedaluwarsa: kunci penuh, tenggang 7 hari, pengingat H-14
+Tabelnya efektif kosong, jadi **sekarang waktu termurah untuk mengubahnya**.
 
-Ditetapkan pemilik produk 2026-08-11.
+### 2b. Siklus: bulanan atau tahunan, tidak ada yang lain
+
+*"Client hanya bisa memilih pembayaran per bulan atau per tahun."*
+
+Enum tertutup dua nilai: `monthly` | `yearly`. Bukan jumlah hari, bukan jumlah
+bulan bebas. Tidak ada kuartalan, tidak ada seumur hidup.
+
+Perhitungan tanggal berakhir cuma punya dua cabang — dan wajib memakai varian
+**no-overflow**: langganan bulanan yang mulai 31 Januari berakhir 28/29 Februari,
+bukan melompat ke 3 Maret.
+
+Harga sudah tersedia di `plans.monthly_price` / `yearly_price`.
+
+### 2c. Tidak ada trial, tidak ada Free
+
+Free dinonaktifkan sampai ada modal menanggung biayanya; masa percobaan tidak
+pernah diadakan.
+
+Akibatnya: **tidak ada keadaan "belum berlangganan" yang sah.** Setiap client
+punya langganan berbayar sejak dibuat. Kolom `trial_ends_at` ikut dibuang, dan
+nilai `trial` di `companies.status` (dipakai perusahaan #1 di dev) jadi tidak
+bermakna — tandai untuk dibersihkan.
+
+### 2d. Kedaluwarsa: kunci penuh, tenggang 7 hari, pengingat H-14
 
 | | |
 |---|---|
 | Pengingat | **H-14** sebelum `ends_at` |
-| Masa tenggang | **7 hari** setelah `ends_at` — akses penuh berlanjut |
+| Masa tenggang | **7 hari** setelah `ends_at` — akses masih penuh |
 | Setelah tenggang | **Kunci penuh** — login ditolak |
 
-Aku sempat merekomendasikan "turun ke Free" dan menyarankan agar kunci penuh
+Aku sempat merekomendasikan "turun ke Free" dan menyarankan kunci penuh
 dihindari; pemilik produk memutuskan sebaliknya, dan keputusan itu yang berlaku.
 
-Satu hal faktual yang perlu diurus dalam pelaksanaannya, bukan untuk membatalkan
-keputusan: pembukuan itu dokumen yang wajib disimpan dan bisa diproduksi ulang
-untuk keperluan pajak. Client yang terkunci tidak bisa menariknya. Dua peredam
-yang tidak mengubah keputusan:
+Satu hal faktual untuk diurus dalam pelaksanaannya, bukan untuk membatalkan
+keputusan: pembukuan wajib bisa diproduksi ulang untuk keperluan pajak, dan
+client terkunci tidak bisa menariknya. Dua peredam yang tidak mengubah keputusan:
 
-1. **Admin bisa membuka kunci** dari area admin kapan saja — jalur pemulihan
-   untuk client yang membayar terlambat atau butuh datanya untuk pelaporan.
-2. **Selama 7 hari tenggang, akses masih penuh**, jadi ada jendela nyata untuk
-   menarik data. Ini menguatkan alasan membangun fitur ekspor
-   ([data-import Fase 6](../data-import/phase-6-ekspor.md)) sebelum penguncian
-   dinyalakan.
+1. **Admin bisa membuka kunci** kapan saja — jalur pemulihan wajib.
+2. **Selama 7 hari tenggang akses masih penuh**, jadi ada jendela nyata untuk
+   menarik data. Ini alasan ketiga kenapa
+   [ekspor](../data-import/phase-6-ekspor.md) sebaiknya sudah ada sebelum
+   penguncian dinyalakan.
 
-Pesan penguncian wajib menyebut cara menghubungi — tautan WhatsApp yang sama
-dengan yang dipakai gerbang fitur.
+### 2e. Perpanjangan manual, baris baru
 
-## Keputusan yang masih harus diambil
+Manual selama belum ada gerbang pembayaran — kamu yang memperpanjang lewat area
+admin setelah pembayaran diterima. Karena riwayat disimpan, memperpanjang berarti
+**membuat baris baru** yang mulai di `ends_at` baris sebelumnya, bukan menggeser
+tanggal baris lama.
 
-### 1. Nasib tabel `subscriptions`
+---
 
-Tiga jalan:
+## 3. Bentuk data
 
-- **Pindahkan ke client.** `subscriptions.user_id` menggantikan `company_id`.
-  Paling konsisten dengan model sekarang (paket = milik client), tapi mengubah
-  tabel yang sudah ada.
-- **Tinggalkan, pakai kolom di `users`.** `subscription_starts_at`,
-  `subscription_ends_at`, `subscription_status`. Paling murah, tapi tidak
-  menyimpan riwayat — tidak bisa menjawab "client ini pernah di paket apa".
-- **Biarkan `subscriptions` mati, buat tabel baru.** Paling bersih secara
-  konsep, menambah satu tabel lagi.
+### Migrasi ubah `subscriptions`
 
-Rekomendasi: **yang pertama**, kalau riwayat langganan memang dibutuhkan untuk
-penagihan. Kalau belum, yang kedua sudah cukup dan bisa ditingkatkan nanti.
+Bukan drop-and-create: tabel ini mungkin sudah berisi sesuatu di lingkungan yang
+tidak terlihat dari sini. Ubah bertahap.
 
-### 2. Perpanjangan — manual, tapi mekanismenya belum ditetapkan
+| Langkah | Catatan |
+|---|---|
+| Tambah `user_id` (nullable dulu) | FK ke `users`, **`restrictOnDelete`** |
+| Isi dari `companies.created_by` lewat `company_id` | Pemilik perusahaan = pemilik langganan |
+| Hapus baris `billing_cycle = 'free'` atau `status = 'trial'` | Nilai yang sudah tidak ada di model bisnis. Di dev, ini menghapus tepat dua baris demo. |
+| Hapus baris yang `user_id`-nya tetap kosong | Perusahaan tanpa `created_by` |
+| Jadikan `user_id` non-nullable, drop `company_id` | |
+| Drop `trial_ends_at` | Tidak ada trial |
+| `starts_at`, `ends_at` jadi non-nullable | Setiap langganan punya periode |
+| Ganti bawaan `billing_cycle` dari `'free'` → tanpa bawaan | Harus diisi eksplisit |
+| Drop kolom `status` | Lihat di bawah |
+| Indeks `user_id`, `ends_at` | `ends_at` dipakai command harian |
 
-Ditetapkan pemilik produk: **manual dulu**, karena belum ada gerbang pembayaran.
-Kamu yang memperpanjang lewat area admin setelah pembayaran diterima.
+**`restrictOnDelete` pada `user_id` disengaja.** Ia sekaligus menutup risiko laten
+yang ditemukan saat QA: `users` tidak memakai SoftDeletes, dan menghapus pemilik
+membuat `companies.created_by` jadi NULL sehingga perusahaannya membeku di batas
+cadangan. Dengan restrict, client yang punya riwayat langganan tidak bisa dihapus
+begitu saja.
 
-Yang belum diputuskan: apakah memperpanjang berarti **menggeser `ends_at`** pada
-baris langganan yang sama, atau **membuat baris baru**. Bergantung pada keputusan
-#1 — kalau riwayat langganan disimpan, baris baru; kalau tidak, geser tanggal.
+### Status diturunkan dari tanggal, bukan disimpan
 
-## Pekerjaan (garis besar, menunggu keputusan #1)
+Kolom `status` dibuang. Keadaan langganan **dihitung** dari `starts_at`,
+`ends_at`, `cancelled_at`, dan tenggang 7 hari:
 
-- Kolom/tabel sesuai keputusan #1, memuat `billing_cycle`, `starts_at`,
-  `ends_at`, dan harga terkunci. Plus migrasi.
-- `SubscriptionStatusService` di `app/Shared/Subscription/` — menjawab
-  "langganan client ini aktif, dalam tenggang, atau kedaluwarsa".
-- **Penguncian di titik login**, bukan di `EnsureCompanyAccess`. Alasannya:
-  penguncian berlaku ke client, bukan ke perusahaan, dan menolak di login memberi
-  satu tempat untuk menampilkan pesan + tautan WhatsApp. Token yang sudah terbit
-  ikut dicabut saat status berpindah ke terkunci — kalau tidak, sesi yang sedang
-  berjalan tetap hidup sampai token kedaluwarsa sendiri.
-- **Membuka kunci dari area admin** — satu tombol, jalur pemulihan wajib.
-- Command terjadwal harian yang memindahkan status dan mengirim pengingat H-14.
-  `QUEUE_CONNECTION=database` sudah aktif, tapi **belum ada worker yang berjalan
-  di server** — prasyarat yang sama dengan
-  [data-import Fase 2](../data-import/phase-2-antrean.md).
-- Area admin: tanggal berakhir + sisa hari di daftar client dan tab Langganan.
-- Spanduk peringatan di aplikasi client sejak H-14 dan selama masa tenggang.
+```
+cancelled_at terisi        → dibatalkan
+now < ends_at              → aktif
+now < ends_at + 7 hari     → tenggang
+selain itu                 → kedaluwarsa
+```
+
+Alasannya penting: kalau status disimpan dan digeser command harian, **command
+yang gagal jalan semalam berarti orang terkunci atau terbuka secara keliru.**
+Dengan diturunkan, gerbangnya selalu benar apa pun yang terjadi pada penjadwalan.
+Command harian tinggal mengurus hal yang memang butuh dijalankan — pengingat dan
+pencabutan token.
+
+### `users.plan_id` tetap ada
+
+Ia jawaban cepat "paket aktif sekarang", dibaca setiap request oleh lapis kuota
+dan lapis paket. Menggantinya dengan join ke `subscriptions` di tiap request
+adalah pemborosan.
+
+Ia diperlakukan sebagai **turunan dengan satu penulis**: hanya
+`SubscriptionService` yang boleh mengubahnya, dan selalu bersamaan dengan
+membuat/mengubah baris langganan.
+
+**Kunci penuh membuat ini aman.** Client kedaluwarsa tidak bisa login sama
+sekali, jadi tidak ada request yang membawa `plan_id` basi ke lapis kuota atau
+lapis paket. Keduanya boleh mempercayai `users.plan_id` tanpa memeriksa tanggal.
+
+---
+
+## 4. Pekerjaan
+
+### 4a. Migrasi + model
+
+Sesuai §3. `Subscription` model diperbarui, `DemoCentralSeeder` disesuaikan agar
+tidak lagi menulis baris `trial`/`free`.
+
+### 4b. `SubscriptionService` di `app/Shared/Subscription/`
+
+Satu-satunya penulis `subscriptions` dan `users.plan_id`:
+
+```php
+public function subscribe(User $client, Plan $plan, string $cycle, ?Carbon $startsAt = null): Subscription;
+public function renew(User $client, ?Plan $plan = null, ?string $cycle = null): Subscription;
+public function cancel(User $client): void;
+public function currentFor(User $client): ?Subscription;
+public function stateFor(User $client): string;   // aktif | tenggang | kedaluwarsa | dibatalkan
+public function daysRemaining(User $client): int;
+```
+
+`subscribe()` mengunci harga dari paket saat itu ke kolom `price`. Kenaikan harga
+paket tidak boleh menyentuh langganan yang sedang berjalan.
+
+Aturan: **hanya satu baris per client yang boleh aktif atau dalam tenggang.**
+`renew()` membuat baris baru yang mulai di `ends_at` baris sebelumnya.
+
+### 4c. Penguncian di titik login
+
+Di `AuthController::login()`, **bukan** di `EnsureCompanyAccess`. Alasannya:
+penguncian berlaku ke client bukan ke perusahaan, dan menolak di login memberi
+satu tempat untuk menampilkan pesan berisi tautan WhatsApp.
+
+Token yang sudah terbit **ikut dicabut** saat client berpindah ke kedaluwarsa —
+kalau tidak, sesi yang sedang berjalan tetap hidup sampai tokennya mati sendiri.
+Itu tugas command harian di 4e.
+
+### 4d. Area admin
+
+- Kolom tanggal berakhir + sisa hari di daftar client
+- Tab Langganan: paket, siklus, periode berjalan, harga terkunci, riwayat baris
+- Tombol **Perpanjang** (memilih siklus, membuat baris baru)
+- Tombol **Buka kunci** — jalur pemulihan, wajib ada
+- Daftar tersaring **"akan jatuh tempo 14 hari ke depan"** — ini yang kamu pakai
+  untuk menghubungi client lewat WhatsApp
+
+### 4e. Command harian
+
+```
+php artisan subscriptions:sweep [--dry-run]
+```
+
+Dua tugas, keduanya tidak memengaruhi kebenaran gerbang:
+
+1. Mencabut token client yang baru melewati tenggang
+2. Menandai siapa yang perlu dihubungi (H-14 dan selama tenggang)
+
+Wajib `--dry-run` yang mencetak daftar tanpa mengubah apa pun, dan wajib mencatat
+apa yang diubah.
+
+### 4f. Peringatan di aplikasi client
+
+Spanduk sejak H-14 dan selama masa tenggang, menyebut sisa hari dan tautan
+WhatsApp.
 
 **Pengingat H-14 lewat apa?** Belum ada pengiriman email sama sekali di aplikasi
-ini (`MAIL_MAILER=array` di test, dan tidak ada notifikasi terdaftar). Kalau
-pengingat harus sampai ke client, itu pekerjaan tersendiri. Jalur termurah untuk
-gelombang pertama: spanduk di dalam aplikasi + daftar "akan jatuh tempo" di area
-admin supaya kamu bisa menghubungi manual lewat WhatsApp.
+ini. Kalau pengingat harus sampai ke client di luar aplikasi, itu pekerjaan
+tersendiri. Jalur termurah untuk gelombang pertama: spanduk di dalam aplikasi
+plus daftar "akan jatuh tempo" di area admin, lalu kamu menghubungi manual.
 
-## Yang sudah beres dan tidak perlu diulang
+---
 
-Perilaku **penurunan paket** sudah benar sejak kuota dibangun: perusahaan dan
-user yang sudah ada tidak pernah dicabut, hanya penambahan berikutnya yang
-ditahan. Flag `over_quota` di payload admin sudah menampilkan keadaan itu sebagai
-kondisi sah, bukan error. Sejak keputusan "turun tier tidak mencabut hak baca",
-lapis paket berperilaku sama.
+## 5. Test
 
-**Kedaluwarsa adalah pengecualian dari pola itu** — ia mengunci penuh, bukan
-menurunkan. Jadi ia tidak bisa memakai ulang mekanisme penurunan paket; ia
-mekanisme tersendiri di titik login.
+- `subscribe()` menghitung `ends_at` benar untuk kedua siklus
+- **31 Januari + 1 bulan = 28/29 Februari**, bukan 3 Maret
+- Harga terkunci: menaikkan `plans.monthly_price` tidak mengubah langganan berjalan
+- `renew()` membuat baris baru yang mulai tepat di `ends_at` sebelumnya
+- Hanya satu baris aktif/tenggang per client
+- Keadaan diturunkan benar di keempat batas: sehari sebelum `ends_at`, tepat di
+  `ends_at`, hari ke-7 tenggang, hari ke-8
+- Client kedaluwarsa **tidak bisa login**; pesannya memuat tautan WhatsApp
+- Client dalam tenggang **masih bisa login penuh**
+- Admin membuka kunci → client bisa login lagi
+- Token dicabut saat melewati tenggang
+- `--dry-run` tidak mengubah apa pun
+- Client dengan riwayat langganan **tidak bisa dihapus** (`restrictOnDelete`)
+- Migrasi: baris `trial`/`free` lama terhapus, `user_id` terisi dari
+  `companies.created_by`
 
-## Risiko
+---
+
+## 6. Risiko
 
 - **Penguncian penuh tanpa jalur ekspor** membuat client tidak bisa menarik
-  pembukuannya untuk keperluan pajak. Tombol buka kunci di area admin adalah
-  peredamnya, dan fitur ekspor sebaiknya sudah ada sebelum penguncian menyala.
-- **Command terjadwal menyentuh seluruh basis client sekaligus.** Bug di sana
-  mengunci semua orang dalam semalam. Wajib punya `--dry-run`, mencatat apa yang
-  diubah, dan bisa dibalik.
-- **Belum ada worker antrean maupun pengiriman email** di aplikasi ini. Keduanya
-  prasyarat operasional, bukan kode semata.
+  pembukuannya untuk keperluan pajak. Tombol buka kunci adalah peredamnya, dan
+  ekspor sebaiknya sudah ada sebelum penguncian menyala.
+- **Command harian menyentuh seluruh basis client sekaligus.** Bug di sana
+  mencabut token semua orang dalam semalam. `--dry-run` dan pencatatan wajib.
+  Diperingan oleh keputusan menurunkan status dari tanggal: command yang salah
+  tidak membuat gerbangnya salah.
+- **Migrasi menghapus baris.** Di dev hanya dua baris demo, tapi perintahnya
+  harus menyaring dengan syarat eksplisit (`billing_cycle = 'free'` atau
+  `status = 'trial'`), bukan mengosongkan tabel.
+- **Belum ada worker antrean maupun email.** Keduanya prasyarat operasional,
+  bukan kode semata.
+
+---
+
+## 7. Yang sudah beres dan tidak perlu diulang
+
+Perilaku **penurunan paket** sudah benar sejak kuota dibangun: perusahaan dan
+user yang ada tidak pernah dicabut, hanya penambahan berikutnya yang ditahan.
+Sejak keputusan "turun tier tidak mencabut hak baca", lapis paket berperilaku
+sama.
+
+**Kedaluwarsa adalah pengecualian dari pola itu** — ia mengunci penuh, bukan
+menurunkan. Jadi ia tidak memakai ulang mekanisme penurunan paket; ia mekanisme
+tersendiri di titik login.
