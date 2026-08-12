@@ -9,6 +9,7 @@ Finlite_knowladge/
   reference/      ← Pengetahuan lengkap aplikasi — MULAI DI SINI
   plans/          ← Dokumen perencanaan implementasi + riwayat keputusan
   reviews/        ← Catatan review
+  tutorials/      ← Panduan langkah-demi-langkah untuk pengguna
 ```
 
 ## Reference — mulai di sini
