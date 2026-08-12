@@ -1,6 +1,35 @@
 # Fase 1 — Profil Master Data
 
-**Status: ⬜ Belum dikerjakan. Bergantung pada Fase 0.**
+**Status: ✅ Selesai (backend + frontend).**
+
+Implementasi aktual: tiga committer (`ContactImportCommitter`,
+`ProductImportCommitter`, `ChartOfAccountImportCommitter`) di belakang
+`ImportCommitterFactory`, dipanggil dari `ImportBatchService::commit()`. UI di
+`frontend/src/modules/imports/` (halaman satu-layar: unggah → pemetaan →
+pratinjau → commit), didaftarkan sebagai item ribbon "Impor Data" di bawah
+modul Master Data (`/master-data/import`).
+
+Deviasi dari desain awal di bawah, dicatat di sini karena tidak jelas dari kode:
+
+- **Validasi kode induk COA lintas baris memakai pembacaan ulang seluruh
+  berkas** (`codesInFileCache`), bukan hanya baris yang sudah tervalidasi —
+  supaya "anak sebelum induk di berkas" tetap lolos validasi per-baris, bukan
+  cuma saat commit. Di-cache per batch ID.
+- **Commit COA memakai resolusi topologis iteratif** (`do...while` sampai tidak
+  ada progres lagi), bukan pra-pengurutan berdasarkan kode/level seperti
+  disebut di bawah — hasilnya sama (induk selalu dibuat sebelum anak) tapi
+  toleran terhadap urutan kode yang tidak numerik/berjenjang rapi.
+- **Risiko "impor ke COA yang sudah terisi" ditangani lewat kebijakan
+  tolak-kode-yang-sudah-ada** (bukan membatasi profil ke perusahaan yang belum
+  finalisasi setup) — konsisten dengan "hanya tambah, jangan timpa" di bawah,
+  tapi tidak memblokir akses berdasarkan status `SetupWizardService`.
+- Endpoint baru `GET /imports/profiles` ditambahkan (di luar rencana awal)
+  supaya frontend bisa mengambil daftar field/header/required_fields per
+  profil secara dinamis untuk pemetaan kolom otomatis.
+- `config/imports.php` mendapat array `fields` paralel dengan `headers` di
+  tiap profil (field key snake_case untuk `column_map`, header untuk tampilan).
+
+Rencana awal (untuk konteks keputusan desain):
 
 Profil impor pertama: **kontak, produk, dan COA**. Sinkron, tanpa antrean.
 
@@ -64,14 +93,17 @@ dan pesan yang muncul harus menjelaskan itu, bukan galat 500.
 
 ## Test
 
-- Tiga profil, masing-masing: berkas valid → data masuk lewat service, bukan
+Diimplementasikan di `tests/Feature/Imports/MasterDataImportCommitTest.php` (8
+test, semua lulus; total suite backend 1279 test, 1274 lulus, 5 skip, 0 gagal).
+
+- [x] Tiga profil, masing-masing: berkas valid → data masuk lewat service, bukan
   langsung ke tabel
-- Baris duplikat (kode/nama sudah ada) → ditandai `invalid` di pratinjau, tidak
+- [x] Baris duplikat (kode/nama sudah ada) → ditandai `invalid` di pratinjau, tidak
   menggagalkan berkas
-- COA: anak sebelum induk di berkas → tetap masuk dengan hierarki benar
-- COA: kode sudah ada → ditolak, tidak menimpa
-- Produk: kategori/satuan tidak dikenal → galat per baris yang menyebut nilainya
-- Batch selesai → `import_rows.document_id` terisi, bisa ditelusuri balik
+- [x] COA: anak sebelum induk di berkas → tetap masuk dengan hierarki benar
+- [x] COA: kode sudah ada → ditolak, tidak menimpa
+- [x] Produk: kategori/satuan tidak dikenal → galat per baris yang menyebut nilainya
+- [x] Batch selesai → `import_rows.document_id` terisi, bisa ditelusuri balik
 
 ## Risiko
 

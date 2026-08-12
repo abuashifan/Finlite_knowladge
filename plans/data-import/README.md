@@ -111,8 +111,8 @@ terverifikasi, nol rute bulk di modul Sales. Itu dibangun di
 
 | Fase | Isi | Status |
 |---|---|---|
-| [0](phase-0-mesin-impor.md) | Mesin impor: unggah, baca `.xlsx`/CSV, pemetaan kolom, validasi, pratinjau. Sinkron, belum menulis dokumen apa pun. | ⬜ Belum |
-| [1](phase-1-master-data.md) | Profil master data (kontak, produk, COA). Membuktikan mesin pada data berisiko rendah. Tier Basic. | ⬜ Belum |
+| [0](phase-0-mesin-impor.md) | Mesin impor: unggah, baca `.xlsx`/CSV, pemetaan kolom, validasi, pratinjau. Sinkron, belum menulis dokumen apa pun. | ✅ Selesai |
+| [1](phase-1-master-data.md) | Profil master data (kontak, produk, COA). Membuktikan mesin pada data berisiko rendah. Tier Basic. | ✅ Selesai |
 | [2](phase-2-antrean.md) | Antrean: `app/Jobs` pertama, progres, penanganan gagal, pengikatan koneksi tenant di dalam job. | ⬜ Belum |
 | [3](phase-3-faktur-penjualan.md) | Profil transaksi pertama. Yang paling sulit — menetapkan pola untuk dua modul berikutnya. | ⬜ Belum |
 | [4](phase-4-pembelian-dan-jurnal.md) | Pembelian (`VendorBillService`) dan jurnal umum (`JournalEntryService`). | ⬜ Belum |
