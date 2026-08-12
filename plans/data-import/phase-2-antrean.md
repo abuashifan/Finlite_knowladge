@@ -1,6 +1,6 @@
 # Fase 2 — Antrean
 
-**Status: ⬜ Belum dikerjakan. Prasyarat untuk Fase 3–4.**
+**Status: ✅ Selesai — 2026-08-12.**
 
 Impor transaksi tidak bisa sinkron. Ratusan faktur, masing-masing memicu posting
 jurnal dan mutasi piutang/stok, akan menabrak `max_execution_time` PHP-FPM jauh
