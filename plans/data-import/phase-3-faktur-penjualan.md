@@ -1,6 +1,6 @@
 # Fase 3 — Profil Faktur Penjualan
 
-**Status: ⬜ Belum dikerjakan. Bergantung pada Fase 0, 1, 2.**
+**Status: ✅ Selesai — 2026-08-12.**
 
 Profil transaksi pertama, dan **inti dari kenapa rencana ini ada**: ratusan
 faktur ke pelanggan tetap, setiap hari.

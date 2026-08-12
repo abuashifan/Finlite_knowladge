@@ -23,13 +23,13 @@ Disetujui pemilik produk 2026-08-11, **menggantikan daftar fitur di skema asli**
 | Persediaan satu gudang | ✅ | ✅ | ✅ | *tidak dipetakan* |
 | Aktiva tetap & penyusutan | ✅ | ✅ | ✅ | *tidak dipetakan* |
 | Laporan standar satu periode | ✅ | ✅ | ✅ | *tidak dipetakan* |
-| Impor master data | ✅ | ✅ | ✅ | ⏳ fiturnya belum ada |
+| Impor master data | ✅ | ✅ | ✅ | `masterdata.import` (tidak digerbangi) |
 | Multi-gudang | — | ✅ | ✅ | `warehouses.*` |
 | Jejak audit | — | ✅ | ✅ | `audit.*` |
 | Laporan tersimpan & berbagi | — | ✅ | ✅ | `reports.save` ⚠️ baru |
 | Banding multi-periode | — | ✅ | ✅ | `reports.multi_period` ⚠️ baru |
 | **Alur persetujuan transaksi** | — | ✅ | ✅ | mode `draft_approve_post` — lihat §2 |
-| Impor transaksi | — | ✅ | ✅ | ⏳ fiturnya belum ada |
+| Impor transaksi | — | ✅ | ✅ | `transactions.import` |
 | Anggaran | — | — | ✅ | `budgets.*` |
 | Dimensi departemen & proyek | — | — | ✅ | `departments.*`, `projects.*` |
 | Role kustom & hak akses per orang | — | — | ✅ | `access.*` |

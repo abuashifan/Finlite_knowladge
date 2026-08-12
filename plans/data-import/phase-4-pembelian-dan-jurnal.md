@@ -1,6 +1,6 @@
 # Fase 4 — Profil Pembelian & Jurnal Umum
 
-**Status: ⬜ Belum dikerjakan. Bergantung pada Fase 3.**
+**Status: ✅ Selesai — 2026-08-12.**
 
 Dua profil transaksi berikutnya, mengikuti pola yang sudah ditetapkan Fase 3.
 Sebagian besar pekerjaannya adalah pemakaian ulang; yang ditulis di sini hanya

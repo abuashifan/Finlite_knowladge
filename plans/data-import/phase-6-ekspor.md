@@ -1,6 +1,6 @@
 # Fase 6 — Ekspor Excel & PDF
 
-**Status: ⬜ Belum dikerjakan. Bergantung pada Fase 0 (pustaka berkas).**
+**Status: ✅ Selesai (Excel) — 2026-08-12. PDF ditunda.**
 
 Dimasukkan ke rencana ini atas keputusan pemilik produk 2026-08-11, bukan jadi
 rencana terpisah — ia memakai pustaka berkas yang sama dengan importer, dan

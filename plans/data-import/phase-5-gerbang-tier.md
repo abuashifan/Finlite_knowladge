@@ -1,7 +1,6 @@
 # Fase 5 — Gerbang Tier
 
-**Status: ⬜ Belum dikerjakan. Bergantung pada Fase 1–4 dan pada
-[subscription-tiers Fase 1](../subscription-tiers/phase-1-lapis-paket.md).**
+**Status: ✅ Selesai — 2026-08-12.**
 
 Menyambungkan importer ke lapis paket. Fase terkecil di rencana ini — hampir
 seluruh mekanismenya sudah dibangun di rencana subscription-tiers.
