@@ -1,11 +1,11 @@
 # Fase 1 — Lapis Paket di Jalur Permission
 
-**Status: ⬜ Belum dikerjakan. Belum disetujui.**
+**Status: ✅ SELESAI 2026-08-11**
 
 Menambahkan **lapis kedua** di atas sistem permission yang sudah ada, tanpa
 memasang gerbang baru dan tanpa menyentuh satu pun rute. Setelah fase ini,
-perilaku aplikasi harus **persis sama** — yang bertambah hanya kemampuan
-menjawab "paket client ini membuka izin ini atau tidak".
+perilaku aplikasi **persis sama** — yang bertambah hanya kemampuan menjawab
+"paket client ini membuka izin ini atau tidak", dan saklarnya masih mati.
 
 Rancangan ini menggantikan rencana `FeatureGateService` + middleware `feature:`
 yang ditulis 2026-08-11 pagi. Alasannya di bawah.
@@ -30,16 +30,7 @@ Kedua puluh yang tidak terjaga persis yang memang tidak boleh terjaga:
 bukan gerbangnya — hanya alasan kedua untuk menutupnya. Memasang middleware
 `feature:` berarti membangun gerbang kedua di sebelah gerbang yang sudah ada.
 
-Namespace permission pun sudah sejajar dengan modul:
-
-```
-access  audit  budgets  cash_bank  coa  contacts  dashboard  departments
-fiscal_year  fixed_assets  inventory  journal  master_data  opening_balance
-payment_terms  period_end  products  projects  purchase  reports  sales
-settings  setup  units  warehouses
-```
-
-## Dua sumbu yang TIDAK boleh dilebur
+## Dua sumbu yang TIDAK dilebur
 
 Ini keputusan rancangan terpenting di fase ini, ditegaskan pemilik produk
 2026-08-11: *"Budget itu fitur dari tipe client, dan permission user itu tentang
@@ -59,13 +50,7 @@ Dari 8 role, hanya `owner` dan `admin` yang `['*']`. Enam sisanya — `finance`
 (38 izin), `accountant` (27), `sales` (46), `purchasing` (39), `warehouse` (32),
 `viewer` (3) — adalah "user tambahan" yang dimaksud.
 
-**Konsekuensinya: irisan buta salah.** Menulis
-`efektif = (role + allow − deny) ∩ paket` memang menghasilkan angka yang benar
-untuk owner (`semua ∩ paket = paket`), tapi mencapainya lewat konsep yang keliru,
-dan kekeliruan itu bocor di tiga tempat: pesan error, siapa yang harus dihubungi,
-dan editor role. Yang benar adalah **urutan evaluasi**, bukan irisan.
-
-## Urutan evaluasi
+## Urutan evaluasi yang dibangun
 
 ```
 can(izin):
@@ -78,9 +63,9 @@ can(izin):
 Lapis 1 dievaluasi **sebelum** jalan pintas `*`, lapis 2 **sesudah**. Itu satu
 satunya cara owner tetap kebal terhadap permission tapi tunduk pada paket.
 
-### Ranjau yang wajib diurus
+### Ranjau yang diurus
 
-`EffectivePermissionService::hasPermission()` (baris 50-57) berbunyi:
+`EffectivePermissionService::hasPermission()` berbunyi:
 
 ```php
 return in_array($permissionKey, $this->getEffectivePermissionKeys($companyUser), true)
@@ -92,49 +77,57 @@ dalam `getEffectivePermissionKeys()`, **owner dan admin tembus ke semua fitur** 
 dan owner ada di setiap perusahaan. Gerbangnya akan tampak bekerja saat diuji
 dengan role staff, lalu bocor total pada orang yang paling sering memakainya.
 
-Jalan pintas itu **tidak dihapus** (ia benar untuk lapis 2), tapi lapis 1 harus
-disisipkan di atasnya. `explainPermission()` punya jalan pintas serupa dan perlu
-perlakuan sama, plus sumber baru `not_in_plan`.
+Jalan pintas itu **tidak dihapus** (ia benar untuk lapis 2); lapis 1 disisipkan
+di atasnya, di `hasPermission()` maupun `explainPermission()`. Dikunci test
+`test_owner_with_wildcard_is_still_bound_by_the_plan`.
 
-## Pekerjaan
+## File yang disentuh
 
-### 1a. Peta fitur → izin
+### Baru
 
-`config/plan_features.php` — pemetaan prefix, bukan kosakata baru:
+| File | Isi |
+|---|---|
+| `app/Shared/Subscription/PlanOwnerResolver.php` | Rantai tunggal perusahaan → pemilik (`companies.created_by`) → paket, dengan jatuh ke `free`. |
+| `app/Shared/Subscription/PlanPermissionResolver.php` | Lapis 1. `featuresFor()`, `blockedKeysFor()`, `allows()`, `allowedKeysFor()`, `enforcing()`, `flush()`. Cache per request. |
+| `config/plan_features.php` | Saklar `enforce` + peta fitur → izin. |
+| `tests/Feature/Subscription/PlanPermissionTest.php` | 14 test. |
 
-```php
-return [
-    'enforce'  => env('PLAN_FEATURES_ENFORCE', true),
+### Diubah
 
-    'features' => [
-        // Pro ke atas
-        'multi_warehouse'  => [
-            'warehouses.create', 'warehouses.edit', 'warehouses.deactivate',
-        ],
-        'audit_trail'      => ['audit.*'],   // hanya punya `audit.view`, tidak bisa dipisah
-        'advanced_reports' => ['reports.save', 'reports.multi_period'],  // ← kunci BARU
+| File | Perubahan |
+|---|---|
+| `app/Shared/Subscription/UserQuotaService.php` | `ownerOf()` privat dihapus, memakai `PlanOwnerResolver`. Import `Plan` ikut hilang. |
+| `app/Shared/Subscription/CompanyQuotaService.php` | `planFor()` mendelegasi ke `PlanOwnerResolver`. `DEFAULT_PLAN_CODE` jadi alias ke konstanta di resolver. |
+| `app/Shared/Permission/EffectivePermissionService.php` | Lapis 1 disisipkan di `hasPermission()` dan `explainPermission()` (sumber baru `not_in_plan`); `getEffectivePermissionKeys()` disaring; helper `planFeaturesFor()`, `planAllows()`, `planFilter()`, `companyOf()`. |
+| `app/Shared/Permission/PermissionService.php` | `explain()` dan `planFeatures()` baru. |
+| `app/Shared/Http/Middleware/EnsurePermission.php` | Memilih kode error lewat `errorCodeFor()`; alasannya ikut masuk metadata audit. |
+| `app/Shared/Api/ApiErrorCode.php` + `config/api_errors.php` | `FEATURE_NOT_IN_PLAN`. |
+| `app/Modules/Auth/Controllers/PermissionController.php` | Respons menambah `plan_features`. |
+| `app/Shared/Providers/SharedServiceProvider.php` | `PlanPermissionResolver` didaftarkan singleton. |
 
-        // Enterprise
-        'budgeting'        => [
-            'budgets.submit', 'budgets.approve_head', 'budgets.approve_finance', 'budgets.manage',
-        ],
-        'dimensions'       => [
-            'departments.create', 'departments.edit', 'departments.deactivate',
-            'projects.create', 'projects.edit', 'projects.deactivate',
-        ],
-        'user_permission'  => [
-            'access.roles.create', 'access.roles.edit', 'access.roles.clone',
-            'access.roles.deactivate', 'access.roles.manage',
-            'access.permissions.assign', 'access.permissions.revoke', 'access.permissions.manage',
-        ],
-    ],
-];
-```
+**Nol rute disentuh. Nol middleware baru. Nol perubahan frontend.**
 
-Enam entri. Prefix yang **tidak** disebut selalu terbuka — daftar putih, bukan
-daftar hitam, supaya menambah modul baru tidak diam-diam mematikannya.
+## Peta fitur
 
-### Kenapa izin `.view` sengaja TIDAK ikut digerbangi
+`config/plan_features.php`, enam entri, **daftar putih**: izin yang tidak
+disebut selalu terbuka, supaya menambah modul baru tidak diam-diam mematikannya
+di semua tier.
+
+| Fitur | Izin yang digerbangi |
+|---|---|
+| `multi_warehouse` | `warehouses.create/edit/deactivate` |
+| `audit_trail` | `audit.*` |
+| `advanced_reports` | `reports.save`, `reports.multi_period` |
+| `budgeting` | `budgets.submit/approve_head/approve_finance/manage` |
+| `dimensions` | `departments.create/edit/deactivate`, `projects.create/edit/deactivate` |
+| `user_permission` | `access.roles.create/edit/clone/deactivate/manage`, `access.permissions.assign/revoke/manage` |
+
+`reports.save` dan `reports.multi_period` **belum ada** di
+`config/permissions.php` — laporan tersimpan dan banding multi-periode belum
+dibangun. Entrinya ditulis sekarang supaya petanya lengkap saat fitur itu datang;
+sampai saat itu ia tidak berefek apa pun.
+
+### Kenapa izin `.view` sengaja TIDAK digerbangi
 
 Keputusan pemilik produk 2026-08-11: client yang turun tier **tetap boleh
 membaca** data yang terlanjur dibuatnya. Client Enterprise yang sudah menandai
@@ -142,106 +135,72 @@ membaca** data yang terlanjur dibuatnya. Client Enterprise yang sudah menandai
 dari pandangan.
 
 Jadi peta hanya memuat izin **tulis**. Yang tetap terbuka di semua tier:
+`budgets.view`, `warehouses.view`, `departments.view`, `projects.view`,
+`access.roles.view`, `access.permissions.view`, `reports.view`, dan seluruh
+`access.users.*` + `access.invitations.*` (Basic dengan 3 user tetap harus bisa
+mengundang orang — yang membatasi jumlahnya kuota user, bukan gerbang fitur).
 
-| Izin | Kenapa terbuka |
-|---|---|
-| `budgets.view` | Membaca anggaran yang sudah dibuat |
-| `warehouses.view`, `departments.view`, `projects.view` | idem |
-| `access.roles.view`, `access.permissions.view` | Melihat role preset yang berlaku |
-| `access.users.*`, `access.invitations.*` | **Semua tier** perlu menambah anggota timnya — Basic dengan 3 user tetap harus bisa mengundang orang |
-| `reports.view` | Laporan standar |
-
-Konsekuensi yang harus diterima: client Basic yang belum pernah punya anggaran
-tetap bisa membuka layar anggaran — dan melihatnya kosong dengan tombol buat
-yang mati. Itu justru permukaan upsell yang jujur.
-
-Konsekuensi untuk frontend: modul digerbangi **ditampilkan** kalau paketnya
-memuatnya **atau** perusahaan punya data lamanya. Hitungan "punya data lama" itu
-ikut dikirim sekali saat perusahaan dipilih, bukan dihitung tiap render.
+Dikunci test `test_read_permissions_survive_a_tier_downgrade`.
 
 `audit.*` adalah pengecualian: ia hanya punya `audit.view` dan isinya catatan
 sistem, bukan data yang dibuat client. Digerbangi utuh.
 
-### 1b. Resolver
+## Deviasi dari rancangan
 
-`app/Shared/Subscription/PlanPermissionResolver.php`:
-
-```php
-public function allowedKeysFor(Company $company): array;  // izin yang dibuka paket
-public function allows(Company $company, string $key): bool;
-public function featuresFor(Company $company): array;     // untuk dikirim ke frontend
-```
-
-Rantainya: perusahaan → pemilik (`companies.created_by`) → `users.plan_id` →
-`plans.features` → prefix → daftar izin.
-
-**Rantai "perusahaan → pemilik → paket" sudah ada dua kali** (`CompanyQuotaService`,
-`UserQuotaService::ownerOf()`). Fase ini tidak boleh menambah salinan ketiga —
-naikkan `ownerOf()` ke `app/Shared/Subscription/PlanOwnerResolver.php` lebih
-dulu, lalu ketiganya memakainya.
-
-### 1c. Saklar transisi
-
-`config('plan_features.enforce')`, bawaan **false**.
-
-Selama false, `allowedKeysFor()` mengembalikan seluruh daftar izin — perilaku
-persis seperti sekarang. Ini yang membuat fase ini netral, dan yang membuat
-peluncuran di Fase 2 bisa dibatalkan tanpa deploy ulang.
-
-### 1d. Penyisipan
-
-Di `EffectivePermissionService`:
-
-- `getEffectivePermissionKeys()` — hasilnya diiris dengan `allowedKeysFor()`,
-  supaya daftar yang dikirim ke frontend sudah bersih
-- `hasPermission()` — lapis 1 disisipkan **di atas** jalan pintas `*`
-- `explainPermission()` — sama, plus `source: 'not_in_plan'`
-
-`EnsurePermission` membaca `explainPermission()` untuk memilih kode error:
-`FEATURE_NOT_IN_PLAN` (403) atau `PERMISSION_DENIED` (403). Tidak ada rute yang
-disentuh.
-
-### 1e. Dua daftar ke frontend
-
-`GET /api/auth/permissions` mengirim `permissions` (hasil irisan, dipakai guard)
-**plus** daftar fitur paket. Tanpa yang kedua, UI tidak bisa membedakan "minta ke
-admin perusahaan" dari "naikkan paket" — dan kehilangan satu-satunya tempat wajar
-untuk menawarkan upgrade.
-
-### 1f. Cache per request
-
-`can()` menembak database, dan `EnsurePermission` memanggilnya tiap request.
-Menambah resolusi paket berarti dua query lagi per pemeriksaan. Hasil
-`allowedKeysFor()` di-cache selama satu request. Belum ada cache sama sekali hari
-ini, jadi ini sekalian perbaikan.
+| | Rancangan | Yang dibangun | Kenapa |
+|---|---|---|---|
+| Bawaan `enforce` | §1a menulis `env(..., true)`, §1c menulis `false` | **`false`** | §1c yang benar dan konsisten dengan janji fase ini ("perilaku persis sama"). Menyalakannya hari ini akan menutup keenam fitur untuk **semua** tier — tidak ada satu pun paket di seeder yang mencantumkan `multi_warehouse`, `budgeting`, dst. Mengisinya pekerjaan Fase 2. |
+| Bentuk resolver | `allowedKeysFor(Company): array` — daftar izin yang dibuka | **`blockedKeysFor(Company): array`** — pola izin yang ditutup; `allowedKeysFor(Company, array $kandidat)` menyaring daftar yang dikirim masuk | Menghitung "yang dibuka" butuh katalog izin lengkap, dan katalog itu tinggal di `EffectivePermissionService::allPermissionKeys()` — yang justru memanggil resolver ini. Menyuntikkannya balik = **ketergantungan melingkar** yang gagal saat container me-resolve. Bentuk "yang ditutup" juga lebih murah: daftar putih membuat himpunan tertutup selalu kecil. |
 
 ## Test
 
-`tests/Feature/Subscription/PlanPermissionTest.php`:
+`tests/Feature/Subscription/PlanPermissionTest.php` — 14 test:
 
-- paket memuat fitur → izinnya lolos
-- paket tidak memuat → 403 `FEATURE_NOT_IN_PLAN`
-- **owner (`*`) tetap ditolak** oleh lapis paket — test terpenting di fase ini
-- owner tetap lolos lapis permission untuk izin yang dibuka paket
-- deny override tetap menang atas `*`
-- prefix di luar peta selalu terbuka
-- client tanpa paket → jatuh ke Free
-- `enforce = false` → seluruh perilaku identik dengan sebelum fase ini
+| Test | Mengunci |
+|---|---|
+| `..._passes_when_the_plan_includes_the_feature` | paket memuat → lolos (role `finance`, lapis 2 pasti lolos) |
+| `..._is_refused_when_the_plan_omits_the_feature` | paket tidak memuat → ditolak, `source: not_in_plan` |
+| `..._owner_with_wildcard_is_still_bound_by_the_plan` | **terpenting** — `*` tidak menembus lapis 1 |
+| `..._owner_still_passes_layer_two_...` | owner tetap kebal permission untuk izin yang dibuka paket |
+| `..._deny_override_still_beats_the_wildcard` | lapis 2 masih bekerja, dan alasannya tetap `user_override_deny` |
+| `..._prefixes_outside_the_map_are_always_open` | daftar putih, bukan daftar hitam |
+| `..._read_permissions_survive_a_tier_downgrade` | `.view` tidak ikut tertutup |
+| `..._wildcard_pattern_closes_the_whole_prefix` | `audit.*` |
+| `..._client_without_a_plan_falls_back_to_free` | jaring pengaman paket bawaan |
+| `..._effective_permission_list_is_filtered_...` | daftar yang dikirim ke frontend sudah bersih |
+| `..._permissions_endpoint_reports_the_plan_features` | `plan_features` terkirim |
+| `..._route_refused_by_the_plan_answers_feature_not_in_plan` | 403 `FEATURE_NOT_IN_PLAN` lewat rute nyata |
+| `..._route_refused_by_permission_still_answers_permission_denied` | pesan tidak salah alamat |
+| `..._switch_off_restores_the_behaviour_from_before_this_phase` | `enforce = false` → identik |
 
-Plus satu test yang menjaga janji fase ini: dengan `enforce = false`, jumlah test
-yang lulus di seluruh suite harus **sama persis** seperti sebelumnya.
+## Verifikasi yang dijalankan
 
-## Verifikasi
-
-```bash
-php artisan test          # wajib 0 gagal — fase ini tidak boleh mengubah perilaku
-./vendor/bin/pint --dirty
+```
+php artisan test              → 1196 test, 1191 lulus, 5 skip, 0 gagal
+./vendor/bin/pint --dirty     → lulus
 ```
 
-## Risiko
+Janji fase ini terverifikasi: **0 gagal**, dan jumlah test yang lulus sebelum
+fase ini (1174 saat Fase 0, ditambah 8 dari pekerjaan impor yang sedang berjalan
+di tree yang sama) utuh — 14 tambahannya semua milik fase ini.
 
-- **Menaikkan `ownerOf()` menyentuh dua penegakan produksi** (kuota perusahaan &
-  kuota user). Refactor murni; `CompanyQuotaTest` dan `UserQuotaTest` adalah
-  jaringnya. Jangan ubah perilaku sambil memindahkan — dua langkah, dua commit.
-- **`ModuleBoundariesTest`** melarang `app/Shared/` bergantung ke `app/Modules/`.
-  Semua berkas fase ini tinggal di `Shared`; perhatikan arah import.
+## Temuan sampingan (bukan bagian fase ini)
+
+Di database test yang segar, tabel `permissions` hanya berisi **56 baris**, bukan
+~240 dari `config/permissions.php`: yang mengisinya cuma tujuh migrasi `sync_*`
+per modul, sementara katalog penuhnya hanya ditulis `PermissionSeeder`.
+`EffectivePermissionService::allPermissionKeys()` berhenti di hasil database
+begitu ia tidak kosong, jadi daftar izin efektif owner ikut terpotong ke 56 kunci
+itu — `warehouses.view` dan kawan-kawan hilang dari respons
+`GET /api/auth/permissions`.
+
+Di produksi seeder itu dijalankan, jadi ini belum tentu bug hidup. Tapi **Fase 2
+menyentuh editor role**, yang membaca katalog yang sama — sebaiknya diperiksa
+lebih dulu di sana.
+
+## Yang belum dikerjakan
+
+- **Mengisi `plans.features`** dengan peta tier yang disetujui → Fase 2.
+- **Menyalakan `enforce`** → Fase 2, setelah seeder terisi.
+- **Frontend**: `plan_features` sudah dikirim tapi belum dibaca siapa pun. Editor
+  role dan permukaan upsell → Fase 2.

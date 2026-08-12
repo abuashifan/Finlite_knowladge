@@ -48,29 +48,45 @@ Plus ~28 flag fitur per tier (`data_import`, `multi_warehouse`,
 | Kuota perusahaan | ✅ Ditegakkan. `CompanyQuotaService` + gerbang di `CompanyController::store()` (`COMPANY_QUOTA_EXCEEDED`, 422). |
 | Kuota user | ✅ Ditegakkan. `UserQuotaService`, titik penegakan tunggal di `CompanyUserAssignmentService::assign()`. |
 | Add-on user | ✅ Fase 0 (di bawah). |
-| Flag fitur | ❌ **Tidak ditegakkan di mana pun.** Kolom `plans.features` (JSON) dan `plans.can_use_sales/purchases/inventory/export_reports` sudah ada sejak `2026_05_15_000004_create_plans_table.php`, tapi `grep` atas `app/` dan `tests/` menunjukkan keempat boolean itu **hanya** disebut di `Plan.php` (`$fillable` + `$casts`) — tidak ada satu pun pembacaan. Semua client saat ini mendapat semua fitur. |
+| Flag fitur | ✅ **Ditegakkan sejak Fase 2 (2026-08-12).** `plans.features` diisi peta tier yang disetujui, `config('plan_features.enforce')` bawaannya `true`. Client Basic/Pro/Enterprise/Custom sekarang benar-benar berbeda kemampuannya. Keempat boolean `plans.can_use_*` tetap **tidak dibaca siapa pun**; peta fitur memakai `plans.features`, bukan mereka. |
 | Permission | ✅ **Sudah menjaga hampir semuanya.** 421 dari 441 rute API memakai `permission:` (95,5%); 20 sisanya memang tidak boleh dijaga (health, auth, admin, pemilih perusahaan). Role kustom per perusahaan, override allow/deny per orang, dan 240 izin sudah berjalan. **Inilah tulang yang dipakai Fase 1–2**, bukan gerbang baru. |
-| `max_transactions_per_month` | ❌ Ada kolomnya, tidak dibaca siapa pun. Skema tier baru tidak menyebut batas transaksi sama sekali. |
-| Siklus langganan | ❌ Tabel `subscriptions` ada tapi ber-scope **perusahaan**, sementara paket menempel di **client** (`users.plan_id`). Tidak dipakai untuk kuota. Tidak ada trial, kedaluwarsa, atau masa tenggang. |
+| `max_transactions_per_month` | ⚠️ Kolomnya tetap ada, tetap tidak dibaca siapa pun (sengaja tidak dihapus — lihat "Yang sengaja TIDAK dikerjakan"). **Diganti fungsinya** oleh kuota penyimpanan sejak Fase 4 (2026-08-12): `StorageQuotaService` + `storage:measure` harian, ditegakkan sebelum unggahan impor. |
+| Siklus langganan | ✅ **Ditegakkan sejak Fase 3 (2026-08-12).** `subscriptions` sekarang ber-scope **client** (`user_id`), satu baris per periode. Kedaluwarsa mengunci penuh di titik login setelah tenggang 7 hari; `SubscriptionService` satu-satunya penulis. **Client lama yang belum di-backfill berstatus `none`, bukan `expired` — tidak terkunci.** Lihat Fase 3 §8.1. |
 
 ## Fase
 
 | Fase | Isi | Status |
 |---|---|---|
 | [0](phase-0-kuota-addon.md) | Angka tier + tier Enterprise + add-on user per client | ✅ **SELESAI 2026-08-11** |
-| [1](phase-1-lapis-paket.md) | Lapis paket disisipkan ke jalur permission yang sudah ada — **tanpa menyentuh satu rute pun**, dimatikan saklar | ⬜ Belum |
-| [2](phase-2-peta-tier-dan-peluncuran.md) | Mengisi peta fitur per tier, editor role menyaring, lalu menyalakannya | ⬜ Belum |
-| [3](phase-3-siklus-langganan.md) | Siklus bulanan/tahunan, kedaluwarsa, kunci penuh, tenggang 7 hari | ⬜ Belum |
-| [4](phase-4-kuota-penyimpanan.md) | Kuota penyimpanan per tier, menggantikan batas jumlah transaksi | ⬜ Belum |
-| [5](phase-5-kebersihan-tenant.md) | ⚠️ **Bug aktif** — 53 GB berkas tenant uji bocor di `database/tenants/` | ⬜ Belum |
+| [1](phase-1-lapis-paket.md) | Lapis paket disisipkan ke jalur permission yang sudah ada — **tanpa menyentuh satu rute pun**, dimatikan saklar | ✅ **SELESAI 2026-08-11** |
+| [2](phase-2-peta-tier-dan-peluncuran.md) | Mengisi peta fitur per tier, editor role menyaring, lalu menyalakannya | ✅ **SELESAI 2026-08-12** |
+| [3](phase-3-siklus-langganan.md) | Siklus bulanan/tahunan, kedaluwarsa, kunci penuh, tenggang 7 hari | ✅ **SELESAI 2026-08-12** |
+| [4](phase-4-kuota-penyimpanan.md) | Kuota penyimpanan per tier, menggantikan batas jumlah transaksi | ✅ **SELESAI 2026-08-12** |
+| [5](phase-5-kebersihan-tenant.md) | ⚠️ **Bug aktif** — 53 GB berkas tenant uji bocor di `database/tenants/` | ✅ **SELESAI 2026-08-12** |
 
-Fase 0 sudah dikerjakan. **Fase 1–5 seluruh keputusannya sudah diambil** per
-sesi QA 2026-08-11 dan tinggal dieksekusi; belum ada yang dimulai.
+**Semua lima fase dari rencana skema tier sudah selesai dikerjakan.** Saklar
+paket menyala (`plan_features.enforce` bawaan `true`), siklus langganan
+berjalan (`subscriptions` per-client, kunci penuh di login setelah tenggang
+7 hari), kuota penyimpanan ditegakkan sebelum unggahan impor, dan kebocoran
+berkas tenant test (14 GB saat ditutup) sudah berhenti dengan guard
+anti-regresi terpasang. Suite penuh: **1271 test, 0 gagal.**
 
-Fase 5 berdiri sendiri — ia bug aktif, tidak bergantung pada fase mana pun, dan
-bisa dikerjakan kapan saja. *(Isi direktorinya sudah dibersihkan manual
-2026-08-11 — 53 GB → 5,7 MB — tapi penyebabnya belum ditutup, jadi ia akan terisi
-lagi pada `php artisan test` berikutnya.)*
+Satu hal penting dari Fase 3 yang perlu diketahui sebelum menyentuh fase
+mana pun lebih lanjut: kunci login hanya benar-benar menahan client yang
+**sudah pernah** di-subscribe lewat area admin — client lama yang belum
+di-backfill berstatus `none` (belum berlangganan), bukan `expired`, dan
+TIDAK terkunci. Backfill massal ke seluruh client lama belum dikerjakan dan
+bukan bagian dari janji fase mana pun; itu keputusan operasional pemilik
+produk. Detail di
+[Fase 3 §8.1](phase-3-siklus-langganan.md#81-keputusan-yang-diambil-saat-eksekusi-none--expired).
+
+Fase 5 dikerjakan **sebelum** Fase 4 (persis urutan yang diminta rancangan
+sendiri — Fase 4 punya prasyarat eksplisit ke Fase 5). Deviasi terbesarnya:
+mekanisme "redirect ke direktori sementara" yang disarankan rancangan diganti
+perbaikan langsung di sumber kebocoran (lima base class test menjangkau
+~110 dari ~117 titik) plus guard PHPUnit yang menggagalkan build kalau ada
+regresi baru — detail di
+[Fase 5 §Hasil eksekusi](phase-5-kebersihan-tenant.md#hasil-eksekusi-2026-08-12).
 
 ### Perubahan rancangan 2026-08-11 (sore)
 

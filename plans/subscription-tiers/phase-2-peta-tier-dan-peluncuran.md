@@ -1,6 +1,9 @@
 # Fase 2 — Mengisi Peta Tier & Menyalakannya
 
-**Status: ⬜ Belum dikerjakan. Belum disetujui. Bergantung pada Fase 1.**
+**Status: ✅ SELESAI 2026-08-12.** Ringkasan eksekusi, deviasi dari rancangan,
+dan temuan ada di **§10** — baca itu dulu kalau menyentuh ulang berkas-berkas
+fase ini. Sisa dokumen di bawah adalah rancangan ASLI (pra-eksekusi),
+dipertahankan sebagai riwayat keputusan.
 
 Fase inilah yang **mengubah perilaku aplikasi**: sesudahnya ada client yang
 kehilangan akses ke kemampuan yang sebelumnya terbuka. Kerjakan hanya setelah
@@ -509,3 +512,158 @@ Tidak perlu menyentuh suite lama.
 - **Memisahkan izin Reports menyentuh 8 dari 41 rute** di modul terbesar.
   Perubahannya kecil, tapi role preset yang lupa diperbarui membuat `finance`
   dan `accountant` kehilangan laporan tersimpan di semua tier.
+
+---
+
+## 10. Hasil eksekusi 2026-08-12
+
+Saklar **menyala** (`plan_features.enforce` bawaan `true`). Ini fase yang
+mengubah perilaku aplikasi — semua §6 dikerjakan, plus tiga temuan yang
+mengubah detail rancangan (bukan keputusannya).
+
+### 10.1 Peta fitur — dibangun persis §1, dengan satu koreksi
+
+`database/seeders/PlanSeeder.php`: Basic tanpa kunci gerbang; Pro dapat
+`multi_warehouse`, `audit_trail`, `advanced_reports`, `transaction_approval`;
+Enterprise dapat semua itu plus `budgeting`, `dimensions`, `user_permission`;
+Custom disalin dari Enterprise. Free `status = 'inactive'`, baris tidak
+dihapus.
+
+**Koreksi terhadap rancangan §1/§2:** `audit_trail` di `config/plan_features.php`
+**tidak** menggerbangi `audit.*` seperti ditulis rancangan. Diverifikasi
+`grep -rn "permission:audit\." app/` **kosong** — kunci `audit.view` ada di
+katalog izin dan di preset role `finance`/`accountant`, tapi nol rute
+memakainya sebagai gerbang. Rute jejak audit yang benar-benar hidup
+(`GET /access/audit`, `AccessAuditController`) dijaga `access.audit.view`,
+namespace berbeda. Peta diubah menggerbangi `access.audit.view` supaya
+"Jejak audit ada mulai Pro" benar-benar berlaku, bukan cuma tertulis di
+dokumen. Rancangan §2 ("Namespace `audit` hanya punya satu izin") salah
+menyebut namespace-nya — koreksi ini dicatat di sini, bukan di §2, supaya
+riwayat argumennya (biner vs bertingkat) tetap utuh.
+
+Temuan sampingan yang **tidak** diperbaiki (tidak berefek, daftar putih):
+`access.permissions.assign` dan `access.permissions.revoke` di `user_permission`
+juga tidak dipakai rute mana pun (hanya `access.permissions.manage` dan
+`.view` yang hidup). Dibiarkan di peta — kunci mati di daftar putih tidak
+menutup apa pun yang seharusnya terbuka.
+
+### 10.2 Alur persetujuan — dibangun sesuai §2, dengan perbaikan saklar
+
+`UpdateCompanyAccountingSettingRequest::planAllowsTransactionApproval()`
+memeriksa `PlanPermissionResolver::enforcing()` lebih dulu sebelum membaca
+`featuresFor()`. Tanpa ini, gerbang baru itu (jalur tersendiri, bukan lewat
+`blockedKeysFor()`) akan tetap menahan Basic walau `plan_features.enforce =
+false` — melanggar janji "saklar mati = perilaku identik sebelum fase ada"
+yang jadi dasar seluruh Fase 1.
+
+### 10.3 Izin Reports dipisah sesuai §3
+
+`reports.save` (6 rute `reports/saved`) dan `reports.multi_period` (2 rute
+`*/multi-period`) — persis §3. Ditambahkan ke role preset `finance` dan
+`accountant`. Migrasi sinkronisasi baru:
+`2026_08_11_000006_sync_advanced_reports_permissions.php` (pola yang sama
+dengan migrasi sync lain di modul ini).
+
+### 10.4 Tombol upgrade WhatsApp — dibangun sesuai §6d, plus satu jalur baru
+
+- `UpgradeLinkBuilder` (`app/Shared/Subscription/`), nomor dari
+  `services.support.whatsapp_number` (`SUPPORT_WHATSAPP_NUMBER` di `.env`).
+  `null` kalau nomor belum diisi — pemanggil menyembunyikan tombol, bukan
+  menampilkan tautan buntu.
+- Muncul di **tiga** tempat, bukan dua seperti §6d: (1) `meta.upgrade_url`
+  di respons `FEATURE_NOT_IN_PLAN` — dipakai layar penolakan fitur; (2)
+  `PermissionCatalogController` mengirim `blocked_by_plan_keys` +
+  `upgrade_url` — dipakai editor role; (3) **baru** — jaring pengaman global
+  di interceptor axios (`http.ts`): setiap respons `FEATURE_NOT_IN_PLAN` di
+  mana pun di aplikasi otomatis menampilkan toast dengan tombol WhatsApp,
+  tanpa menyentuh satu pun dari ~80 pemanggil `toast.error()` yang sudah ada.
+  Alasannya: aksi yang digerbangi normalnya sudah tersembunyi lewat
+  `PermissionGuard` (daftar izin dari `/auth/permissions` sudah disaring
+  paket), jadi kasus ini semestinya jarang benar-benar terpicu — tapi kalau
+  terpicu (race condition, tombol yang sengaja tetap terlihat-tapi-terkunci),
+  ada satu tempat yang menanganinya, bukan nol.
+
+### 10.5 Editor role — dibangun sesuai §6c
+
+`RolesPage.tsx`: izin di luar paket ditampilkan **terkunci** (checkbox
+nonaktif + ikon gembok + tooltip "Tidak termasuk paket saat ini"), bukan
+disembunyikan. Tombol "Minta Upgrade" muncul di header editor kalau ada
+izin terkunci dan nomor WhatsApp sudah diisi.
+
+**Editor role dan ketiga tempat tombol upgrade di atas adalah satu-satunya
+kerja frontend di Fase 1–2**, sesuai janji rancangan.
+
+### 10.6 Test — empat berkas baru, sesuai §8 dengan penyesuaian cakupan
+
+| Berkas | Isi | Hasil |
+|---|---|---|
+| `tests/TestCase.php` | `seedTierPlans()`, `clientOn()`, `companyOwnedBy()`, `enforcePlanFeatures()` — diisi dari kosong, dipakai semua test baru | — |
+| `PlanFeatureMatrixTest.php` | Matriks tier lewat `EffectivePermissionService::hasPermission()` langsung (bukan lewat rute HTTP) — 11 izin gerbang × 3 tier + 12 izin selalu-terbuka × 3 tier | 2 test, 69 assertion |
+| `PlanLayerBoundaryTest.php` | Owner tetap ditolak lapis paket (test terpenting), owner lolos lapis 2, staff ditolak `PERMISSION_DENIED` bukan `FEATURE_NOT_IN_PLAN`, deny override menang, jatuh ke Free, perusahaan tanpa pemilik, saklar mati | 7 test |
+| `PlanSmokeTest.php` | Alur nyata lewat HTTP sungguhan: Basic buat+posting jurnal (janji terpenting — pembukuan inti tidak tersentuh), Basic ditolak gudang kedua, Pro lolos gudang kedua, Pro ditolak anggaran, Enterprise lolos anggaran, turun Enterprise→Pro (baca dimensi lama tetap lolos, buat dimensi baru ditahan) | 6 test |
+| `TransactionApprovalGateTest.php` | Basic ditolak `draft_approve_post`, Pro lolos, Basic tetap bisa `draft_then_post`, saklar mati membuka semua tier — tidak disebut eksplisit di §8 tapi perlu untuk §2 "Alur persetujuan transaksi" | 4 test |
+
+**Deviasi dari §8:** rancangan meminta matriks 63 pemeriksaan lewat data
+provider yang memukul rute HTTP satu per satu untuk 11 kemampuan (termasuk
+`budgets.submit`, `departments.edit`, dst. dengan payload valid per domain).
+Yang dibangun: matriks lewat **service layer langsung**
+(`EffectivePermissionService::hasPermission()`), bukan HTTP — mengukur
+persis hal yang sama (resolusi lapis paket per tier per izin) tanpa perlu
+merakit payload valid untuk delapan domain berbeda. Cakupan HTTP nyata
+dipindah ke `PlanSmokeTest` (6 alur, bukan 12-15 seperti tabel §8) — dipilih
+yang paling representatif: satu per kategori kemampuan (gudang, anggaran,
+dimensi+downgrade), plus yang **terpenting**, jurnal Basic tetap jalan.
+Alasan memotong cakupan: delapan domain (budget submission chain,
+role-kustom-lalu-assign, dst.) masing-masing butuh provisioning tenant
+sendiri: `PlanFeatureMatrixTest` sudah membuktikan resolusi gate-nya benar
+untuk semuanya; `PlanSmokeTest` membuktikan kabelnya nyambung end-to-end
+untuk satu wakil tiap kategori. "Hasil kali silang" (1215 skenario lama ×
+gerbang menyala) tetap sengaja tidak dikerjakan, persis alasan §8.
+
+**Total test baru: 19** (2+7+6+4), suite penuh **1215 test, 1210 lulus, 5
+skip, 0 gagal**.
+
+### 10.7 Ranjau yang ditemukan saat menyalakan saklar
+
+**`phpunit.xml` wajib mengunci `PLAN_FEATURES_ENFORCE=false`.** Menyalakan
+`enforce` di `config/plan_features.php` (bawaan produksi) otomatis ikut
+menyala di test run kalau tidak dikunci — dan **19 test lama gagal**
+persis seperti diperingatkan §8 "Yang benar-benar hilang": `UserFactory`
+tidak menyetel `plan_id`, jadi perusahaan uji lama jatuh ke Free (tanpa
+fitur gerbang apa pun) dan setiap pemeriksaan `warehouses.create`,
+`reports.save`, `budgets.manage`, dst. di test lama (`WarehouseTest`,
+`DepartmentTest`, `ProjectTest`, `BudgetFlowTest`, `MultiPeriodReportTest`,
+`SavedReportTest`, `AccessManagementTest`) berubah dari lolos jadi
+`403 FEATURE_NOT_IN_PLAN`. Baris `<env name="PLAN_FEATURES_ENFORCE"
+value="false"/>` ditambahkan ke `phpunit.xml` — persis solusi yang sudah
+ditulis §8, cuma belum diterapkan sampai saklar sungguhan dinyalakan.
+Test `Subscription/*` tidak terpengaruh: masing-masing memanggil
+`enforcePlanFeatures(true)` sendiri di `setUp()`.
+
+**Audit data dev menemukan pelanggaran nyata sebelum saklar dinyalakan** —
+persis skenario §7 langkah 2 ("cocokkan dengan apa yang mereka pakai").
+Client dev #1 (pemilik `PT Maju Jaya` dan `PT Nusantara Dagang Sejahtera`)
+berlangganan **Pro**, tapi kedua perusahaannya sudah punya baris departemen
+(4 masing-masing) dan proyek (6 dan 3) — dimensi yang di peta baru hanya
+terbuka di **Enterprise**. Anggaran dan role kustom nol, aman. Diserahkan ke
+pemilik produk (sesi ini): **client dinaikkan ke Enterprise** sebelum saklar
+dinyalakan, supaya tidak ada penambahan/pengubahan dimensi yang tiba-tiba
+ditahan pada data yang sudah berjalan.
+
+### 10.8 Verifikasi yang dijalankan
+
+```
+php artisan test              → 1215 test, 1210 lulus, 5 skip, 0 gagal
+./vendor/bin/pint --dirty     → lulus
+npm run build (tsc -b && vite) → 0 error
+npm run lint                  → 0 error, 0 warning
+```
+
+### 10.9 Yang belum dikerjakan
+
+- **Hasil kali silang** (1215 skenario lama × gerbang menyala) — sengaja,
+  alasan sama dengan §8.
+- **Ekspor/impor** — masih di luar cakupan seperti dicatat README utama.
+- **Migrasi bersih-bersih `max_transactions_per_month`** dan nilai
+  `companies.status = 'trial'`— ditandai §1, belum dieksekusi; tidak
+  mendesak dan bukan bagian dari janji perilaku fase ini.

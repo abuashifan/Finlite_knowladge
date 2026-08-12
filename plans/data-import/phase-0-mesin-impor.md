@@ -1,6 +1,11 @@
 # Fase 0 — Mesin Impor
 
-**Status: ⬜ Belum dikerjakan.**
+**Status: ✅ Selesai backend awal — 2026-08-11.**
+
+Implementasi backend ada di `/workspace/laravel_backend/app/Modules/Imports`.
+Fase ini menambahkan endpoint upload, pembacaan CSV/XLSX, penyimpanan batch tenant,
+pemetaan kolom, validasi per baris, preview berhalaman, template CSV, dan pembatalan
+batch. Endpoint `commit` sudah tersedia sebagai stub aman dan belum menulis dokumen.
 
 Membangun kerangka yang dipakai ulang oleh **semua** profil impor: unggah berkas,
 baca `.xlsx`/CSV, petakan kolom, validasi, tampilkan pratinjau. Fase ini
@@ -112,10 +117,16 @@ Aturannya, ditetapkan di sini karena pemilik produk menyerahkannya:
 Dua peran itu digabung dengan sengaja. Satu kolom yang harus diisi, bukan dua —
 dan karena pengelompokan sudah menuntutnya, idempotensi jadi gratis.
 
-**Penegakan:** unique index `(profile, external_ref)` di tabel `import_rows`
-per database tenant. Baris yang `Ref`-nya sudah pernah dipakai ditandai `invalid`
-di pratinjau, dengan pesan yang menyebut batch dan tanggal pemakaian
+**Penegakan:** baris yang `Ref`-nya sudah pernah dipakai di batch lain ditandai
+`invalid` di pratinjau, dengan pesan yang menyebut batch dan tanggal pemakaian
 sebelumnya — bukan sekadar "duplikat".
+
+Catatan implementasi 2026-08-11: karena `Ref` juga menjadi kolom pengelompokan
+dokumen bermultibaris, unique index langsung `(profile, external_ref)` di
+`import_rows` akan memblokir baris kedua dari dokumen yang sama. Untuk Fase 0,
+database memakai index pencarian `(profile, external_ref)` dan idempotensi lintas
+batch ditegakkan di service validasi. Fase commit boleh memperketat ini di level
+dokumen/group bila sudah ada bentuk dokumen impor final.
 
 **Lapis kedua, lunak:** `file_hash` memberi peringatan "berkas ini sudah pernah
 diunggah tanggal …, lanjutkan?". Menahan kecelakaan paling umum sebelum user
