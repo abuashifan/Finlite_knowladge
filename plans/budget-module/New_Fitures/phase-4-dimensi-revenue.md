@@ -148,6 +148,40 @@ php artisan test tests/Feature/Reports    # laporan penjualan & P&L tidak beruba
 
 ---
 
+## Hasil implementasi — 2026-08-14
+
+Status: **selesai** untuk cakupan dokumen ini (Sales Invoice).
+
+Perubahan bedah persis seperti rencana: **satu method, satu file**
+(`SalesInvoiceService::invoiceRevenueJournalLines()`). Kunci grouping berubah dari
+`$revenueAccountId` menjadi komposit `akun|dept|proyek`, lalu dipecah kembali saat baris jurnal
+dibentuk. Ditambah dua helper privat: `dimensionKey()` dan `parseDimensionKey()`.
+
+`scaleGroupedAmounts()` tidak perlu diubah — ia tidak peduli bentuk kuncinya; docblock-nya saja
+yang diperbarui dari `array<int,float>` jadi `array<array-key,float>`.
+
+`VendorBillService` **tidak disentuh**, sesuai §"Modul lain: sengaja tidak diubah".
+
+### Verifikasi
+
+`tests/Feature/Sales/SalesInvoiceDimensionTest.php` — 5 test:
+dimensi terbawa ke baris pendapatan · dua proyek pada akun pendapatan sama → **dua** baris ·
+baris diskon ikut membawa dimensi · **invoice tanpa dimensi menghasilkan jurnal yang sama
+persis seperti sebelumnya** (jaring pengaman utama) · departemen saja sudah cukup untuk memecah
+baris. Semua kasus menegaskan `Σdebit = Σkredit`.
+
+`php artisan test tests/Feature/Sales` lulus penuh; `tests/Feature/Reports` tidak berubah.
+
+> ⚠️ `pint --test` pada `SalesInvoiceService.php` gagal — tapi **sudah gagal sebelum perubahan
+> ini** (fixer file-wide: `braces_position`, `unary_operator_spaces`, dst.). Tidak dirapikan
+> karena aturan "jangan refactor modul yang tidak diminta".
+
+**Cakupan yang belum ditutup:** kebocoran dimensi di Sales Return, Purchase Bill/Return,
+`StockMovementJournalService`, dan Fixed Asset — lihat peringatan di kepala dokumen ini dan
+`project-dimension-budgeting-readiness-plan.md`. G11 **belum** tertutup penuh.
+
+---
+
 ## Acceptance criteria
 
 1. Sales invoice bertanda proyek menghasilkan `journal_entry_lines.project_id` terisi.

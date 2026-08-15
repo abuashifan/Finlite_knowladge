@@ -289,6 +289,54 @@ php artisan test tests/Feature/Budget tests/Feature/Architecture
 
 ---
 
+## Hasil implementasi — 2026-08-14
+
+Status: **selesai**.
+
+### Yang dibuat
+
+`BudgetCashService` · `BudgetProjectService` · `BudgetAnalysisController` (8 aksi) ·
+`BudgetCashController` · `BudgetProjectController` (3 aksi) · `BudgetAnalysisRequest` ·
+`BudgetCashRequest` · migration central `2026_08_14_000001_sync_budget_permissions.php` (G13).
+
+13 route baru; **16 route lama dipertahankan seluruhnya**, termasuk
+`/reports/budget/comparison` sebagai alias.
+
+Business rules yang ditambahkan ke service: overlap periode (`BUDGET_PERIOD_OVERLAP`), nominal
+negatif (`BUDGET_NEGATIVE_AMOUNT`), proyek nonaktif (`BUDGET_PROJECT_NOT_ACTIVE`). Sisanya
+sudah dijaga fase 1–2 (unique grain, direction mismatch, FK cascade/nullify/restrict,
+immutability, zero budget sah).
+
+### Penyimpangan
+
+1. **`/budget/projects/{id}/cash-flow` ditambahkan** (view #15). Rencana menyebut Project Cash
+   Flow sebagai "#10 difilter project_id" tanpa endpoint sendiri; dibuat eksplisit karena
+   katalog laporan butuh route diskrit.
+2. **`applyAccountTypeFilter()` tidak dipakai** — ia menambah join kedua ke alias `coa` yang
+   sudah dipasang `BudgetActualService` untuk membalik tanda.
+3. **Konsolidasi membuang baris tanpa anggaran** — laporan itu menjawab "berapa yang
+   dianggarkan", bukan realisasinya.
+4. **`utilization_pct` dan `margin_pct` kembali sebagai angka JSON**, sehingga `90.0` terkirim
+   sebagai `90`. Test memakai `assertEqualsWithDelta`, bukan `assertSame`.
+
+### Verifikasi
+
+`tests/Feature/Budget/BudgetViewsTest.php` — 13 test: endpoint analisis, `group_by` tak dikenal
+→ 422, konsistensi lintas view (#1 = #2), alias comparison, urutan utilization,
+Cash Budget (`Beginning + Inflow − Outflow = Ending`, dengan dan tanpa override, catatan asumsi
+akrual ikut terkirim), Project Profitability (30jt/6% persis contoh brief), proyek tanpa
+revenue → margin `null`, proyek tanpa transaksi → actual 0, overlap periode, nominal negatif
+ditolak & nol diterima, proyek nonaktif ditolak, permission baru terdaftar & `budgets.view`
+tidak di-gate paket.
+
+### Yang belum
+
+- Isolasi tenant lintas perusahaan belum punya test khusus di modul ini (dijaga arsitektur
+  satu-DB-per-perusahaan + `forCompany()`, tapi belum dibuktikan test).
+- Migration permission belum dijalankan pada database central produksi — hanya lulus di test.
+
+---
+
 ## Acceptance criteria
 
 1. Keenam belas view memberi angka konsisten dari sumber yang sama.

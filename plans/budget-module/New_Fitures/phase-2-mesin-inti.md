@@ -220,6 +220,82 @@ php artisan test tests/Unit/Budget tests/Feature/Budget tests/Feature/Architectu
 
 ---
 
+## Hasil implementasi — 2026-08-14
+
+Status: **selesai**. Semua service baru ada di `app/Modules/Budget/Services/`, plus
+`Support/BudgetState.php`.
+
+### Yang dibuat
+
+| File | Isi |
+|---|---|
+| `Services/BudgetMatchResolver.php` | Tangga spesifisitas 6 prioritas. Kombinasi dimensi dibangun berurutan (departemen → proyek → bulan), berhenti di kecocokan pertama. |
+| `Services/BudgetActualService.php` | `aggregate()` (per dimensi) + `sumFor()` (satu kombinasi). Basis WAJIB `reportableJournalLinesQuery()`; tanda dibalik per `account_type`. |
+| `Services/BudgetAllocationResolver.php` | `comparableRange()`, `amountForMonth()`, `monthsIn()`, `monthBounds()`. |
+| `Services/BudgetAnalysisService.php` | Mesin inti; allowlist `group_by`, `mode`, `allocation`, `version`. |
+| `Support/BudgetState.php` | 5 state + `variance()`, `variancePct()`, `utilizationPct()`, toleransi 0.0001. |
+
+### Yang berubah
+
+- `BudgetComparisonService` — logika lama **dibuang**, kini ±55 baris pembungkus
+  `group_by=[account]` + `mode=variance`. Bentuk balasan lama dipertahankan; `direction` dan
+  `state` ditambahkan (aditif).
+- `BudgetConsolidationService` — jadi pembungkus, hasilnya dinormalkan kembali ke bentuk
+  bersarang lama supaya `BudgetConsolidationTable.tsx` tidak rusak.
+- `ModuleBoundariesTest` — `'Budget → App\Modules\Reports\Services\ReportQueryService'`.
+
+### Deviasi & keputusan yang tidak ada di rencana
+
+1. **`BudgetWarningService` ikut dipindah ke mesin ini, lebih awal dari fase 3.** Bukan
+   pilihan gaya: service itu mem-query kolom `budget_lines.period`, yang **sudah tidak ada**
+   setelah fase 1. Membiarkannya berarti posting jurnal error. Karena ia sekarang memakai
+   `BudgetMatchResolver` + `BudgetAllocationResolver`, **G6, G7, dan G8 ikut tertutup di sini**.
+   Kontrak publik `check()` tidak berubah, jadi `JournalEntryController` tidak disentuh.
+   Sisa untuk fase 3: **G9** (sudah tidak ada `strftime()` di modul Budget — tinggal verifikasi
+   menyeluruh) dan test perilaku end-to-end lewat HTTP.
+2. **`direction: mixed`.** Rencana mengasumsikan setiap baris punya satu arah. Nyatanya
+   `group_by=[department]` tanpa filter arah bisa mencampur pendapatan dan beban dalam satu
+   baris, dan "favorable" tidak punya makna tunggal di sana. Baris seperti itu ditandai
+   `mixed` (variance memakai konvensi beban) alih-alih diam-diam memilih salah satu.
+3. **`mode` kurang terdefinisi di rencana.** Yang diimplementasikan: `detail` menambahkan
+   array `lines` per baris; `summary` dan `variance` menghasilkan baris identik — `variance`
+   dipertahankan sebagai nama preset supaya maksud di titik pemanggilan terbaca.
+   **Kalau `variance` seharusnya menyaring baris (mis. hanya yang menyimpang), itu keputusan
+   produk yang belum diambil.**
+4. **`applyAccountTypeFilter()` tidak dipakai.** Ia menambahkan join kedua ke alias `coa`,
+   padahal `BudgetActualService` selalu butuh join itu untuk membalik tanda. Filternya
+   dipasang langsung pada alias yang sudah ada.
+5. **Konsolidasi membuang baris tanpa anggaran.** Laporan itu menjawab "berapa yang
+   dianggarkan"; baris yang hanya punya actual akan muncul sebagai baris anggaran 0 dan
+   mengubah arti laporannya.
+
+### Verifikasi
+
+```
+php artisan test tests/Feature/Budget        → 47 lulus
+php artisan test tests/Feature/Architecture  → 4 lulus
+php artisan test --filter=Journal            → 122 lulus (konsumen BudgetWarningService)
+php artisan test --filter=Department         → 25 lulus
+vendor/bin/pint --test <file berubah>        → bersih
+```
+
+Test baru: `BudgetMatchResolverTest` (11) — satu test per prioritas, prioritas spesifik menang,
+G7 (belanja proyek jatuh ke anggaran departemen), G8 (jurnal tanpa departemen **tidak**
+mencocok anggaran departemen), hanya versi aktif+approved, bulan di luar periode.
+`BudgetAnalysisTest` (14) — tanda pendapatan positif, pendapatan di atas target favorable,
+jurnal obsolete/draft/void tidak terhitung, actual di luar periode dibuang, konsistensi
+drill-down 3 level, drill-down lewat filter induk, `no_budget`/`no_actual`/`on_budget`,
+`utilization_pct` null saat anggaran 0, partial period ditandai, baris tahunan tidak dipecah,
+`allocation=even`, pengelompokan bulanan, `direction: mixed`, `group_by` tak dikenal → 422,
+`version=active` vs `version=all`.
+
+### Yang BELUM dikerjakan (sesuai rencana, milik fase lain)
+
+- Endpoint `GET /budget/analysis` — fase 6. Fase ini sengaja hanya lapis service.
+- Verifikasi menyeluruh G9 + test HTTP peringatan over-budget — fase 3.
+
+---
+
 ## Acceptance criteria
 
 1. `BudgetAnalysisService` menghasilkan angka **sama** dengan `BudgetComparisonService` lama

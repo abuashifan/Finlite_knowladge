@@ -1,6 +1,9 @@
 # Budget Module — Index & Progress Ledger
 
-> **Agent: baca file ini PERTAMA setiap sesi.** Ia menentukan fase mana yang sedang berjalan.
+> **Rencana ini SELESAI (Fase 0–3, 2026-08-09).** Kelanjutannya ada di
+> **[`New_Fitures/README.md`](New_Fitures/README.md)** — *Unified Multidimensional
+> Budgeting*, yang mengubah bentuk datanya jadi benar-benar multidimensi dan
+> menutup empat temuan perilaku di bawah. **Mulai dari sana untuk pekerjaan baru.**
 >
 > Rencana ini **menghidupkan modul anggaran yang sudah ada**, bukan membangunnya
 > dari nol. Backend-nya lengkap dan teruji; frontend-nya ada tapi tidak berfungsi
@@ -128,7 +131,24 @@ penetapan departemen di modul Akses. Sampai itu diputuskan, semua pemegang
 > di tabel central berarti satu departemen per user **untuk semua perusahaan**,
 > yang kemungkinan besar salah. Butuh rancangan tersendiri.
 
-## Temuan rancangan yang belum diputuskan — bukan bagian Fase 0–3
+## Temuan rancangan yang belum diputuskan — ✅ SEMUA SELESAI 2026-08-14
+
+> **Keempatnya sudah ditutup** oleh rencana lanjutan
+> [`New_Fitures/`](New_Fitures/README.md) — lihat
+> [`New_Fitures/phase-3-perbaikan-cacat.md`](New_Fitures/phase-3-perbaikan-cacat.md).
+> Isi di bawah dipertahankan sebagai catatan diagnosis aslinya.
+>
+> | # | Temuan | Ditutup oleh |
+> |---|---|---|
+> | 1 | Anggaran tahunan hampir tidak pernah memicu peringatan | `BudgetAllocationResolver` — baris tahunan dibandingkan dengan actual **kumulatif** |
+> | 2 | Transaksi bertanda proyek melewati anggaran umum | `BudgetMatchResolver` prioritas 3–4 |
+> | 3 | Baris jurnal tanpa departemen mencocok anggaran departemen mana pun | `whereNull('department_id')` eksplisit di `BudgetMatchResolver` |
+> | 4 | Dirancang untuk beban, bukan target pendapatan | `BudgetActualService` membalik tanda per `account_type`; variance pendapatan = `Actual − Budget` |
+>
+> Catatan portabilitas `strftime()` juga selesai: `grep -rn "strftime" app/Modules/Budget/`
+> tidak lagi menemukan pemakaian, hanya komentar yang menjelaskan kenapa ia dihindari.
+>
+> Peringatan tetap **non-blocking** — posting jurnal tidak pernah ditolak karena anggaran.
 
 Ditemukan 2026-08-09 saat menjelaskan konsep anggaran ke pemilik produk.
 Semuanya dibaca langsung dari `BudgetWarningService` dan
@@ -161,10 +181,10 @@ proyek dan bulan **opsional**.
    pendapatan menghasilkan realisasi negatif sehingga `over_budget` tidak pernah
    menyala.
 
-Nomor 1–3 bisa dirumuskan jadi Fase 4 kalau pemilik produk menghendaki.
-Nomor 4 lebih mendasar dan butuh keputusan lebih dulu: pada pendapatan,
-"melampaui anggaran" justru kabar baik, jadi arah perbandingannya harus
-ditetapkan sebelum ada kode yang ditulis.
+~~Nomor 1–3 bisa dirumuskan jadi Fase 4 kalau pemilik produk menghendaki.
+Nomor 4 lebih mendasar dan butuh keputusan lebih dulu.~~ — Keputusannya sudah diambil
+dan dikerjakan di `New_Fitures/`: pada pendapatan, "melampaui anggaran" berarti target
+terlampaui (favorable), dan variance-nya memakai `Actual − Budget`.
 
 > Catatan portabilitas terkait: `strftime()` adalah fungsi SQLite. Kalau tenant
 > suatu saat pindah ke MySQL, `BudgetWarningService` ikut harus diubah.

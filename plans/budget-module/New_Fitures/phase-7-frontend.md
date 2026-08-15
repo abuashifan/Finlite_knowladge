@@ -141,6 +141,58 @@ Sebelum mengedit halaman existing, **salin versi lamanya ke scratchpad** supaya 
 
 ---
 
+## Hasil implementasi — 2026-08-14
+
+Status: **selesai secara kode**; verifikasi browser belum.
+
+### File baru
+
+`pages/`: `BudgetAnalysisPage.tsx` · `CashBudgetPage.tsx` · `ProjectFinancialSummaryPage.tsx` ·
+`BudgetVersionHistoryPage.tsx` · `BudgetDashboardPage.tsx`
+`hooks/` (folder baru): `useBudgetAnalysis.ts` · `useBudgetVersions.ts` ·
+`useProjectFinancials.ts` · `useCashBudget.ts`
+`schemas/` (folder baru): `budgetSchema.ts`
+
+### File yang berubah
+
+`budgetApi.ts` (+10 method, semua dengan generic kedua `ApiResponse<T>`) ·
+`budget.types.ts` (+11 tipe) · `BudgetLineEditor.tsx` (+kolom Cost Center) ·
+`BudgetStatusBadge.tsx` (+`superseded`) · `BudgetSubmissionPage.tsx` (+Versi, badge Versi
+Aktif, tombol Revisi ber-`PermissionGuard`, alasan revisi) · `routes.tsx` (+5 rute) ·
+`moduleConfig.ts` (+4 item ribbon) · `useTabStore.ts` (**+`'budget'` ke `ModuleKey`** — G14) ·
+`reportCategories.ts` (+7 entri) · `reportKeyRoutes.ts` (+9 entri) ·
+`journalEntry.types.ts` (fase 3).
+
+### Penyimpangan
+
+1. **`BudgetComparisonPage.tsx` tidak dipindah ke `DataTable`.** Ada di §Existing files
+   affected tapi tidak di acceptance criteria. `DataTable` menuntut `id` per baris + paginasi
+   server-side; baris laporan ini hasil agregasi tanpa id. Halaman analisis baru memakai pola
+   tabel manual yang sama, jadi konversinya churn berisiko tanpa manfaat.
+2. **Tab lokal `BudgetPeriodDetailPage` tidak dipindah ke `components/ui/tabs`** — kosmetik,
+   di luar acceptance criteria.
+3. **Drill-down memakai pola breadcrumb + klik baris**, bukan baris yang bisa di-*expand*.
+   Rencana mengizinkan memilih salah satu preseden; ini yang paling dekat dengan
+   `GeneralLedgerPage` dan tidak butuh komponen baru.
+4. **`ReportCompactBar`/`ReportParameterModal` tidak dipakai** — keduanya terikat
+   `useReportParams`, yang parameternya (start/end date + akun) tidak cocok dengan parameter
+   anggaran (periode anggaran, group_by, versi, alokasi). Filter dipasang lewat `toolbar`
+   `WorkspaceLayout`, pola yang sama dengan `BudgetComparisonPage` yang sudah ada.
+
+### Verifikasi
+
+```
+npm run build   → ✅ 0 error
+npm run lint    → ✅ No issues found
+grep -rn "as ModuleKey" src/  → 1 hasil di Topbar.tsx:80, generik untuk semua modul
+                                (bukan cast khusus 'budget') — G14 tertutup
+```
+
+**Belum dijalankan:** verifikasi di browser (drill-down 4 level, angka konsisten tiap level,
+tampilan di viewport pendek). Tidak ada test runner frontend di repo ini.
+
+---
+
 ## Acceptance criteria
 
 1. Drill-down Total → Cost Center → Proyek → Akun berjalan di browser dengan angka konsisten

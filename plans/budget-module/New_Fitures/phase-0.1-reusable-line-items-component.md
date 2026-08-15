@@ -31,7 +31,7 @@ UI baru bila sudah ada yang bisa dipakai ulang".
 |---|---|---|---|
 | 17 form (Sales Invoice, Vendor Bill, Cash Payment, Cash Receipt, Stock Adjustment, Stock Movement, Journal, Goods Receipt, Quotation, Proforma, Delivery Order, Sales Order, Sales Return, Purchase Order, Purchase Return, Purchase Request, ProyekFormPage) | berbagai | ✅ Sudah pakai `LineItemsTable` | — |
 | `BudgetLineEditor.tsx` | Budget | ❌ Manual (disengaja, ada komentar di file) | ~129 baris |
-| `OpeningBalanceBatchPage.tsx` | Accounting | ❌ Manual | ~39 baris (+16 picker) |
+| `OpeningBalanceBatchPage.tsx` | Opening Balance | ❌ Manual | ~39 baris (+16 picker) |
 | `VendorPaymentFormPage.tsx` | Purchase | ❌ Manual | ~43 baris |
 | `SalesReceiptFormPage.tsx` | Sales | ❌ Manual (tapi styling **sudah identik** dengan `LineItemsTable`) | ~73 baris |
 | `StockOpnameFormPage.tsx` | Inventory | ⚠️ Manual — **TIDAK dimigrasi** | ~73 baris |
@@ -81,7 +81,7 @@ perubahan komponen.
 |---|---|
 | `frontend/src/components/shared/form/LineItemsTable.tsx` | **G1**: tambah prop opsional `footer?: (items: T[]) => ReactNode` — dirender sebagai `<tfoot>` di bawah baris terakhir, konsisten dengan filosofi komponen ("render callback bebas", sama seperti `column.render`), bukan menambah state/logic baru ke komponen. **G2**: `onAdd` diubah jadi opsional (`onAdd?: () => void`); saat tidak diisi, tombol "+ Tambah Item" bawaan tidak dirender — pemanggil bebas menaruh `SearchableSelect` sendiri di atas `<LineItemsTable>` dan memanggil `onUpdate`/state-nya sendiri untuk menambah baris berisi data |
 | `frontend/src/modules/budget/components/BudgetLineEditor.tsx` | Pindah ke `LineItemsTable` + `footer` (Total Nominal) + `columns` untuk Akun/Proyek/Periode/Nominal. Validasi format Periode dihitung client-side, digabung ke `errors` prop dalam bentuk `LineItemErrorMap` yang sama dengan error backend. Hapus komentar baris 91-95 yang menjelaskan alasan deviasi (sudah tidak berlaku) |
-| `frontend/src/modules/accounting/pages/OpeningBalanceBatchPage.tsx` | Pindah ke `LineItemsTable` + `footer` (Total Debit/Kredit/Selisih). Tambah-baris via `SearchableSelect` eksternal tetap dipertahankan (letakkan di atas `<LineItemsTable onAdd={undefined} .../>`) |
+| `frontend/src/modules/opening-balance/pages/OpeningBalanceBatchPage.tsx` | Pindah ke `LineItemsTable` + `footer` (Total Debit/Kredit/Selisih). Tambah-baris via `SearchableSelect` eksternal tetap dipertahankan (letakkan di atas `<LineItemsTable onAdd={undefined} .../>`) |
 | `frontend/src/modules/purchase/pages/VendorPaymentFormPage.tsx` | Pindah ke `LineItemsTable` + `footer` (Total Dibayar). Pola tambah-baris via `SearchableSelect` eksternal sama seperti di atas |
 | `frontend/src/modules/sales/pages/SalesReceiptFormPage.tsx` | Pindah ke `LineItemsTable` — migrasi **paling ringan**, styling sudah identik, tinggal ganti markup `<table>` manual dengan `<LineItemsTable columns={...} items={...} .../>` dan pola tambah-baris via tombol chip invoice tetap dipertahankan lewat `onAdd` opsional |
 
@@ -152,6 +152,54 @@ Manual, per form yang dimigrasi:
 4. Error dari backend (422) tetap muncul di baris/sel yang benar
 5. Mode read-only (dokumen sudah bukan draft) — semua sel jadi non-editable, tombol tambah/hapus hilang
 6. **Regresi 17 form existing** — buka masing-masing sekali, pastikan tampilan & fungsi tidak berubah sama sekali (prop baru harus 100% backward-compatible)
+
+---
+
+## Hasil implementasi — 2026-08-14
+
+Dikerjakan bersama fase 0. Status: **selesai secara kode**, verifikasi visual manual belum.
+
+### Yang berubah
+
+| File | Hasil |
+|---|---|
+| `components/shared/form/LineItemsTable.tsx` | `onAdd` jadi opsional (tombol "+ Tambah Item" hanya dirender bila diisi **dan** tidak read-only); prop `footer` baru dirender sebagai `<tfoot className="border-t border-[#d9e2e5] bg-[#f8fafc]">`. `colSpan` empty-state dirapikan memakai `columnCount` yang sudah ada (sebelumnya ekspresi yang sama ditulis dua kali) |
+| `modules/budget/components/BudgetLineEditor.tsx` | Pindah ke `LineItemsTable` (kolom Akun/Proyek/Periode/Nominal) + `footer` Total. Komentar deviasi baris 91-95 dihapus. `_key`/`nextKey` dibuang — identitas baris kini indeks, sama seperti 17 form lain |
+| `modules/opening-balance/pages/OpeningBalanceBatchPage.tsx` | Pindah ke `LineItemsTable` tanpa `onAdd`; kotak total terpisah di bawah tabel diganti dua baris `<tfoot>` (Total Debit/Kredit, lalu Selisih dengan pewarnaan hijau/merah yang sama) |
+| `modules/purchase/pages/VendorPaymentFormPage.tsx` | Pindah ke `LineItemsTable` tanpa `onAdd` + `footer` Total Dibayar. `footer` sengaja `undefined` saat 0 baris supaya perilakunya identik dengan `tfoot` lama yang hanya muncul bila ada baris |
+| `modules/sales/pages/SalesReceiptFormPage.tsx` | Pindah ke `LineItemsTable` tanpa `onAdd`. Blok chip "Invoice terbuka" pindah ke kotak sendiri **di bawah** tabel (dulu di dalam container tabel manual, sekarang container itu milik komponen) |
+
+### Deviasi dari rencana
+
+1. **Path `OpeningBalanceBatchPage.tsx`** — rencana menyebut `modules/accounting/pages/`; lokasi
+   sebenarnya `modules/opening-balance/pages/`. Sudah dikoreksi di dokumen ini.
+2. **Signature `footer`** — rencana menulis `footer?: (items: T[]) => ReactNode`. Yang dipakai
+   `footer?: (items: T[], cellCount: number) => React.ReactNode`. Argumen kedua adalah jumlah sel
+   per baris (kolom `#` + kolom data + Subtotal bila ada + kolom aksi); tanpa itu setiap pemanggil
+   harus menebak `colSpan` dari jumlah kolom internal komponen. Ini superset — callback yang
+   ditulis sesuai signature lama tetap type-check.
+3. **G3 tidak menambah fitur komponen**, sesuai temuan audit: validasi format Periode dihitung di
+   `BudgetLineEditor` lalu digabung ke `errors` (`LineItemErrorMap`) yang sama dengan error 422.
+   Sekalian: error backend kini benar-benar dipetakan ke barisnya lewat `getApiLineErrors` —
+   indeksnya diremap karena payload membuang baris tanpa akun, jadi pesan "baris ke-N" backend
+   tidak menempel di baris yang salah.
+
+### Verifikasi yang sudah dijalankan
+
+```
+npm run build   → ✅ 0 error (script = `tsc -b && vite build`)
+npm run lint    → ✅ 0 error, 0 warning
+```
+
+Backward-compatibility 17 form lama dicek statis: seluruhnya masih mengoper `onAdd` dan tidak ada
+satu pun yang mengoper `footer`, sehingga `<tfoot>` tidak dirender dan tombol tambah tetap ada —
+nol perubahan markup.
+
+### Belum dijalankan — sisa untuk pemilik produk
+
+- **Regresi visual manual 17 form existing** (§Testing poin 6) dan uji manual poin 1–5 per form
+  yang dimigrasi. Butuh backend hidup; belum dilakukan.
+- Tidak ada test runner otomatis frontend di repo ini, jadi tidak ada test baru yang bisa ditulis.
 
 ---
 

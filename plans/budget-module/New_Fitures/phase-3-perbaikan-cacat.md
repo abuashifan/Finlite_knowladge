@@ -124,6 +124,41 @@ grep -rn "strftime" app/Modules/Budget/    # harus kosong
 
 ---
 
+## Hasil implementasi — 2026-08-14
+
+Status: **selesai**.
+
+**Sebagian besar sudah terjadi di fase 2, bukan karena melompat langkah.**
+`BudgetWarningService` mem-query kolom `budget_lines.period` yang dihapus fase 1 — dibiarkan
+berarti posting jurnal error. Ia karenanya dipindah ke `BudgetMatchResolver` +
+`BudgetAllocationResolver` + `BudgetActualService` saat itu juga, dan cacat 1–4 ikut tertutup.
+
+Yang ditambahkan di fase ini:
+
+- Payload peringatan bertambah `state`, `direction`, dan `matched_scope`
+  (mis. `department:7|project:all|period:annual`) — menjawab pertanyaan pertama user:
+  "peringatan ini dari anggaran yang mana?".
+- `frontend/.../journalEntry.types.ts` — `BudgetWarning` + 3 field **opsional** dan tipe
+  `BudgetWarningState`, supaya respons backend lama tetap bertipe benar.
+- `tests/Feature/Budget/BudgetWarningTest.php` — 11 test, satu per kasus di §Testing.
+
+### Verifikasi acceptance criteria
+
+| # | Kriteria | Bukti |
+|---|---|---|
+| 1 | Empat cacat tertutup, dibuktikan test | `BudgetWarningTest` + `BudgetMatchResolverTest` + `BudgetAnalysisTest` |
+| 2 | `grep -rn "strftime" app/Modules/Budget/` nol hasil | ✅ hanya 3 komentar yang menjelaskan kenapa dihindari — nol pemakaian |
+| 3 | `BudgetWarningService` tidak query `journal_entry_lines` sendiri | ✅ `grep journal_entry_lines app/Modules/Budget/` hanya menemukan README |
+| 4 | Posting tidak pernah diblokir anggaran | `test_posting_a_journal_is_never_blocked_by_a_budget_warning` — 200 + `meta.warnings` terisi |
+| 5 | `../README.md` diperbarui | ✅ keempat temuan ditandai selesai dengan tautan ke fase ini |
+
+### Yang belum
+
+Mempertajam toast di `JournalFormPage.tsx` memakai `matched_scope` — rencana menandainya
+opsional dan boleh ditunda; belum dikerjakan.
+
+---
+
 ## Acceptance criteria
 
 1. Empat cacat yang tercatat di `../README.md` tertutup, dibuktikan test masing-masing.

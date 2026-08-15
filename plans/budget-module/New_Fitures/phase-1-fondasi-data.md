@@ -220,6 +220,73 @@ php artisan test tests/Feature/Budget
 
 ---
 
+## Hasil implementasi — 2026-08-14
+
+Status: **selesai**. Dikerjakan bersama fase 2 karena mesin fase 2 tidak bisa diuji tanpa
+skema ini.
+
+### Migration yang dibuat (semua di `database/migrations/tenant/`)
+
+| File | Isi |
+|---|---|
+| `2026_08_14_000001_add_parent_id_to_departments_table.php` | `parent_id` + self-FK `nullOnDelete` + index |
+| `2026_08_14_000002_add_fiscal_and_cash_fields_to_budget_periods_table.php` | `fiscal_year_id`, `beginning_cash_override`, index `(fiscal_year, status)` |
+| `2026_08_14_000003_add_versioning_to_budget_submissions_table.php` | `parent_submission_id`, `version_no`, `is_active`, `revision_reason`; `department_id` → nullable; enum status + `superseded`; 3 FK + 2 index |
+| `2026_08_14_000004_recreate_budget_lines_table_with_dimensions.php` | drop & recreate dengan `department_id`/`period_month`/`direction`, 4 FK, 6 index, unique index ekspresi |
+
+**Risiko "SQLite tidak mendukung ALTER untuk NOT NULL → nullable" ternyata tidak berlaku.**
+Laravel 13.9 menangani `change()` dan penambahan foreign key di SQLite lewat rebuild tabel
+(`SQLiteGrammar::getAlterCommands()`), tanpa `doctrine/dbal`. `budget_submissions` **tidak**
+perlu di-drop-recreate; migration `change()` biasa jalan bersih.
+
+### File lain yang berubah
+
+`BudgetPeriod` / `BudgetSubmission` (+`parent()`, `versions()`, `scopeActive()`) /
+`BudgetLine` (+`department()`, `department_name`) · `Department` (+`parent()`, `children()`,
+`scopeRoots()`) · `DepartmentService` (guard siklus + kedalaman 5) ·
+`Store`/`UpdateDepartmentRequest` · `StoreBudgetSubmissionRequest` ·
+`UpdateBudgetLinesRequest` · `BudgetSubmissionService` · `ApiErrorCode` + `config/api_errors.php`
+(4 kode baru) · `app/Modules/Budget/README.md` (baru) · `docs/backend-directory-tree.md`
+(220 → 221 direktori).
+
+### Deviasi dari rencana
+
+1. **`BudgetDirection` memakai `const` biasa, bukan `const string`.** Rencana menulis
+   `const string`. Nol file di codebase ini memakai konstanta bertipe — kelima Support class
+   yang sudah ada (`InventoryMovementType`, `OpeningBalanceType`, dst.) memakai
+   `public const X = '...'`. Konsistensi codebase dimenangkan; maksud aturannya (class
+   konstanta, **bukan** backed enum) tetap dipatuhi.
+2. **`updateLines()` menerima `period` maupun `period_month`.** Kolomnya berganti nama, tapi
+   payload lama tidak dipaksa berubah — `period` tetap diterima sebagai alias.
+3. **Pewarisan departemen dibuat eksplisit.** Key `department_id` tidak dikirim = warisi
+   departemen pemilik dokumen; `null` eksplisit = lintas departemen. Tanpa aturan ini,
+   konsolidasi per departemen mendadak kehilangan semua barisnya.
+4. **`is_active` sudah ditulis di fase ini, bukan ditunda ke fase 5.** Mesin fase 2 memakai
+   `version=active` sebagai default; tanpa ada yang pernah menandai `is_active = true`,
+   seluruh laporan akan mengembalikan nol. `markActiveVersion()` dipanggil saat submission
+   mencapai `approved`. Alur revisi/supersede tetap milik fase 5.
+5. **Kode error tambahan di luar daftar rencana**: `DEPARTMENT_HIERARCHY_CYCLE`,
+   `DEPARTMENT_HIERARCHY_TOO_DEEP`, `BUDGET_INVALID_GROUP_BY` — masing-masing punya jalan
+   keluar yang berbeda bagi user, jadi tidak dilebur ke `VALIDATION_ERROR`.
+
+### Verifikasi
+
+```
+php artisan test tests/Feature/Budget   → 47 lulus (7 lama + 40 baru)
+vendor/bin/pint --test <file berubah>   → bersih
+```
+
+Test baru: `BudgetSchemaTest` (15) — grain multidimensi, pewarisan departemen, submission
+tingkat perusahaan, unique index saat dimensi NULL, cascade/nullify/restrict FK, `direction`
+otomatis, akun neraca ditolak, hierarki (nesting, siklus, batas 5 level, pemindahan subtree),
+guard migration menolak tabel berisi data. `BudgetMatchResolverTest` (11) ada di fase 2.
+
+> ⚠️ `pint --test` pada seluruh repo **gagal** untuk ±22 file di Sales, Imports, `config/`, dan
+> `bootstrap/` — utang gaya yang sudah ada sebelum fase ini dan tidak disentuh, sesuai aturan
+> "jangan refactor modul yang tidak diminta".
+
+---
+
 ## Acceptance criteria
 
 1. Skema baru terpasang di tenant kosong tanpa error.

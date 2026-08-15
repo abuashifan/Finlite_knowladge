@@ -198,6 +198,45 @@ php artisan test tests/Feature/Budget
 
 ---
 
+## Hasil implementasi — 2026-08-14
+
+Status: **selesai**.
+
+`BudgetRevisionService` (revise + versions), `ReviseBudgetSubmissionRequest`
+(`revision_reason` wajib min 10 karakter), 2 route baru, 11 konstanta `AuditEvent`, dan
+panggilan audit di seluruh jalur tulis `BudgetPeriodService` + `BudgetSubmissionService`.
+
+`markActiveVersion()` sudah dipasang lebih awal di fase 1 (mesin fase 2 butuh
+`version=active`); fase ini menambah `lockForUpdate()` pada grup versi di dalam transaksi
+revisi, sesuai mitigasi race condition di §Risks.
+
+### Penyimpangan penting — audit trail
+
+Rencana menyuruh menyuntik `AuditLogService` sebagai **argumen konstruktor nullable terakhir**
+mengikuti `JournalEntryService`. **Pola itu tidak bekerja.** Container Laravel mengisi parameter
+bernilai default dengan default-nya, sehingga `$this->auditLogService` selalu `null` dan
+`audit()` langsung `return` — diverifikasi lewat refleksi, bukan dugaan.
+
+Modul Budget karenanya memakai pola `FixedAssetService`/`PeriodEndService`: dependensi
+**wajib**, tanpa nilai default. Test `test_every_write_leaves_an_audit_entry` gagal dengan pola
+lama dan lulus dengan pola baru.
+
+> ⚠️ Konsekuensinya di luar modul ini: `JournalEntryService`, `CashPaymentService`,
+> `CashReceiptService`, dan `BankTransferService` memakai pola nullable yang sama, jadi
+> **audit trail keempatnya kemungkinan besar tidak pernah menulis**. Belum diperbaiki —
+> di luar cakupan rencana ini.
+
+### Verifikasi
+
+`tests/Feature/Budget/BudgetVersioningTest.php` — 10 test, mencakup seluruh daftar di §Testing:
+v1→v2 supersede · baris v1 utuh setelah revisi · v2 approved jadi satu-satunya aktif ·
+rantai v1/v2/v3 terbaca dengan total masing-masing (15jt/18jt/20jt persis contoh brief) ·
+revise pada draft → 422 `BUDGET_ALREADY_APPROVED` · alasan revisi wajib & min 10 karakter ·
+403 tanpa `budgets.revise` · approved tetap tidak bisa diedit langsung · **reject tetap
+berperilaku persis seperti sebelumnya** · audit log tertulis dengan `version_no` di metadata.
+
+---
+
 ## Acceptance criteria
 
 1. Versi 1 (15 jt) → 2 (18 jt) → 3 (20 jt): ketiganya terbaca, hanya v3 aktif.

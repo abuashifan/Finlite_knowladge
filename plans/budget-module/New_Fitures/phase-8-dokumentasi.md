@@ -118,6 +118,62 @@ Fase 7 (dan karenanya seluruh fase sebelumnya).
 
 ---
 
+## Hasil implementasi — 2026-08-14
+
+Status: **🔄 Berjalan** — dokumentasi selesai, verifikasi manual belum.
+
+### Checklist §Files affected
+
+| File | Status |
+|---|---|
+| `laravel_backend/docs/backend-directory-tree.md` | ✅ tanggal + `Modules/Budget/Support` + 220 → 221 direktori |
+| `laravel_backend/docs/backend-missing-modules-audit.md` | ✅ §6 dikoreksi — klaim *"No tenant tables or API routes exist for budgets"* **salah sejak 2026-06-29**; isi lama dipertahankan di dalam `<details>` sebagai catatan sejarah |
+| `frontend/docs/struktur_frontend.md` | ✅ 5 halaman + `hooks/` + `schemas/` |
+| `frontend/docs/gap_docs/gap-12-budget-module.md` | ✅ diberi penanda SUPERSEDED + tabel "dulu vs sekarang"; tidak dihapus karena alur approval-nya masih berlaku |
+| `Finlite_knowladge/plans/budget-module/README.md` | ✅ 4 temuan → selesai + tautan ke fase 3; header menunjuk ke `New_Fitures/` |
+| `New_Fitures/README.md` | ✅ progress ledger + 8 penyimpangan tercatat |
+| `reference/02-backend.md` · `03-frontend.md` · `04-komponen-reusable.md` | ⬜ tidak diubah — tidak ada konvensi baru yang muncul (`LineItemsTable.footer` sudah dicatat di fase 0.1) |
+| `app/Modules/Budget/README.md` | ✅ dibuat di fase 1 |
+
+### Verifikasi otomatis
+
+```
+php artisan test                              → 1388 lulus, 5 skipped, 0 gagal (1393 total)
+vendor/bin/pint --test <file yang diubah>     → bersih
+grep -rn "strftime" app/Modules/Budget/       → nol pemakaian (hanya komentar)
+grep -rn "journal_entry_lines" app/Modules/Budget/ → nol query (hanya README)
+grep -rn "as ModuleKey" ../frontend/src/      → 1 hasil generik di Topbar.tsx, bukan khusus 'budget'
+npm run build / npm run lint                  → hijau, 0 error
+```
+
+`tests/Unit/Budget` **tidak dibuat** — resolver butuh koneksi tenant, jadi test-nya feature
+test. Menaruhnya di `tests/Unit/` akan menyesatkan.
+
+### Edge case dari brief §TESTING PLAN
+
+| Kategori | Tercakup? |
+|---|---|
+| Nominal (budget 0, actual 0, >, <, =) | ✅ `BudgetAnalysisTest` |
+| Pendapatan >/< budget | ✅ `BudgetAnalysisTest`, `BudgetWarningTest` |
+| Beban >/< budget | ✅ `BudgetAnalysisTest`, `BudgetViewsTest` |
+| Proyek: dengan revenue · tanpa revenue · hanya beban · tanpa transaksi | ✅ `BudgetViewsTest` |
+| Anggaran tanpa transaksi · transaksi tanpa anggaran | ✅ `BudgetAnalysisTest` |
+| Versi: multi versi · revisi setelah approved · reject sebelum approved | ✅ `BudgetVersioningTest` |
+| Waktu: periode parsial · tahunan vs bulanan | ✅ `BudgetAnalysisTest`, `BudgetWarningTest` |
+| **Koreksi: reversal · refund · credit/debit note · penyesuaian negatif** | ⚠️ **tidak ada test khusus.** Secara desain semuanya jurnal balik ter-post yang otomatis mengurangi actual, dan jurnal `is_obsolete` sudah diuji dikecualikan — tapi jalur reversal end-to-end belum dibuktikan test tersendiri |
+| **Periode akuntansi tertutup** | ⚠️ **belum ada test.** `PeriodLockService::isDateReadOnly()` belum disambungkan ke pembuatan/revisi anggaran (§6 business rules menyebutnya, implementasinya belum) |
+| **Tenancy: isolasi antar perusahaan** | ⚠️ **belum ada test khusus** di modul ini |
+
+### Verifikasi manual — BELUM DIJALANKAN
+
+Dua belas langkah di §Verifikasi manual **belum satu pun dijalankan** — butuh backend hidup.
+Sesuai §Risks, fase ini karenanya ditandai `🔄 Berjalan`, bukan `✅ Selesai`.
+
+Data uji: **tidak ada yang ditambahkan ke tenant demo.** Seluruh test memakai tenant SQLite
+sementara yang dibersihkan di `tearDown()`; `budget_periods` di kedua tenant demo tetap 0.
+
+---
+
 ## Acceptance criteria
 
 1. Tidak ada dokumen yang mengklaim sesuatu yang tidak benar tentang modul Budget.
