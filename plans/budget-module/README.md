@@ -3,7 +3,11 @@
 > **Rencana ini SELESAI (Fase 0–3, 2026-08-09).** Kelanjutannya ada di
 > **[`New_Fitures/README.md`](New_Fitures/README.md)** — *Unified Multidimensional
 > Budgeting*, yang mengubah bentuk datanya jadi benar-benar multidimensi dan
-> menutup empat temuan perilaku di bawah. **Mulai dari sana untuk pekerjaan baru.**
+> menutup empat temuan perilaku di bawah. **SELESAI 2026-08-14 (fase 0–8).**
+>
+> Rencana ketiga, **[`UI_Reporting/README.md`](UI_Reporting/README.md)** (2026-08-15),
+> membangun halaman list, form input, dan katalog laporan di atas mesin itu —
+> plus memperbaiki tiga cacat di form Proyek. **Mulai dari sana untuk pekerjaan baru.**
 >
 > Rencana ini **menghidupkan modul anggaran yang sudah ada**, bukan membangunnya
 > dari nol. Backend-nya lengkap dan teruji; frontend-nya ada tapi tidak berfungsi
