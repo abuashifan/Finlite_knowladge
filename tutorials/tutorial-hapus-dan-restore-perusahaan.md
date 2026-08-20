@@ -104,6 +104,17 @@ Setiap pintu masuk ke data perusahaan melewati query yang otomatis mengenal soft
 
 > ⚠️ **Semua staf yang diundang langsung kehilangan akses.** Mereka tidak diberi notifikasi apa pun oleh sistem.
 
+### Keluar dari wizard setup tanpa menghapus
+
+Perusahaan yang baru dibuat langsung membawa Anda ke **wizard Setup Perusahaan Baru**. Kalau ternyata Anda salah masuk atau ingin mengurus perusahaan lain dulu, **tidak perlu menghapus perusahaannya**:
+
+1. Klik **Batalkan** di pojok kanan atas header wizard.
+2. Konfirmasi dengan **Ya, Pilih Perusahaan**.
+
+Anda kembali ke halaman Pilih Perusahaan, dan perusahaan tadi **tetap ada**. Langkah yang sudah tersimpan tetap tersimpan — buka lagi perusahaan itu kapan saja untuk melanjutkan setup dari langkah terakhir.
+
+> 💡 Yang hilang hanya isian pada langkah yang sedang terbuka dan belum disimpan. Menghapus perusahaan (bagian di atas) adalah tindakan yang sama sekali berbeda — pakai itu hanya kalau perusahaannya memang tidak diinginkan.
+
 ---
 
 ## 4. Tutorial: Memulihkan Perusahaan (Super Admin)
@@ -377,6 +388,7 @@ foreach (App\Shared\Models\Company::onlyTrashed()->orderBy('deleted_at')->get() 
 |---|---|
 | `src/modules/auth/pages/CompanyPickerPage.tsx` | Menu ⋮ per kartu (owner saja) |
 | `src/modules/auth/components/DeleteCompanyDialog.tsx` | Dialog konfirmasi ketik-nama |
+| `src/modules/onboarding/pages/OnboardingPage.tsx` | Tombol **Batalkan** untuk keluar dari wizard tanpa menghapus |
 | `src/modules/admin/pages/AdminDeletedCompaniesPage.tsx` | Halaman admin perusahaan terhapus |
 | `src/modules/admin/hooks/useDeletedCompanies.ts` | Query + mutasi restore/purge |
 
