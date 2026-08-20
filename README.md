@@ -30,6 +30,16 @@ Plus mirror peta direktori (`backend-directory-tree.md`, `struktur_frontend.md`)
 **mirror, bukan sumber kebenaran**; sumbernya di `laravel_backend/docs/` &
 `frontend/docs/`. Aturan sinkronisasi ada di `reference/README.md`.
 
+## Tutorials
+
+Panduan langkah-demi-langkah untuk pengguna dan admin aplikasi.
+
+| File | Isi |
+|---|---|
+| [`tutorial-hapus-dan-restore-perusahaan.md`](tutorials/tutorial-hapus-dan-restore-perusahaan.md) | Menghapus perusahaan (client) dan memulihkannya (super admin): soft delete vs purge, masa pemulihan 30 hari, aturan kuota, `companies:sweep-deleted`, pemecahan masalah |
+| [`tutorial-import.md`](tutorials/tutorial-import.md) | Impor master data & transaksi dari `.xlsx`/CSV |
+| [`tutorial-pengecekan-subscription-tiers.md`](tutorials/tutorial-pengecekan-subscription-tiers.md) | Memeriksa & menegakkan fitur berdasarkan tier langganan |
+
 ## Plans
 
 - **[Laravel Modularization](plans/laravel-modularization/README.md)** — Rencana detail refactoring backend Laravel ke arsitektur modular (`app/Shared/` + `app/Modules/`), 9 fase (0–8), mapping file eksplisit per fase, dirancang untuk dieksekusi lintas sesi. ✅ SELESAI 2026-07-08. **Mulai dari `plans/laravel-modularization/README.md` (index + progress ledger).**
