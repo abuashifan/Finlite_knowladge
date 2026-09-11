@@ -54,7 +54,7 @@ Cara termudah adalah mengunduh template yang sudah disediakan:
 1. Buka halaman **Import** di sidebar
 2. Klik tombol **"Unduh Template"**
 3. Pilih profil yang ingin diimpor (misal: `sales_invoice`, `contact`, `journal_entry`)
-4. Template akan terunduh dengan header kolom yang sudah benar
+4. Template akan terunduh sebagai berkas Excel (`.xlsx`) dengan header kolom yang sudah benar — langsung bisa dibuka, diisi, lalu diunggah balik tanpa konversi
 
 > 💡 **Simpan pemetaan kolom** setelah pertama kali memetakan — template dari sistem lain bisa dipetakan sekali dan dipakai ulang setiap hari.
 

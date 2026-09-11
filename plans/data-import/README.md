@@ -118,7 +118,8 @@ terverifikasi, nol rute bulk di modul Sales. Itu dibangun di
 | [4](phase-4-pembelian-dan-jurnal.md) | Pembelian (`VendorBillService`) dan jurnal umum (`JournalEntryService`). | ✅ Selesai |
 | [5](phase-5-gerbang-tier.md) | Kunci izin `*.import`, pemetaan ke tier, integrasi ke rencana subscription-tiers. | ✅ Selesai |
 | [6](phase-6-ekspor.md) | Ekspor Excel/PDF untuk halaman daftar dan laporan. | ✅ Selesai (Excel) |
-| [7](phase-7-saldo-awal-dan-aset-tetap.md) | Saldo awal & aset tetap awal + aktivasi aset dan batch koreksi. Melengkapi janji "akan diisi nanti" di Step 5 wizard. | ✅ Selesai |
+| [7](phase-7-saldo-awal-dan-aset-tetap.md) | Saldo awal & aset tetap awal + aktivasi aset dan batch koreksi. **Keputusan intinya dibalik Fase 8** — baca Fase 8 dulu. | ⚠️ Sebagian dibalik |
+| [8](phase-8-perantara-saldo-awal.md) | **Membalik 7C-1/7D-1.** Akun perantara saldo awal jadi lawan universal, sehingga impor saldo awal dan aset tetap saling lepas — tanpa urutan wajib, tiap batch bisa dibatalkan sendiri, ekuitas dihitung bukan ditebak. | ✅ Selesai |
 
 Urutannya disengaja: **master data lebih dulu**, karena ia menguji mesin tanpa
 menyentuh buku besar. Kalau pemetaan kolom atau pratinjau salah di sana,

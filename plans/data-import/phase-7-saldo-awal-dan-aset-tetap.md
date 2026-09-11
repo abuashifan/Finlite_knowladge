@@ -1,6 +1,19 @@
 # Fase 7 — Impor Saldo Awal & Aset Tetap Awal
 
-> Status: **✅ Terimplementasi penuh** (2026-08-25), termasuk 7F dan 7D-1.
+> Status: **⚠️ SEBAGIAN DIBALIK Fase 8** (2026-09-06). Terimplementasi penuh
+> 2026-08-25, lalu keputusan intinya dicabut — baca
+> [Fase 8](phase-8-perantara-saldo-awal.md) lebih dulu sebelum memakai dokumen ini.
+>
+> **Yang sudah TIDAK berlaku:** 7B (baris batch saldo awal), 7C-1 (aset aktif saat
+> batch diposting), 7D-1 & baris sistem aset tetap, 7G (batch koreksi), urutan wajib
+> aset tetap → saldo awal, dan penolakan akun aset tetap di berkas saldo awal.
+>
+> **Yang MASIH berdiri:** 7A (kategori aset tetap tersambung ke akun COA per kelas),
+> profil impor `fixed_asset_opening` itu sendiri, 7D (pintu masuk impor di layar
+> Saldo Awal / Aktiva Tetap / wizard), dan perhitungan akumulasi penyusutan otomatis
+> per tanggal saldo awal. Karena itu dokumen ini tidak dihapus: ia tetap satu-satunya
+> catatan kenapa bagian-bagian itu berbentuk seperti sekarang.
+>
 > Prasyarat: Fase 0–5 selesai (mesin impor + profil master + profil transaksi).
 >
 > ⚠️ **Koreksi terhadap draf pertama rencana ini.** Draf awal menyebut
@@ -231,9 +244,9 @@ posting jurnal, ≤1.000 baris. Tidak butuh worker antrean.
 |---|---|---|---|
 | Name | `name` | ✅ | |
 | Category | `category` | ✅ | cocokkan `code` **atau** `name` kategori — `ResolvesModelByCodeOrName` sudah ada |
-| Acquisition Date | `acquisition_date` | ✅ | `DD/MM/YYYY`, ≤ tanggal saldo awal |
+| Acquisition Date | `acquisition_date` | ✅ | `DD/MM/YYYY`; tanggal setelah saldo awal **diperingatkan**, tidak ditolak — saat impor tanggal saldo awal belum tentu ada |
 | Acquisition Cost | `acquisition_cost` | ✅ | > 0 |
-| Accumulated Depreciation | `accumulated_depreciation` | — | default 0, **tidak boleh > cost − salvage** |
+| Accumulated Depreciation | `accumulated_depreciation` | — | **kosong = dihitung sistem** (garis lurus s/d tanggal saldo awal); 0 yang diketik tetap 0; **tidak boleh > cost − salvage** |
 | Salvage Value | `salvage_value` | — | default 0 |
 | Useful Life Years | `useful_life_years` | — | wajib `4, 8, 10, 16, 20` — batasan `in:` yang sudah ada di request |
 | Quantity | `quantity` | — | default 1 |
@@ -241,6 +254,30 @@ posting jurnal, ≤1.000 baris. Tidak butuh worker antrean.
 | Department | `department` | — | kode, opsional |
 | Project | `project` | — | kode, opsional |
 | Description | `description` | — | |
+
+**Templatnya .xlsx dua sheet**
+
+Sheet `Data` untuk diisi, sheet `Referensi` berisi master data yang wajib
+dicocokkan (kategori aset, departemen, proyek) sekaligus jadi sumber dropdown
+di sheet Data. Kolom Category/Department/Project/Useful Life Years dikunci
+`DataValidation` bertipe list. Kode, bukan id: id auto-increment tidak berarti
+apa-apa bagi manusia, beda antar tenant, dan salah ketik satu digit tetap
+menghasilkan id yang sah — kesalahan yang tidak bisa ditangkap validasi mana
+pun. Kolom tanggal dipaksa bertipe Teks supaya Excel tidak mengubahnya jadi
+angka seri yang gagal dibaca `XlsxSpreadsheetReader`.
+
+`XlsxSpreadsheetReader` membaca sheet **pertama** (`getSheet(0)`), bukan
+`getActiveSheet()` — kalau tidak, berkas yang disimpan sambil membuka sheet
+Referensi akan diimpor dari sheet yang salah.
+
+**Peringatan tingkat baris (`ProvidesImportWarnings`)**
+
+Kolom `import_rows.warnings` + `import_batches.warning_rows`. Peringatan tidak
+pernah mengubah status baris — barisnya tetap `valid` dan tetap ter-commit.
+Yang diperingatkan profil ini: umur manfaat ≠ default kategori, kategori tanpa
+penyusutan yang membawa umur/akumulasi, akumulasi yang menyimpang > 10% dari
+garis lurus, akumulasi kosong (menyebutkan angka yang akan dipakai sistem), dan
+tanggal perolehan setelah tanggal saldo awal.
 
 **Perubahan backend yang dibutuhkan sebelum committer bisa benar:**
 
@@ -384,6 +421,29 @@ Yang dilakukan `FixedAssetService::activateOpeningAssets()`:
 `capitalize()` menolak aset `opening_import` (`FIXED_ASSET_OPENING_NOT_CAPITALIZABLE`),
 dan tombolnya disembunyikan di `FixedAssetFormPage` — tombol itu sebelumnya hidup
 dan menekannya membukukan harga perolehan dua kali.
+
+**Akumulasi penyusutan yang dihitung sistem**
+(`OpeningAccumulatedDepreciation` + `FixedAssetService::fillAutoAccumulatedDepreciation()`)
+
+Kolom yang dikosongkan berarti "hitungkan", bukan "nol" — aset warisan yang
+sudah dipakai bertahun-tahun hampir pasti sudah menyusut, dan default 0 yang
+lama diam-diam melebihkan nilai bukunya. Asetnya ditandai
+`metadata.accumulated_depreciation_auto`, dan angkanya baru diisi saat
+`activateOpeningAssets()` — di titik itu tanggal saldo awal sudah pasti,
+alasan yang sama dengan `assertOpeningAssetsDepreciable()`.
+
+```
+bulan berjalan = (bulan tanggal saldo awal) − (bulan mulai pakai + 1 bulan)
+akumulasi      = min(basis / (umur × 12) × bulan berjalan, basis)
+```
+
+Penandanya TIDAK dihapus setelah dihitung: reopen mengembalikan aset ke draft
+dan batch berikutnya bisa bertanggal lain.
+
+`openingAssetTotals()` menerima tanggal saldo awal supaya **pratinjau** neraca
+pembuka memperlihatkan angka yang sama dengan yang nanti dibukukan — kalau
+tidak, user menyusun baris penyeimbang ekuitas dari total yang salah lalu
+angkanya berubah sendiri saat posting.
 
 **Matematika jadwalnya** (`generateOpeningSchedules()`):
 
