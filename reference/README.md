@@ -14,6 +14,7 @@ relevan dengan tugas.
 | **[03-frontend.md](03-frontend.md)** | 15 modul, 145 halaman, memory router, shell tab, state, alur data, form | mengubah frontend |
 | **[04-komponen-reusable.md](04-komponen-reusable.md)** | katalog 37 komponen bersama + pola halaman daftar & form standar | membangun halaman/tabel/form |
 | **[05-role-permission-guard.md](05-role-permission-guard.md)** | 8 role, 240 permission, resolusi override, guard rute & UI | apa pun yang menyangkut hak akses |
+| **[06-penyimpanan-tenant.md](06-penyimpanan-tenant.md)** | di mana data akuntansi tiap perusahaan disimpan, `TenantStorage`, schema Postgres per tenant, cutover & query diagnosa | menyentuh provisioning/tenant, atau data perusahaan hilang |
 
 ## Mirror peta direktori
 

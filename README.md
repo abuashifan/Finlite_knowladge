@@ -25,6 +25,7 @@ disusun supaya **agent AI baru tidak perlu memindai seluruh folder project**.
 | `03-frontend.md` | 15 modul, 145 halaman, memory router, shell tab, state, form |
 | `04-komponen-reusable.md` | katalog 37 komponen bersama + pola halaman standar |
 | `05-role-permission-guard.md` | 8 role, 240 permission, guard rute & UI |
+| `06-penyimpanan-tenant.md` | di mana data akuntansi tiap perusahaan benar-benar disimpan, kenapa dulu hilang tiap deploy, schema Postgres per tenant |
 
 Plus mirror peta direktori (`backend-directory-tree.md`, `struktur_frontend.md`) —
 **mirror, bukan sumber kebenaran**; sumbernya di `laravel_backend/docs/` &

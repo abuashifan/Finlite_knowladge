@@ -25,7 +25,7 @@ Persediaan, Aset Tetap, Anggaran, Saldo Awal, Laporan, Pengaturan & Hak Akses.
 | Path | `/workspace/laravel_backend/` | `/workspace/frontend/` |
 | Stack | PHP 8.3, Laravel 13, Sanctum | React 19, Vite, TypeScript |
 | Bentuk | REST API **saja** (tanpa Blade untuk aplikasi) | SPA, terpisah penuh |
-| Database | SQLite (central + satu file per tenant) | — |
+| Database | central Postgres (Neon) + satu database per perusahaan — schema Postgres di production, berkas SQLite di lokal/test. Lihat [06-penyimpanan-tenant.md](06-penyimpanan-tenant.md) | — |
 | Autentikasi | Bearer token (Sanctum) | Token disimpan di localStorage |
 
 Repo ketiga: `/workspace/Finlite_knowladge/` — knowledge base ini
