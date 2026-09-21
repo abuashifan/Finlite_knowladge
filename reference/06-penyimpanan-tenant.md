@@ -6,6 +6,9 @@
 >
 > Ditulis 2026-09-21 setelah menelusuri masalah ini sampai akarnya di kode nyata.
 > Perintah verifikasi di sini sudah dijalankan, bukan dikira-kira.
+>
+> **Status: selesai dan terverifikasi (2026-09-21).** Perusahaan dibuat dengan
+> `driver=pgsql`, datanya bertahan melewati redeploy Render.
 
 ---
 
@@ -331,8 +334,65 @@ gratis** khusus tes, jangan database central production.
 
 ---
 
-## 10. Rujukan
+## 10. Dua jebakan yang memakan waktu paling lama
+
+Keduanya tidak terlihat dari kode, dan keduanya berulang kalau tidak dicatat.
+
+### Region database harus sama dengan region aplikasi
+
+Project Neon pertama dibuat di `us-east-2` (Ohio) sementara Render berjalan di
+Oregon (`us-west1`). Tiap perintah SQL menempuh ~50–70 ms pulang-pergi. Karena
+provisioning menjalankan ratusan perintah DDL, pembuatan perusahaan menggantung
+lebih dari dua menit lalu diputus gateway — tanpa pesan error apa pun, karena
+respons tidak pernah sempat dikirim.
+
+Setelah project Neon dipindah ke `us-west-2` (Oregon), waktunya turun ke hitungan
+detik.
+
+Untuk aplikasi yang membangun 70 tabel setiap kali perusahaan dibuat, jarak
+antara aplikasi dan database bukan penyetelan halus — ia menentukan bisa atau
+tidak. Cara memeriksa region Render: dashboard → service → **Settings → Region**.
+
+### `$table->enum(...)->change()` tidak jalan di Postgres
+
+Di Postgres, `enum()` bukan tipe tersendiri melainkan `varchar` + CHECK
+constraint terpisah. Laravel menempelkan `check (...)` langsung ke
+`ALTER COLUMN ... TYPE`, yang bukan sintaks sah dan gagal dengan
+`SQLSTATE 42601`. Karena migration tenant dijalankan saat provisioning, satu
+migration seperti ini membuat **setiap** pembuatan perusahaan gagal.
+
+Di SQLite gejalanya tidak pernah muncul: `change()` di sana membangun ulang
+seluruh tabel, jadi enum baru terpasang tanpa keluhan.
+
+**Aturannya: jangan pernah `->change()` kolom enum di migration tenant.** Ganti
+daftar nilainya lewat helper yang sadar driver — contohnya `setStatusValues()`
+di `2026_08_14_000003_add_versioning_to_budget_submissions_table.php`, yang
+membuang CHECK constraint lama (namanya dicari dari `pg_constraint`, bukan
+ditebak) lalu memasang yang baru.
+
+### Pelajaran umumnya
+
+Kedua bug ini lolos dari 1.370 test karena test berjalan di SQLite lokal —
+tidak ada latensi jaringan, dan `change()` selalu bekerja. Yang membedakan
+SQLite dari Postgres justru persis di titik yang tidak teruji.
+
+Karena itu **suite `TenantPgsql` wajib dijalankan setiap kali menambah migration
+tenant** (§9). Bug `enum()` ditemukan dengan cara paling mahal — satu per satu
+lewat UI production, tiap putaran butuh deploy — padahal satu kali menjalankan
+suite itu akan menampilkan semuanya sekaligus.
+
+## 11. Rujukan
 
 - Prosedur cutover ringkas: `laravel_backend/docs/tenant-postgres-cutover.md`
-- Commit: `b1c5b9e` — *feat(tenant): dukung schema Postgres sebagai penyimpanan tenant*
-- Verifikasi saat commit: 1.370 test, 1.365 lulus, 5 skip, 0 gagal; Pint bersih
+
+| Commit | Isi |
+|---|---|
+| `b1c5b9e` | lapisan `TenantStorage` + schema Postgres per tenant (1.370 test, 1.365 lulus, 5 skip, 0 gagal) |
+| `362c4b3` | alasan gagal provisioning ditampilkan saat `APP_DEBUG` menyala |
+| `d905ea6` | perbaikan `enum()->change()` yang menggagalkan migrasi di Postgres |
+
+Catatan: `362c4b3` yang akhirnya memecahkan kebuntuan. Selama pesan errornya
+masih generik, penyebabnya hanya bisa ditebak — dan empat tebakan berturut-turut
+meleset. Begitu alasan aslinya tampil di layar, bug-nya ketahuan dalam hitungan
+menit. Kalau ada kegagalan provisioning lagi, nyalakan `APP_DEBUG` lebih dulu
+sebelum menganalisis apa pun.
