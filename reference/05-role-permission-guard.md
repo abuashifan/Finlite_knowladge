@@ -1,10 +1,12 @@
 # Role, Permission, dan Guard
 
-> Pembaruan 2026-10-28: Fase 1 hak akses menyusun matriks 10 tab dengan 323
-> kunci, peta nama lama, serta menghapus gerbang paket `user_permission`.
-> Role dan pemeriksaan rute lama masih dipakai sampai fase implementasi
-> berikutnya. Jumlah dan daftar di bawah adalah kondisi historis Agustus 2026;
-> lihat `RENCANA_IMPLEMENTASI_HAK_AKSES.md` di root workspace untuk progres.
+> Pembaruan 2026-10-28: Fase 1 menyusun matriks 10 tab dengan 323 kunci,
+> peta nama lama, serta menghapus gerbang paket `user_permission`. Fase 2
+> mengubah resolver menjadi izin langsung di `company_user_permissions`, atau
+> seluruh izin untuk `full_access`/`is_owner`, tetap disaring berdasarkan paket.
+> Data role dan override lama disimpan untuk Fase 3; API/layar pengaturannya
+> diperbarui pada Fase 4–6. Rincian role dan override di bawah adalah kondisi
+> historis Agustus 2026. Lihat rencana hak akses di root workspace untuk progres.
 
 Aturan project: **jangan pernah merender tombol aksi tanpa cek permission**, dan
 jangan pernah menaruh logika permission langsung di controller.
