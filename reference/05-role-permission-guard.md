@@ -4,8 +4,10 @@
 > peta nama lama, serta menghapus gerbang paket `user_permission`. Fase 2
 > mengubah resolver menjadi izin langsung di `company_user_permissions`, atau
 > seluruh izin untuk `full_access`/`is_owner`, tetap disaring berdasarkan paket.
-> Data role dan override lama disimpan untuk Fase 3; API/layar pengaturannya
-> diperbarui pada Fase 4–6. Rincian role dan override di bawah adalah kondisi
+> Fase 3 memigrasikan role dan override lama ke izin langsung per perusahaan;
+> owner/admin memperoleh `full_access`, dan pembuat perusahaan `is_owner`.
+> `access:verify-migration` memeriksa hasil migrasi saat backend dimulai.
+> API/layar pengaturan diperbarui pada Fase 4–6. Rincian role dan override di bawah adalah kondisi
 > historis Agustus 2026. Lihat rencana hak akses di root workspace untuk progres.
 
 Aturan project: **jangan pernah merender tombol aksi tanpa cek permission**, dan
