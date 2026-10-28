@@ -54,7 +54,7 @@ Angka = jumlah endpoint di `Routes/api.php` (total **429**).
 | **Settings** | 5 | `/settings/company/*` | 0 | 1 |
 | **Dashboard** | 4 | `dashboard` | 0 | 1 |
 | **Companies** | 2 | `/companies`, `/companies/select` | 0 | 1 |
-| **Tenant** | 1 | `/tenant-context-test` | 0 | 0 |
+| **Tenant** | 0 | Rute debug `/tenant-context-test` dihapus pada 2026-10-28 | 0 | 0 |
 
 `routes/api.php` isinya hanya `/health` + 18 baris `require` ke
 `app/Modules/*/Routes/api.php`. **Untuk mencari sebuah endpoint, buka file rute

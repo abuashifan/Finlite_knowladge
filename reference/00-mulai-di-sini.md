@@ -1,5 +1,10 @@
 # Mulai Di Sini — Orientasi Finlite ERP untuk AI Agent
 
+> Klarifikasi pemilik produk 2026-10-28: aplikasi masih development,
+> `app.finlite.my.id` dipakai untuk testing, belum ada pengguna produksi, dan
+> seluruh transaksi saat ini adalah data uji. Angka hak akses di bawah berasal
+> dari Agustus dan telah berubah pada Fase 1 rencana hak akses di root workspace.
+
 > **Tujuan file ini:** membuat agent baru bisa bekerja tanpa memindai seluruh folder project.
 > Baca berurutan `00` → `05`. Setelah itu Anda tahu di mana segala sesuatu berada dan
 > aturan apa yang berlaku, tinggal membuka file yang benar-benar relevan dengan tugas.

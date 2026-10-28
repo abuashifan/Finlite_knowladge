@@ -1,5 +1,11 @@
 # Role, Permission, dan Guard
 
+> Pembaruan 2026-10-28: Fase 1 hak akses menyusun matriks 10 tab dengan 323
+> kunci, peta nama lama, serta menghapus gerbang paket `user_permission`.
+> Role dan pemeriksaan rute lama masih dipakai sampai fase implementasi
+> berikutnya. Jumlah dan daftar di bawah adalah kondisi historis Agustus 2026;
+> lihat `RENCANA_IMPLEMENTASI_HAK_AKSES.md` di root workspace untuk progres.
+
 Aturan project: **jangan pernah merender tombol aksi tanpa cek permission**, dan
 jangan pernah menaruh logika permission langsung di controller.
 
