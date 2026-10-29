@@ -9,10 +9,11 @@
 > Fase 4 mengganti API pengaturan akses menjadi izin langsung, menambahkan
 > penerimaan undangan dan pengaman pemilik/pengelola terakhir, serta mencatat
 > perubahan sebelum dan sesudah di audit. Pemeriksaan migrasi lama tidak lagi
-> dijalankan otomatis setelah akses dapat diubah. Rute bisnis dan layar diperbarui
-> pada Fase 6. Fase 5 menerapkan kunci matriks pada rute dan layanan backend,
+> dijalankan otomatis setelah akses dapat diubah. Fase 5 menerapkan kunci matriks pada rute dan layanan backend,
 > memisahkan izin jenis kas, laporan dan impor, serta mengganti perintah
-> penugasan pengguna menjadi izin langsung. Rincian role dan override di bawah adalah kondisi
+> penugasan pengguna menjadi izin langsung. Fase 6 menyediakan matriks pada
+> layar pengguna dan undangan, penerimaan undangan melalui tautan, serta guard
+> izin untuk navigasi, ekspor dan cetak laporan. Rincian role dan override di bawah adalah kondisi
 > historis Agustus 2026. Lihat rencana hak akses di root workspace untuk progres.
 
 Aturan project: **jangan pernah merender tombol aksi tanpa cek permission**, dan
