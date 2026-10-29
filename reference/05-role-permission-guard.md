@@ -6,8 +6,11 @@
 > seluruh izin untuk `full_access`/`is_owner`, tetap disaring berdasarkan paket.
 > Fase 3 memigrasikan role dan override lama ke izin langsung per perusahaan;
 > owner/admin memperoleh `full_access`, dan pembuat perusahaan `is_owner`.
-> `access:verify-migration` memeriksa hasil migrasi saat backend dimulai.
-> API/layar pengaturan diperbarui pada Fase 4–6. Rincian role dan override di bawah adalah kondisi
+> Fase 4 mengganti API pengaturan akses menjadi izin langsung, menambahkan
+> penerimaan undangan dan pengaman pemilik/pengelola terakhir, serta mencatat
+> perubahan sebelum dan sesudah di audit. Pemeriksaan migrasi lama tidak lagi
+> dijalankan otomatis setelah akses dapat diubah. Rute bisnis dan layar diperbarui
+> pada Fase 5–6. Rincian role dan override di bawah adalah kondisi
 > historis Agustus 2026. Lihat rencana hak akses di root workspace untuk progres.
 
 Aturan project: **jangan pernah merender tombol aksi tanpa cek permission**, dan
