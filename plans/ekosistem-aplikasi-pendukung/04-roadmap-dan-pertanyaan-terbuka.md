@@ -13,7 +13,8 @@
 
 ## Tahap 0 — Discovery
 
-- Wawancara 3–5 organisasi calon pengguna (misalnya sekolah/yayasan).
+- Pilot pertama: sekolah milik pemilik produk, diuji dengan agen AI yang memerankan pengguna ditambah tes manual (dokumen 07, bagian 9). Bahan nyata dikumpulkan di luar repo.
+- Wawancara singkat 2–3 organisasi lain (misalnya sekolah/yayasan) sebelum alur persetujuan dikunci, untuk menghindari satu sampel.
 - Petakan alur proposal, RAB, approval, pencairan, LPJ, dan laporan yang dipakai sekarang.
 - Audit modul Budget/Project/Inventory/Permissions di Finlite aktual.
 - Pilih satu skenario pilot dengan kriteria keberhasilan terukur.

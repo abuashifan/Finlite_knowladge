@@ -123,9 +123,24 @@ Sisa pekerjaan kecil Accounting (izin impor, noise 403 dashboard untuk staf tanp
 
 Urutan ini adalah hipotesis prioritas, **bukan jadwal**.
 
-## 9. Keputusan masih terbuka
+## 9. Pilot dan strategi pengujian (keputusan 2026-11-01)
 
-1. **Calon pilot nyata** dan segmen yang dilayani lebih dulu.
+**Pilot pertama adalah sekolah milik pemilik produk**, memakai data dan aturan sekolah itu. Pengujian tidak mengandalkan pihak luar:
+
+1. **Agen AI memerankan pengguna** (guru, kepala kurikulum, kepala sekolah, bendahara, auditor) berdasarkan struktur dan aturan sekolah sebenarnya, dengan skrip skenario normal dan skenario gagal (persetujuan ganda, melewati batas kewenangan, revisi berulang, pembatalan, pengiriman ulang).
+2. **Pemilik produk menguji secara manual satu per satu** setelah tiap tahap, untuk menilai rasa pakai yang tidak terjangkau agen.
+3. **Bahan nyata** yang dikumpulkan lebih dulu: struktur organisasi, form pengajuan, contoh RAB, aturan batas nominal dan siapa menyetujui apa, contoh LPJ, dan bagan akun anggaran.
+
+Batas yang harus diingat:
+
+- Agen berperilaku rapi; pengguna sungguhan lupa mengunggah bukti, salah mengisi, dan bingung istilah. Hasil tes agen **tidak membuktikan** kemudahan pakai.
+- Satu sekolah adalah satu sampel. Aturan sekolah lain bisa berbeda; sebelum alur persetujuan dikunci, tambahkan 2–3 percakapan singkat dengan sekolah atau yayasan lain.
+- Pilot internal tidak membuktikan kesediaan membayar.
+- **Data nyata sekolah (nama, nominal, dokumen) tidak boleh masuk repositori ini** karena bersifat publik; simpan di luar repo atau anonimkan.
+
+## 10. Keputusan masih terbuka
+
+1. ~~Calon pilot nyata~~ — sekolah milik pemilik produk (bagian 9). Segmen yang dilayani lebih dulu masih terbuka.
 2. **Pemetaan unit ke company:** apakah setiap sekolah/unit selalu sama dengan satu perusahaan berpembukuan sendiri, atau sebuah unit hanya bagian organisasi di dalam Workspace tanpa pembukuan.
 3. **Kursi pegawai Workspace:** terpisah dari kursi staf Accounting (kecenderungan saat ini), atau pegawai tidak dihitung kursi dan harga per unit. Termasuk skema lisensi per organisasi, per pegawai aktif, atau per paket unit.
 4. **Satu orang di beberapa organisasi** (konsultan, auditor): skema mengizinkan, tetapi perlu desain pemilihan organisasi di antarmuka.
