@@ -29,8 +29,11 @@ Finlite Accounting/ERP tetap menjadi **financial core saat pelanggan mengaktifka
 ## Keputusan arah terbaru (2026-11-01)
 
 - **Workspace berdiri sendiri**: sekolah boleh memakai Workspace tanpa Accounting; semua kombinasi produk harus berjalan, dan integrasi hanya tambahan.
-- **Langganan menempel ke organisasi dan produk**, bukan ke pengguna pemilik seperti kondisi kode saat ini.
-- **Lapisan platform dibangun lebih dulu** (Finlite ID, organisasi, hak pakai per produk) sebelum produk baru apa pun.
+- **Backend dan database mengikuti Finlite**: tenant tetap per perusahaan, pemilik tetap pemegang langganan, tanpa entitas Organisasi baru.
+- **Langganan per pemilik per produk**; tenant (schema) dibuat per perusahaan per produk saat produk diaktifkan, sehingga sekolah yang hanya memakai Workspace tidak mendapat tabel Accounting.
+- **Fondasi dibangun lebih dulu**: dimensi produk pada paket, langganan, tenant, dan izin, sebelum produk baru apa pun. Kursi Workspace memakai pita jumlah pegawai.
+- **Satu yayasan = satu pembukuan**; unit sekolah adalah dimensi, bukan perusahaan terpisah.
+- Pilot pertama adalah sekolah milik pemilik produk, diuji dengan agen AI ditambah tes manual.
 - Accounting tetap hanya lewat undangan; pendaftaran terbuka untuk produk mandiri adalah keputusan terpisah.
 - Baca [07-keputusan-platform-segmen-dan-model-data.md](07-keputusan-platform-segmen-dan-model-data.md) untuk segmen pelanggan, skema tabel awal, pola data per produk, batas Workspace dan Accounting, serta urutan implementasi.
 
@@ -46,7 +49,7 @@ Finlite Accounting/ERP tetap menjadi **financial core saat pelanggan mengaktifka
 
 ## Urutan eksplorasi (belum disetujui)
 
-0. **Platform**: Finlite ID, organisasi, dan hak pakai per produk; Accounting dipindahkan ke struktur ini.
+0. **Fondasi**: dimensi produk pada paket, langganan, tenant, dan izin; Accounting menjadi produk pertama dalam struktur ini.
 1. **Workspace mandiri**: validasi kebutuhan sekolah/yayasan, desain organisasi dan workflow; audit modul Budget yang sudah ada hanya untuk batas dan jembatan, bukan sebagai fondasi.
 2. **Jembatan Workspace-Accounting** (opsional bagi pelanggan).
 3. **POS**: validasi kebutuhan retail dan integrasi Sales/Inventory/Payment.
@@ -62,7 +65,7 @@ Urutan ini merupakan hipotesis prioritas, **bukan komitmen jadwal**.
 - [03-integrasi-dan-arsitektur-awal.md](03-integrasi-dan-arsitektur-awal.md) — ownership data, keamanan, integrasi.
 - [04-roadmap-dan-pertanyaan-terbuka.md](04-roadmap-dan-pertanyaan-terbuka.md) — validasi, MVP, risiko, keputusan yang belum dibuat.
 - [06-finlite-pos-konsep-dan-roadmap.md](06-finlite-pos-konsep-dan-roadmap.md) — konsep POS retail online-only dan Device Bridge dari MVP.
-- [07-keputusan-platform-segmen-dan-model-data.md](07-keputusan-platform-segmen-dan-model-data.md) — keputusan arah 2026-11-01: segmen, platform, model data, urutan implementasi.
+- [07-keputusan-platform-segmen-dan-model-data.md](07-keputusan-platform-segmen-dan-model-data.md) — keputusan arah 2026-11-01: segmen, dimensi produk, tenant dan skala, urutan implementasi, pilot.
 
 ## Referensi kondisi saat ini
 

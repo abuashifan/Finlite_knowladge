@@ -1,20 +1,25 @@
 # Keputusan Arah: Platform, Segmen, dan Model Data
 
-> **STATUS: KEPUTUSAN ARAH (2026-11-01) — BELUM DIIMPLEMENTASIKAN.**
+> **STATUS: KEPUTUSAN ARAH (diperbarui 2026-11-01) — BELUM DIIMPLEMENTASIKAN.**
 >
 > Dokumen ini mencatat hasil diskusi pemilik produk. Bagian "Keputusan" mengikat arah rancangan; bagian "Hipotesis" dan "Keputusan masih terbuka" belum final. Skema tabel di bawah adalah rancangan awal, bukan migrasi yang sudah ada.
+>
+> Revisi: rancangan awal sempat mengusulkan lapisan Organisasi baru. Usulan itu **dibatalkan** karena backend, database, dan tenant mengikuti Finlite (tenant per perusahaan, pemilik sebagai pemegang langganan); yang ditambahkan hanya dimensi produk.
 
 ## 1. Keputusan yang diambil
 
 | # | Keputusan | Dampak |
 | --- | --- | --- |
 | 1 | **Setiap produk harus lengkap tanpa produk lain.** Integrasi hanya tambahan opsional. | Workspace, POS, WMS, dan CRM tidak boleh bergantung pada tabel atau modul Accounting. |
-| 2 | **Workspace dijual dan dipakai mandiri.** Sekolah boleh hanya memakai Workspace untuk melacak anggaran. Idealnya dipakai bersama Accounting, tetapi semua kombinasi harus berjalan. | Workspace memiliki tabel anggaran/RAB sendiri; tidak memakai modul Budget di database Accounting. |
-| 3 | **POS (dan WMS, CRM) dijual terpisah.** Pelanggannya boleh bukan pelanggan Accounting. | Perlu pendaftaran organisasi dan langganan yang tidak melewati Accounting. |
-| 4 | **Langganan menempel ke organisasi dan produk**, bukan ke pengguna pemilik. | `users.plan_id` dan `subscriptions.user_id` digantikan oleh hak pakai per organisasi per produk. |
-| 5 | **Lapisan platform dibangun lebih dulu**, sebelum produk baru apa pun: identitas, organisasi, langganan per produk. | Murah sekarang karena Accounting belum punya pengguna produksi; mahal bila ditunda. |
-| 6 | **Satu akun orang untuk semua produk** (Finlite ID). Hak akses tetap melekat ke orang per fitur, bukan peran. | Matriks izin per pengguna yang sudah ada dipakai ulang dengan awalan per produk. |
-| 7 | **Accounting tetap hanya lewat undangan** (tanpa pendaftaran terbuka dan tanpa login Google). | Alasan: mencegah akun menumpuk. Aturan ini tidak otomatis berlaku untuk produk yang dijual terbuka (lihat bagian 9). |
+| 2 | **Workspace dijual dan dipakai mandiri.** Sekolah boleh hanya memakai Workspace untuk melacak anggaran; idealnya bersama Accounting, tetapi semua kombinasi harus berjalan. | Workspace memiliki tabel anggaran/RAB sendiri; tidak memakai modul Budget di Accounting. |
+| 3 | **POS (dan WMS, CRM) dijual terpisah.** Pelanggannya boleh bukan pelanggan Accounting. | Pemilik dapat mendaftar dan membeli satu produk saja. |
+| 4 | **Backend dan database mengikuti Finlite.** Satu backend Laravel modular; tenant tetap **per perusahaan**; pemilik (client) tetap pemegang langganan. **Tidak ada entitas Organisasi baru.** | Perubahan fondasi kecil: menambah dimensi produk pada langganan, tenant, dan izin. |
+| 5 | **Langganan per pemilik per produk.** Pelanggan yang hanya membeli POS memiliki satu langganan POS; menambah produk berarti menambah langganan. Bundel hanyalah aturan harga. | `plans` dan `subscriptions` mendapat dimensi produk. |
+| 6 | **Tenant dibuat per perusahaan per produk dan disiapkan saat produk diaktifkan.** Sekolah yang hanya berlangganan Workspace mendapat tenant berisi tabel Workspace saja; tabel Accounting dibuat nanti bila ia berlangganan Accounting. | `tenant_databases` unik per (perusahaan, produk), dengan jalur migrasi sendiri per produk. |
+| 7 | **Satu yayasan = satu pembukuan.** Sekolah dan kantor yayasan adalah unit di dalam satu perusahaan, bukan perusahaan terpisah. | Unit dimodelkan sebagai dimensi (cost center) di Accounting dan struktur organisasi di Workspace. |
+| 8 | **Kursi Workspace memakai pita jumlah pegawai aktif per perusahaan**, bukan tarif per pegawai. | Tagihan pelanggan dapat diprediksi; batas pita ditentukan setelah jumlah pegawai sekolah pilot diketahui. |
+| 9 | **Satu akun orang (Finlite ID) untuk semua produk.** Hak akses melekat ke orang per fitur, bukan peran. | Matriks izin yang sudah ada dipakai ulang dengan awalan per produk. |
+| 10 | **Accounting tetap hanya lewat undangan** (tanpa pendaftaran terbuka dan tanpa login Google). | Alasan: mencegah akun menumpuk. Tidak otomatis berlaku untuk produk yang dijual terbuka (bagian 10). |
 
 ## 2. Segmen pelanggan (HIPOTESIS — belum divalidasi)
 
@@ -32,7 +37,7 @@ Tiga ciri pembeda yang menentukan harga dan penjualan:
 2. **Pembeli berbeda dari pemakai.** Di A dan B pembeli (ketua yayasan) bukan pemakai harian (bendahara).
 3. **Kekuatan alasan berpindah.** Sekolah dan lembaga nirlaba punya kewajiban pelaporan dana; UMKM sering cukup dengan Excel.
 
-**Belum diketahui:** siapa calon pilot nyata, segmen mana dilayani lebih dulu, dan siapa pembeli sebenarnya. Pertanyaan ini harus dijawab sebelum harga dan prioritas final.
+Skala yang diperkirakan: **ratusan pelanggan dalam satu tahun pun belum pasti**. Rancangan tidak perlu mengoptimalkan untuk ribuan tenant sejak awal.
 
 ## 3. Tiga skenario yang wajib berjalan
 
@@ -42,81 +47,80 @@ Tiga ciri pembeda yang menentukan harga dan penjualan:
 | Hanya Accounting | Seperti sekarang, termasuk modul Budget yang sudah ada. |
 | Keduanya | Pencairan yang disetujui di Workspace menghasilkan transaksi di Accounting melalui pesan terverifikasi; realisasi kembali ke Workspace. |
 
-Kombinasi yang sama berlaku untuk POS dan Accounting: POS mandiri, atau POS yang meneruskan penjualan ke Accounting bila keduanya dimiliki organisasi yang sama.
+Kombinasi yang sama berlaku untuk POS dan Accounting.
 
 ## 4. Kondisi kode saat ini (fakta per 2026-11-01)
 
-Diperiksa dari migrasi backend Laravel. Ini keadaan nyata, bukan rancangan.
+Diperiksa dari migrasi dan kode backend Laravel. Ini keadaan nyata, bukan rancangan.
 
-- `users.plan_id` dan `subscriptions.user_id`: paket dan langganan menempel ke **pengguna pemilik**. Tidak ada entitas organisasi.
+- `users.plan_id` dan `subscriptions.user_id`: paket dan langganan menempel ke **pengguna pemilik**. Tidak ada dimensi produk.
 - `plans.max_users` dan `plans.max_companies`: kuota dihitung dari pemilik; pemilik ikut dihitung dalam kuota pengguna.
 - `companies.created_by`: menentukan pemilik langganan sebuah perusahaan.
-- `company_users`: keanggotaan orang di perusahaan (`full_access`, `is_owner`; kolom `role` hanya label). Izin per fitur ada di `company_user_permissions`. Tabel peran lama sudah dihapus.
-- `tenant_databases.company_id` UNIQUE: satu perusahaan tepat satu database tenant (SQLite lokal, Postgres di produksi).
+- `company_users`: keanggotaan orang di perusahaan (`full_access`, `is_owner`; kolom `role` hanya label). Izin per fitur ada di `company_user_permissions`.
+- `tenant_databases.company_id` UNIQUE: satu perusahaan tepat satu tenant. Di Postgres, tenant adalah **satu schema per perusahaan di dalam satu database** (`PostgresTenantStorage`), bukan database terpisah; di lokal berupa berkas SQLite.
 - Satu orang sudah dapat bergabung ke banyak perusahaan; akun staf lahir lewat undangan email.
 
-Implikasi: untuk Accounting tersedia dasar yang baik (akses per orang, undangan, multi-perusahaan), tetapi **tidak ada tempat** untuk organisasi induk maupun hak pakai per produk.
+Implikasi: dasarnya sudah cocok. Yang kurang hanya dimensi produk pada langganan, tenant, dan izin.
 
-## 5. Model platform target (RANCANGAN AWAL)
+## 5. Perubahan fondasi (Tahap P) — RANCANGAN AWAL
 
 ```
-users (Finlite ID)
-  └─< organization_members >── organizations
-                                   ├─< organization_products   (hak pakai: produk, paket, kursi, tanggal)
-                                   └─< companies               (unit usaha, untuk produk yang memakai database per unit)
-                                          ├─< company_users + company_user_permissions
-                                          └─< tenant_databases  (per perusahaan per produk)
+pemilik (client) ──< langganan (per produk) ──> paket (per produk)
+       │
+       └──< companies ──< company_users + company_user_permissions   (izin berawalan produk)
+                  └──< tenant_databases   unik per (company, produk)
+                            ├─ schema accounting
+                            ├─ schema workspace
+                            └─ schema pos ...
 ```
 
-Tabel baru di database pusat:
-
-| Tabel | Isi minimum |
+| Perubahan | Rincian |
 | --- | --- |
-| `organizations` | nama, slug, status, pemilik |
-| `organization_members` | organisasi, pengguna, status, tanggal bergabung; unik per pasangan |
-| `organization_products` | organisasi, kode produk, paket, batas kursi, tanggal mulai dan akhir, status; unik per organisasi dan produk |
+| `plans` | Menambah kolom produk (Accounting, Workspace, POS, ...). Batas kuota memakai satuan masing-masing produk (Workspace: pita pegawai). |
+| `subscriptions` | Menambah kolom produk; satu pemilik dapat memiliki beberapa langganan aktif dengan produk berbeda. Cakupannya perusahaan milik pemilik itu. |
+| `users.plan_id` | Dihapus setelah kode membaca dari langganan per produk. Tanpa lapisan kompatibilitas karena belum ada pengguna produksi. |
+| `tenant_databases` | Menambah kolom produk; unik per (perusahaan, produk). Lokasi tenant tetap disimpan di tabel ini. |
+| Izin | Awalan per produk (contoh `workspace.proposal.submit`) pada matriks izin yang sudah ada. |
+| Aktivasi produk | Mengaktifkan langganan produk menyiapkan tenant produk itu (membuat schema dan menjalankan migrasi produk tersebut). Perusahaan yang sudah ada dipetakan sebagai tenant produk Accounting. |
+| Penghentian langganan | Schema produk **tidak dihapus**; akses dikunci atau dibuat baca-saja sesuai kebijakan langganan, agar data tidak hilang. |
 
-Perubahan pada tabel yang ada:
+Entitas Organisasi (induk beberapa perusahaan dengan satu penagihan) **ditunda**. Tinjau lagi hanya bila ada pelanggan yang membutuhkan beberapa pemilik atau penagihan lintas pemilik.
 
-- `companies` mendapat `organization_id`.
-- `tenant_databases` diubah dari unik per `company_id` menjadi unik per (`company_id`, produk) bila sebuah produk memakai database per perusahaan.
-- `users.plan_id` dan `subscriptions.user_id` dihapus setelah kode membaca dari organisasi (tanpa lapisan kompatibilitas karena belum ada pengguna produksi).
-- Izin diberi awalan produk (contoh `workspace.proposal.submit`) pada matriks izin yang sudah ada.
+## 6. Data dan skala tenant
 
-Migrasi: setiap pemilik yang sudah punya perusahaan otomatis memperoleh satu organisasi berisi perusahaannya; paketnya menjadi satu baris `organization_products` untuk Accounting.
+Semua produk mengikuti pola Finlite: tenant per perusahaan per produk, satu schema per tenant dalam satu database Postgres. Dengan perkiraan ratusan pelanggan, satu database cukup. Pembatasan yang perlu diketahui dan penanganannya:
 
-Pola langganan: **bundel hanyalah aturan harga**, bukan struktur data. Pelanggan yang hanya membeli POS memiliki satu baris hak pakai; menambah produk berarti menambah baris.
+| Masalah saat tenant bertambah | Penanganan (dibangun bila dibutuhkan, bukan sekarang) |
+| --- | --- |
+| Migrasi berjalan satu per satu, makin lama | Jalankan paralel dan berkelompok; tampilkan status per tenant |
+| Ribuan schema memberatkan katalog Postgres | Pecah ke beberapa database; `tenant_databases` menyimpan lokasi tenant |
+| Satu tenant besar memperlambat yang lain | Pindahkan tenant itu ke database sendiri |
+| Lampiran (kuitansi, LPJ) membengkakkan database | Simpan berkas di penyimpanan objek, database hanya menyimpan referensi |
+| Data lama menumpuk | Arsip per periode |
 
-## 6. Pola penyimpanan data per produk (HIPOTESIS)
+Aturan yang dijaga sejak sekarang agar pemecahan itu murah: kode produk tidak boleh mengasumsikan semua tenant berada di database yang sama; selalu menemukan tenant lewat `tenant_databases`.
 
-| Produk | Pola | Alasan |
-| --- | --- | --- |
-| Accounting | Database per perusahaan (tetap) | Sudah berjalan; isolasi kuat; tenant relatif sedikit. |
-| POS | Database bersama dengan `organization_id` | Ribuan toko kecil dengan transaksi sering; database per toko mahal dan sulit dimigrasi. |
-| WMS, CRM | Database bersama dengan `organization_id` | Pola serupa POS. |
-| Workspace | Belum ditentukan; lihat keputusan terbuka | Volume per tenant lebih kecil daripada POS, tetapi ia produk mandiri. |
-
-Risiko database bersama: satu kueri yang lupa menyaring `organization_id` membocorkan data antarpelanggan. Wajib ada filter tingkat model dan tes isolasi khusus sebelum produk mana pun memakai pola ini.
-
-Secara kode, produk baru dapat berada di repositori backend yang sama sebagai modul terpisah dengan koneksi database sendiri dan tanpa tabel yang dibagi. Pemisahan menjadi layanan fisik dapat dilakukan nanti tanpa mengubah kontrak.
+**Catatan POS:** POS bertransaksi lebih sering per tenant daripada Workspace. Perlu diuji beban pada tenant POS sebelum menyatakan pola ini cukup; bila tidak, pola alternatif dievaluasi saat POS direncanakan.
 
 ## 7. Batas Workspace dan Accounting
 
 - **Workspace memiliki proses:** pengajuan, persetujuan, reservasi, pencairan, LPJ.
 - **Accounting memiliki pembukuan:** jurnal, periode, laporan keuangan.
-- **Kode anggaran Workspace tidak memakai akun (COA) Accounting.** Organisasi yang hanya memakai Workspace tidak punya COA. Workspace memiliki daftar kode anggaran sendiri.
+- **Kode anggaran Workspace tidak memakai akun (COA) Accounting.** Organisasi yang hanya memakai Workspace tidak punya COA.
+- **Unit sekolah** di Workspace adalah bagian struktur organisasi; di Accounting adalah dimensi (cost center) pada satu pembukuan yayasan. Pemetaan unit Workspace ke dimensi Accounting disimpan di tabel jembatan.
 - **Pemetaan** kode anggaran ke akun disimpan di satu tabel jembatan yang hanya diisi saat pelanggan menyambungkan kedua produk.
 - Modul Budget di Accounting tetap untuk pelanggan yang hanya memakai Accounting. Bila Workspace tersambung, sumber anggaran ditentukan satu pihak (jangan diisi dua kali). Sumber yang dipilih adalah **keputusan terbuka**.
 - **Sambungan memakai pesan, bukan tabel bersama.** Contoh: Workspace mengirim "pencairan disetujui, nominal, kode anggaran"; Accounting membuat transaksi. Setiap pesan memiliki ID unik (idempotency) agar pengiriman ulang tidak menggandakan jurnal. Pesan yang gagal masuk antrean rekonsiliasi.
-- Definisi angka (allocated, reserved, committed, actual, disbursed, outstanding advance) pada dokumen 02 tetap berlaku di Workspace mandiri. Pada skenario "hanya Workspace", sumber *actual* adalah pencairan dan bukti LPJ yang diverifikasi, bukan jurnal.
+- Karena tenant tiap produk adalah schema terpisah, kedua produk tidak berbagi tabel meski dimiliki perusahaan yang sama.
+- Definisi angka (allocated, reserved, committed, actual, disbursed, outstanding advance) pada dokumen 02 tetap berlaku. Pada skenario "hanya Workspace", sumber *actual* adalah pencairan dan bukti LPJ yang diverifikasi, bukan jurnal.
 
 ## 8. Urutan implementasi yang diusulkan
 
 | Tahap | Isi | Syarat selesai |
 | --- | --- | --- |
-| **P — Platform** | Finlite ID, organisasi, hak pakai per produk. Accounting dipindahkan ke struktur ini. | Pelanggan Accounting yang ada berjalan tanpa perubahan perilaku; kuota dibaca dari hak pakai; tes isolasi lulus. |
-| **1 — Workspace mandiri** | Anggota organisasi, kode anggaran, pengajuan, persetujuan berjenjang, pencairan, LPJ, laporan. Tanpa Accounting. | Satu pilot nyata dapat menjalankan siklus penuh; syarat "siap dibangun" pada dokumen 04 terpenuhi. |
-| **2 — Jembatan Workspace-Accounting** | Pemetaan kode anggaran dan pesan idempotent. | Pencairan menghasilkan transaksi sekali; perbedaan muncul sebagai exception. |
+| **P — Dimensi produk** | Produk pada paket, langganan, tenant, dan izin; aktivasi produk menyiapkan tenant produk. Accounting dipetakan sebagai produk pertama. | Pelanggan Accounting yang ada berjalan tanpa perubahan perilaku; kuota dibaca dari langganan per produk; tes aktivasi dan penguncian lulus. |
+| **1 — Workspace mandiri** | Anggota, pita pegawai, kode anggaran, pengajuan, persetujuan berjenjang, pencairan, LPJ, laporan. Tanpa Accounting. | Pilot (bagian 9) menjalankan siklus penuh; syarat "siap dibangun" pada dokumen 04 terpenuhi. |
+| **2 — Jembatan Workspace-Accounting** | Pemetaan dan pesan idempotent. | Pencairan menghasilkan transaksi sekali; perbedaan muncul sebagai exception. |
 | **3+ — POS, WMS, CRM** | Mengikuti dokumen 06 dan evaluasi setelah pilot. | Ditentukan setelah Tahap 1 menghasilkan pelajaran. |
 
 Sisa pekerjaan kecil Accounting (izin impor, noise 403 dashboard untuk staf tanpa izin dashboard) dapat dikerjakan sebelum atau sesudah Tahap P dan tidak menghalanginya.
@@ -140,11 +144,10 @@ Batas yang harus diingat:
 
 ## 10. Keputusan masih terbuka
 
-1. ~~Calon pilot nyata~~ — sekolah milik pemilik produk (bagian 9). Segmen yang dilayani lebih dulu masih terbuka.
-2. **Pemetaan unit ke company:** apakah setiap sekolah/unit selalu sama dengan satu perusahaan berpembukuan sendiri, atau sebuah unit hanya bagian organisasi di dalam Workspace tanpa pembukuan.
-3. **Kursi pegawai Workspace:** terpisah dari kursi staf Accounting (kecenderungan saat ini), atau pegawai tidak dihitung kursi dan harga per unit. Termasuk skema lisensi per organisasi, per pegawai aktif, atau per paket unit.
-4. **Satu orang di beberapa organisasi** (konsultan, auditor): skema mengizinkan, tetapi perlu desain pemilihan organisasi di antarmuka.
-5. **Pendaftaran terbuka untuk produk yang dijual mandiri** (terutama POS): mekanisme verifikasi yang mencegah akun menumpuk, tanpa membuka pembuatan database tenant Accounting secara bebas.
-6. **Pola data Workspace:** database per organisasi, atau bersama dengan `organization_id`.
-7. **Sumber anggaran saat Workspace dan Accounting tersambung:** Workspace atau modul Budget.
-8. Pertanyaan teknis dan akuntansi pada dokumen 02 dan 04 (rumus available budget, reservasi saat submitted atau approved, definisi actual untuk uang muka dan AP, dan seterusnya).
+1. **Batas pita pegawai Workspace** dan harganya, setelah jumlah guru dan pegawai sekolah pilot diketahui.
+2. **Segmen yang dilayani lebih dulu** setelah pilot.
+3. **Pendaftaran terbuka untuk produk yang dijual mandiri** (terutama POS): mekanisme verifikasi yang mencegah akun menumpuk, tanpa membuka pembuatan tenant Accounting secara bebas.
+4. **Sumber anggaran saat Workspace dan Accounting tersambung:** Workspace atau modul Budget.
+5. **Kecukupan pola tenant untuk POS** (uji beban sebelum POS direncanakan).
+6. **Kebijakan penghentian langganan:** kunci total atau baca-saja, dan lama retensi data.
+7. Pertanyaan teknis dan akuntansi pada dokumen 02 dan 04 (rumus available budget, reservasi saat submitted atau approved, definisi actual untuk uang muka dan AP, dan seterusnya).

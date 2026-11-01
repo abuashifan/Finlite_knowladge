@@ -8,7 +8,7 @@ Satu backend Laravel modular dapat menjadi titik awal bila audit kode membuktika
 
 ## Arah terbaru (2026-11-01)
 
-Setiap produk lengkap tanpa produk lain; integrasi hanya tambahan. Di bawah produk ada **lapisan platform** (Finlite ID, organisasi, hak pakai per produk) yang menjadi satu-satunya hal yang dibagi. Produk tidak berbagi tabel. Pola penyimpanan data per produk (database per perusahaan untuk Accounting; database bersama dengan `organization_id` untuk produk volume tinggi seperti POS) dan skema platform dirinci pada [07-keputusan-platform-segmen-dan-model-data.md](07-keputusan-platform-segmen-dan-model-data.md).
+Setiap produk lengkap tanpa produk lain; integrasi hanya tambahan. Backend dan database mengikuti Finlite: satu backend modular, tenant per perusahaan, dan pemilik sebagai pemegang langganan. Yang dibagi antarproduk hanya identitas (Finlite ID), keanggotaan perusahaan, dan langganan; **produk tidak berbagi tabel**, karena tenant dibuat per perusahaan per produk (satu schema per produk) saat produk diaktifkan. Rinciannya, termasuk skala tenant, ada di [07-keputusan-platform-segmen-dan-model-data.md](07-keputusan-platform-segmen-dan-model-data.md).
 
 ## Kepemilikan domain
 
@@ -20,7 +20,7 @@ Setiap produk lengkap tanpa produk lain; integrasi hanya tambahan. Di bawah prod
 | Bin, picking, packing, stock count fisik | WMS |
 | Proposal, approval, RAB, LPJ, tugas proyek | Workspace |
 | Lead, opportunity, aktivitas pelanggan | CRM |
-| Identitas, organisasi, keanggotaan, hak pakai produk dan langganan | Lapisan platform bersama (rancangan awal di dokumen 07) |
+| Identitas, keanggotaan perusahaan, langganan per produk | Basis data pusat Finlite (dimensi produk ditambahkan; dokumen 07) |
 | Struktur departemen, jabatan, atasan/approver | Workspace (data organisasi internal produk itu sendiri) |
 
 ## Kontrak integrasi
@@ -48,8 +48,8 @@ Setiap produk lengkap tanpa produk lain; integrasi hanya tambahan. Di bawah prod
 4. POS dipastikan online-only (dokumen 06), sehingga risiko sinkronisasi offline tidak berlaku; risiko yang tersisa adalah transaksi ganda akibat pengiriman ulang antarproduk, ditangani dengan idempotency.
 5. WMS harus membedakan kuantitas fisik, reserved stock, dan valuation akuntansi.
 6. Data pegawai dan lampiran membutuhkan kebijakan privasi, retention, dan akses.
-7. Database bersama dengan `organization_id` (POS, WMS, CRM) berisiko membocorkan data antarpelanggan bila filter terlewat; perlu filter wajib tingkat model dan tes isolasi.
-8. Langganan saat ini menempel ke pengguna pemilik; memindahkannya ke organisasi dan produk adalah perubahan fondasi yang harus selesai sebelum produk baru.
+7. Pola tenant per schema perlu diuji bebannya untuk POS (transaksi sering) dan harus siap dipecah ke beberapa database; kode produk tidak boleh mengasumsikan semua tenant berada di satu database.
+8. Langganan saat ini menempel ke pengguna pemilik tanpa dimensi produk; menambah dimensi produk pada paket, langganan, tenant, dan izin adalah perubahan fondasi yang harus selesai sebelum produk baru.
 
 ## Audit sebelum implementasi
 

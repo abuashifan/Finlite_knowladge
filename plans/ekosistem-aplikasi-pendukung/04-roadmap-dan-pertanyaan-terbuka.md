@@ -2,14 +2,15 @@
 
 **STATUS: RENCANA BARU — belum dijadwalkan, belum diimplementasikan.**
 
-> **Pembaruan 2026-11-01:** urutan tahap di bawah disesuaikan oleh keputusan di [07-keputusan-platform-segmen-dan-model-data.md](07-keputusan-platform-segmen-dan-model-data.md): **Tahap P (platform)** dibangun sebelum Workspace, Workspace berdiri sendiri tanpa Accounting, dan jembatan ke Accounting menjadi tahap tersendiri setelahnya.
+> **Pembaruan 2026-11-01:** urutan tahap di bawah disesuaikan oleh keputusan di [07-keputusan-platform-segmen-dan-model-data.md](07-keputusan-platform-segmen-dan-model-data.md): **Tahap P (dimensi produk)** dibangun sebelum Workspace, Workspace berdiri sendiri tanpa Accounting, dan jembatan ke Accounting menjadi tahap tersendiri setelahnya.
 
-## Tahap P — Platform (sebelum produk baru apa pun)
+## Tahap P — Dimensi produk (sebelum produk baru apa pun)
 
-- Finlite ID, organisasi, dan keanggotaan.
-- Hak pakai per organisasi per produk (paket, kursi, tanggal); menggantikan paket yang menempel ke pengguna pemilik.
-- Perusahaan Accounting yang ada dipindahkan ke struktur organisasi tanpa perubahan perilaku.
-- Tes isolasi data antarorganisasi.
+- Produk pada paket dan langganan; satu pemilik dapat memiliki beberapa langganan produk.
+- `tenant_databases` unik per (perusahaan, produk); mengaktifkan produk menyiapkan tenant produk itu saja.
+- Awalan produk pada izin; kuota per produk (Workspace: pita pegawai).
+- Perusahaan Accounting yang ada menjadi tenant produk Accounting tanpa perubahan perilaku.
+- Tes aktivasi, penguncian langganan, dan isolasi antarperusahaan.
 
 ## Tahap 0 — Discovery
 
@@ -48,9 +49,9 @@ Leads, pipeline, account/contact, activity, customer service, integrasi ke Sales
 
 ## Keputusan terbuka
 
-1. Workspace: lisensi per organisasi, per active employee, atau paket unit?
+1. ~~Workspace: skema lisensi~~ — **diputuskan 2026-11-01:** pita jumlah pegawai aktif per perusahaan. Batas pita dan harga masih terbuka.
 2. ~~Shared login/SSO~~ — **diputuskan 2026-11-01:** satu akun orang (Finlite ID) untuk semua produk. Yang masih terbuka: satu orang di beberapa organisasi.
-3. Hierarki yayasan → sekolah → departemen: apakah setiap unit sama dengan satu company berpembukuan sendiri, atau hanya bagian organisasi di Workspace? (masih terbuka; lihat dokumen 07)
+3. ~~Hierarki yayasan → sekolah → departemen~~ — **diputuskan 2026-11-01:** satu yayasan = satu pembukuan (satu perusahaan); unit adalah dimensi di Accounting dan struktur organisasi di Workspace.
 4. Sumber pagu bila Workspace dan Accounting tersambung: Workspace atau modul Budget? (Workspace mandiri memakai kode anggaran sendiri.)
 5. Approval: per role, posisi, nominal, kategori, atau kombinasi?
 6. Apakah pengajuan membuat reservasi saat submitted atau approved?
