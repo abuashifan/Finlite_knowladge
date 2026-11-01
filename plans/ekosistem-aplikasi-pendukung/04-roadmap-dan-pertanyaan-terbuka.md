@@ -2,6 +2,8 @@
 
 **STATUS: RENCANA BARU — belum dijadwalkan, belum diimplementasikan.**
 
+> **Pembaruan 2026-11-01 (urutan produk):** POS dibangun lebih dulu daripada Workspace. "Tahap 2 — POS" di bawah maju ke depan "Tahap 1 — Workspace"; Tahap P tetap paling awal. Lihat dokumen 07 bagian 8.
+>
 > **Pembaruan 2026-11-01:** urutan tahap di bawah disesuaikan oleh keputusan di [07-keputusan-platform-segmen-dan-model-data.md](07-keputusan-platform-segmen-dan-model-data.md): **Tahap P (dimensi produk)** dibangun sebelum Workspace, Workspace berdiri sendiri tanpa Accounting, dan jembatan ke Accounting menjadi tahap tersendiri setelahnya.
 
 ## Tahap P — Dimensi produk (sebelum produk baru apa pun)

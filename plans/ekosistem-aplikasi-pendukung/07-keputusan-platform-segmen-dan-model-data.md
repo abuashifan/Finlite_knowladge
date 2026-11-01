@@ -119,9 +119,10 @@ Aturan yang dijaga sejak sekarang agar pemecahan itu murah: kode produk tidak bo
 | Tahap | Isi | Syarat selesai |
 | --- | --- | --- |
 | **P — Dimensi produk** | Produk pada paket, langganan, tenant, dan izin; aktivasi produk menyiapkan tenant produk. Accounting dipetakan sebagai produk pertama. | Pelanggan Accounting yang ada berjalan tanpa perubahan perilaku; kuota dibaca dari langganan per produk; tes aktivasi dan penguncian lulus. |
-| **1 — Workspace mandiri** | Anggota, pita pegawai, kode anggaran, pengajuan, persetujuan berjenjang, pencairan, LPJ, laporan. Tanpa Accounting. | Pilot (bagian 9) menjalankan siklus penuh; syarat "siap dibangun" pada dokumen 04 terpenuhi. |
-| **2 — Jembatan Workspace-Accounting** | Pemetaan dan pesan idempotent. | Pencairan menghasilkan transaksi sekali; perbedaan muncul sebagai exception. |
-| **3+ — POS, WMS, CRM** | Mengikuti dokumen 06 dan evaluasi setelah pilot. | Ditentukan setelah Tahap 1 menghasilkan pelajaran. |
+| **1 — POS mandiri** (keputusan 2026-11-01: produk pertama) | Mengikuti fase 1–4 dokumen 06: katalog, stok outlet, kasir, shift, retur, laporan, lalu Device Bridge. Tanpa Accounting. | Kriteria penerimaan MVP dokumen 06 bagian 10 terpenuhi; syarat "siap dibangun" dokumen 04 terpenuhi. |
+| **2 — Workspace mandiri** | Anggota, pita pegawai, kode anggaran, pengajuan, persetujuan berjenjang, pencairan, LPJ, laporan. Tanpa Accounting. | Pilot sekolah (bagian 9) menjalankan siklus penuh. |
+| **3 — Jembatan ke Accounting** | Pemetaan dan pesan idempotent untuk POS dan Workspace. | Penjualan atau pencairan menghasilkan transaksi sekali; perbedaan muncul sebagai exception. |
+| **4+ — WMS, CRM** | Evaluasi setelah produk sebelumnya berjalan. | Ditentukan setelah pelajaran dari POS dan Workspace. |
 
 Sisa pekerjaan kecil Accounting (izin impor, noise 403 dashboard untuk staf tanpa izin dashboard) dapat dikerjakan sebelum atau sesudah Tahap P dan tidak menghalanginya.
 

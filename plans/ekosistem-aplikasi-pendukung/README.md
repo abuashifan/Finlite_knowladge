@@ -49,10 +49,12 @@ Finlite Accounting/ERP tetap menjadi **financial core saat pelanggan mengaktifka
 
 ## Urutan eksplorasi (belum disetujui)
 
-0. **Fondasi**: dimensi produk pada paket, langganan, tenant, dan izin; Accounting menjadi produk pertama dalam struktur ini.
-1. **Workspace mandiri**: validasi kebutuhan sekolah/yayasan, desain organisasi dan workflow; audit modul Budget yang sudah ada hanya untuk batas dan jembatan, bukan sebagai fondasi.
-2. **Jembatan Workspace-Accounting** (opsional bagi pelanggan).
-3. **POS**: validasi kebutuhan retail dan integrasi Sales/Inventory/Payment.
+**Keputusan 2026-11-01: produk pertama yang dibangun adalah POS**, bukan Workspace.
+
+0. **Fondasi secukupnya untuk POS**: dimensi produk pada paket, langganan, tenant, dan izin; Accounting menjadi produk pertama dalam struktur ini.
+1. **POS** (dokumen 06): katalog, stok outlet, kasir, shift, retur, laporan, lalu Device Bridge.
+2. **Workspace mandiri**: validasi kebutuhan sekolah/yayasan, desain organisasi dan workflow (pilot di sekolah pemilik produk).
+3. **Jembatan Workspace-Accounting** dan jembatan POS-Accounting (opsional bagi pelanggan).
 4. **WMS**: validasi operasi gudang dan hubungan dengan master stok.
 5. **CRM**: eksplorasi terpisah setelah kebutuhan dan segmentasi pasar teruji.
 
