@@ -2,7 +2,7 @@
 
 > **STATUS: KONSEP / PROPOSAL PENGEMBANGAN BARU — BELUM DIIMPLEMENTASIKAN**
 >
-> Dibuat: 2026-10-30. Dokumen di folder ini adalah usulan arah produk masa depan, **bukan** dokumentasi fitur Finlite yang telah tersedia, bukan keputusan arsitektur final, dan bukan backlog yang sudah disetujui.
+> Dibuat: 2026-10-30. Diperbarui: 2026-11-01 (keputusan platform, segmen, dan model data; lihat dokumen 07). Dokumen di folder ini adalah usulan arah produk masa depan, **bukan** dokumentasi fitur Finlite yang telah tersedia, bukan keputusan arsitektur final, dan bukan backlog yang sudah disetujui.
 
 ## Visi
 
@@ -26,11 +26,19 @@ Finlite Accounting/ERP tetap menjadi **financial core saat pelanggan mengaktifka
 - POS standalone dapat dipakai tanpa Accounting; integrasi Accounting/WMS/CRM bersifat opsional.
 - Baca [06-finlite-pos-konsep-dan-roadmap.md](06-finlite-pos-konsep-dan-roadmap.md) untuk segmen pasar, batas fitur, desain hardware, roadmap, dan risiko.
 
+## Keputusan arah terbaru (2026-11-01)
+
+- **Workspace berdiri sendiri**: sekolah boleh memakai Workspace tanpa Accounting; semua kombinasi produk harus berjalan, dan integrasi hanya tambahan.
+- **Langganan menempel ke organisasi dan produk**, bukan ke pengguna pemilik seperti kondisi kode saat ini.
+- **Lapisan platform dibangun lebih dulu** (Finlite ID, organisasi, hak pakai per produk) sebelum produk baru apa pun.
+- Accounting tetap hanya lewat undangan; pendaftaran terbuka untuk produk mandiri adalah keputusan terpisah.
+- Baca [07-keputusan-platform-segmen-dan-model-data.md](07-keputusan-platform-segmen-dan-model-data.md) untuk segmen pelanggan, skema tabel awal, pola data per produk, batas Workspace dan Accounting, serta urutan implementasi.
+
 ## Prinsip rancangan awal
 
 1. Jangan menduplikasi general ledger, saldo keuangan, atau aturan posting Finlite.
 2. Pertahankan batas tenant/perusahaan dan otorisasi yang eksplisit di setiap integrasi.
-3. Bedakan identitas pengguna, keanggotaan organisasi, role, dan hak akses per aplikasi. Pegawai portal tidak otomatis menjadi pengguna Accounting.
+3. Bedakan identitas pengguna, keanggotaan organisasi, dan hak akses per aplikasi. Hak akses melekat ke orang per fitur (mengikuti keputusan akses Accounting), bukan peran bawaan. Pegawai portal tidak otomatis menjadi pengguna Accounting.
 4. Pemilik data (system of record) ditentukan per domain; hindari dua sumber kebenaran.
 5. Integrasi memakai API/event terverifikasi, idempotency key, audit trail, dan rekonsiliasi; jangan mengakses database tenant aplikasi lain secara langsung.
 6. Semua perubahan status keuangan mengikuti kebijakan approval, posting, period lock, dan void di Finlite.
@@ -38,10 +46,12 @@ Finlite Accounting/ERP tetap menjadi **financial core saat pelanggan mengaktifka
 
 ## Urutan eksplorasi (belum disetujui)
 
-1. **Workspace**: validasi kebutuhan sekolah/yayasan, audit modul Budget yang sudah ada, desain organisasi dan workflow.
-2. **POS**: validasi kebutuhan retail dan integrasi Sales/Inventory/Payment.
-3. **WMS**: validasi operasi gudang dan hubungan dengan master stok.
-4. **CRM**: eksplorasi terpisah setelah kebutuhan dan segmentasi pasar teruji.
+0. **Platform**: Finlite ID, organisasi, dan hak pakai per produk; Accounting dipindahkan ke struktur ini.
+1. **Workspace mandiri**: validasi kebutuhan sekolah/yayasan, desain organisasi dan workflow; audit modul Budget yang sudah ada hanya untuk batas dan jembatan, bukan sebagai fondasi.
+2. **Jembatan Workspace-Accounting** (opsional bagi pelanggan).
+3. **POS**: validasi kebutuhan retail dan integrasi Sales/Inventory/Payment.
+4. **WMS**: validasi operasi gudang dan hubungan dengan master stok.
+5. **CRM**: eksplorasi terpisah setelah kebutuhan dan segmentasi pasar teruji.
 
 Urutan ini merupakan hipotesis prioritas, **bukan komitmen jadwal**.
 
@@ -52,6 +62,7 @@ Urutan ini merupakan hipotesis prioritas, **bukan komitmen jadwal**.
 - [03-integrasi-dan-arsitektur-awal.md](03-integrasi-dan-arsitektur-awal.md) — ownership data, keamanan, integrasi.
 - [04-roadmap-dan-pertanyaan-terbuka.md](04-roadmap-dan-pertanyaan-terbuka.md) — validasi, MVP, risiko, keputusan yang belum dibuat.
 - [06-finlite-pos-konsep-dan-roadmap.md](06-finlite-pos-konsep-dan-roadmap.md) — konsep POS retail online-only dan Device Bridge dari MVP.
+- [07-keputusan-platform-segmen-dan-model-data.md](07-keputusan-platform-segmen-dan-model-data.md) — keputusan arah 2026-11-01: segmen, platform, model data, urutan implementasi.
 
 ## Referensi kondisi saat ini
 

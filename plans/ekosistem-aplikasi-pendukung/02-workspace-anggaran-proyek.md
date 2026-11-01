@@ -2,6 +2,17 @@
 
 > **KONSEP PENGEMBANGAN BARU. BELUM ADA KOMITMEN IMPLEMENTASI.**
 
+## Berdiri sendiri (keputusan 2026-11-01)
+
+Workspace harus lengkap tanpa Accounting: sekolah dapat memakainya hanya untuk melacak anggaran. Konsekuensinya:
+
+- Workspace memiliki tabel kode anggaran, RAB, persetujuan, pencairan, dan LPJ sendiri; tidak memakai modul Budget di database Accounting.
+- Kode anggaran tidak memakai akun (COA) Accounting. Bila organisasi juga memakai Accounting, pemetaan kode anggaran ke akun disimpan di tabel jembatan.
+- Pada skenario "hanya Workspace", *actual* berasal dari pencairan dan bukti LPJ yang diverifikasi. Pada skenario "keduanya", *actual* dibaca dari Accounting melalui pesan terverifikasi.
+- Pernyataan di bawah yang menyebut "transaksi resmi Finlite" atau "Accounting" berlaku **hanya bila kedua produk tersambung**.
+
+Rincian skenario, batas, dan skema ada di [07-keputusan-platform-segmen-dan-model-data.md](07-keputusan-platform-segmen-dan-model-data.md).
+
 ## Aktor
 
 Pegawai/pengaju, kepala departemen, kepala unit, bagian keuangan, pimpinan, auditor; delegasi dan batas kewenangan harus didefinisikan.
@@ -13,7 +24,7 @@ Pegawai/pengaju, kepala departemen, kepala unit, bagian keuangan, pimpinan, audi
 3. Pengajuan kegiatan/proyek: proposal, RAB per item, cost center, lampiran, revisi, komentar.
 4. Workflow approval berjenjang yang configurable menurut nominal, unit, dan jenis pengajuan.
 5. Validasi ketersediaan anggaran dan reservasi sesuai kebijakan.
-6. Pencairan/pengadaan: referensi ke transaksi resmi Finlite (bukan jurnal manual paralel).
+6. Pencairan/pengadaan: dicatat di Workspace; bila Accounting tersambung, merujuk ke transaksi resmi Finlite (bukan jurnal manual paralel).
 7. LPJ: bukti pengeluaran, pengembalian dana, pemeriksaan, penutupan.
 8. Monitoring: pagu, dana yang dicadangkan, komitmen, realisasi aktual, outstanding uang muka, progres kegiatan, audit trail.
 
@@ -48,5 +59,6 @@ Setiap proyek dapat memiliki owner, unit, jadwal, milestone, anggaran per katego
 - Approver tidak dapat melompati batas kewenangan.
 - Satu aksi persetujuan tidak memicu reservasi ganda (idempotency).
 - Perubahan anggaran/pencairan/LPJ terlacak.
-- Angka actual direkonsiliasi ke Finlite; perbedaan disajikan sebagai exception.
+- Bila Accounting tersambung, angka actual direkonsiliasi ke Finlite dan perbedaan disajikan sebagai exception; bila tidak, actual mengikuti pencairan dan LPJ terverifikasi.
+- Workspace berfungsi penuh pada organisasi yang tidak memiliki langganan Accounting.
 - Tenant isolation dan kontrol company diuji.
