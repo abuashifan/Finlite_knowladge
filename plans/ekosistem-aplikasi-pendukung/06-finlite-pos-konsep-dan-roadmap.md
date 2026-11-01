@@ -13,10 +13,20 @@
 - Sasaran fase awal adalah **retail barang fisik**, **bukan restoran/F&B**. Manajemen meja, kitchen display, resep, split bill restoran, dan workflow dapur tidak termasuk MVP.
 - Finlite ID bersama, dengan organisasi, role, scope outlet, dan entitlement aplikasi yang terpisah. Pengguna hanya melihat data yang diizinkan.
 
+### Keputusan tambahan (2026-11-01)
+
+- **Sasaran pengguna:** warung, toko, dan koperasi sekolah. Perangkat bisa HP Android, tablet, atau laptop.
+- **Antarmuka berorientasi mobile (mobile-first).** Layar kasir dirancang untuk HP dan satu tangan lebih dulu, lalu diperluas untuk tablet dan laptop. Ini berlaku untuk kasir; backoffice (katalog, laporan) tetap nyaman di layar lebar tetapi harus dapat dipakai di HP.
+- **Penjualan tanpa data pelanggan** adalah alur normal (tunai langsung). **Penjualan kredit (kasbon) mewajibkan pelanggan.**
+- **Pelanggan baru dapat dibuat cepat saat memasukkan faktur** (nama dan kontak minimal di layar transaksi), tanpa berpindah ke menu master pelanggan. Detail lain dilengkapi belakangan.
+- **Tiga mode struk, dipilih per transaksi atau per outlet:** struk digital, tanpa struk, atau cetak. Outlet **boleh berjalan tanpa printer**; kemampuan Device Bridge tetap dibangun, tetapi bukan syarat untuk mulai berjualan.
+- **Cetak dari HP lewat printer thermal Bluetooth.** Cara teknisnya belum terbukti (lihat bagian 11) dan harus diuji pada perangkat dan printer nyata lebih awal.
+
 ## 2. Segmen pasar dan prioritas
 
 | Prioritas | Segmen | Masalah utama | Karakteristik |
 | --- | --- | --- | --- |
+| P1 | Warung | Transaksi cepat di HP, tanpa barcode atau printer, kasbon pelanggan | Dijalankan pemilik sendiri; kemampuan teknis rendah |
 | P1 | Minimarket lokal / toko kebutuhan harian | Kasir cepat, barcode, stok, shift, laporan | Banyak transaksi dan SKU |
 | P1 | Toko ATK, buku, perlengkapan sekolah | Barcode, kategori, stok, supplier, harga | Retail barang standar |
 | P1 | Koperasi sekolah/yayasan | Operasional kasir, kontrol petugas, laporan | Potensi integrasi Accounting/Workspace |
@@ -38,7 +48,7 @@ POS yang sederhana bagi kasir dan kuat untuk kontrol toko: barcode, transaksi ce
 4. **POS Cloud/API:** transaksi resmi, inventory ledger, pembayaran, shift, permissions, audit, laporan dan API integrasi.
 5. **Finlite Platform:** identitas, organisasi, subscription/entitlement, akses produk dan koneksi integrasi; perlu audit kesesuaian dengan backend yang ada.
 
-Frontend harus responsif untuk laptop dan tablet; dukungan hardware spesifik memerlukan pengujian per OS/browser/model perangkat.
+Frontend dirancang mobile-first (keputusan 2026-11-01) dan responsif ke tablet dan laptop; dukungan hardware spesifik memerlukan pengujian per OS/browser/model perangkat.
 
 ## 5. MVP operasional
 
@@ -119,6 +129,9 @@ Tunai, pencatatan pembayaran transfer/kartu/EDC eksternal dan QRIS statis **sete
 
 ## 11. Keputusan terbuka
 
+- **Cetak dari HP lewat printer Bluetooth:** belum terbukti. Browser di Android hanya dapat berbicara dengan sebagian printer (tergantung jenis Bluetooth yang dipakai printer), dan iPhone tidak didukung browser untuk hal ini. Alternatif: aplikasi pendamping kecil atau aplikasi cetak pihak ketiga. Wajib diuji dengan printer yang akan dipakai sebelum desain cetak dikunci.
+- **Aturan kasbon/piutang:** batas kredit per pelanggan, jatuh tempo, pembayaran cicilan, penghapusan piutang, dan laporan umur piutang.
+- **Data minimal pelanggan baru** saat membuat dari layar transaksi (nama saja, atau nama dan nomor telepon), serta pencegahan pelanggan ganda.
 - Bahasa/stack Device Bridge, lisensi, distribusi/update, dukungan OS dan printer yang disertifikasi.
 - Detail tax/discount/rounding, minimum stok dan retur.
 - Scope satuan/varian, multi-outlet, procurement stok awal dalam MVP.
