@@ -36,6 +36,7 @@ Finlite Accounting/ERP tetap menjadi **financial core saat pelanggan mengaktifka
 - Pilot pertama adalah sekolah milik pemilik produk, diuji dengan agen AI ditambah tes manual.
 - Accounting tetap hanya lewat undangan; pendaftaran terbuka untuk produk mandiri adalah keputusan terpisah.
 - Baca [07-keputusan-platform-segmen-dan-model-data.md](07-keputusan-platform-segmen-dan-model-data.md) untuk segmen pelanggan, skema tabel awal, pola data per produk, batas Workspace dan Accounting, serta urutan implementasi.
+- Baca [08-finlite-pos-rencana-fase.md](08-finlite-pos-rencana-fase.md) untuk rencana kerja POS per fase dan status yang sudah dibangun.
 
 ## Prinsip rancangan awal
 
@@ -68,6 +69,7 @@ Urutan ini merupakan hipotesis prioritas, **bukan komitmen jadwal**.
 - [04-roadmap-dan-pertanyaan-terbuka.md](04-roadmap-dan-pertanyaan-terbuka.md) — validasi, MVP, risiko, keputusan yang belum dibuat.
 - [06-finlite-pos-konsep-dan-roadmap.md](06-finlite-pos-konsep-dan-roadmap.md) — konsep POS retail online-only dan Device Bridge dari MVP.
 - [07-keputusan-platform-segmen-dan-model-data.md](07-keputusan-platform-segmen-dan-model-data.md) — keputusan arah 2026-11-01: segmen, dimensi produk, tenant dan skala, urutan implementasi, pilot.
+- [08-finlite-pos-rencana-fase.md](08-finlite-pos-rencana-fase.md) — rencana Fase 0 sampai rilis POS, status per fase, dan jembatan opsional ke Finlite Accounting.
 
 ## Referensi kondisi saat ini
 
