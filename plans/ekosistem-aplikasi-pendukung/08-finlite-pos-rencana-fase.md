@@ -22,7 +22,7 @@ platform (dokumen 07). Setiap fase berisi tujuan, pekerjaan backend
 
 | Fase | Isi | Status |
 | --- | --- | --- |
-| 0 | Fondasi platform multi-produk | Sebagian selesai |
+| 0 | Fondasi platform multi-produk | Selesai (di-merge 6 November 2026) |
 | 1 | MVP kasir | Kode selesai, belum online |
 | 2 | Berdiri sendiri: daftar, toko, paket POS | Belum |
 | 3 | Operasional toko harian | Belum |
@@ -40,24 +40,32 @@ Fase 5 boleh dimulai setelah Fase 2 karena hanya bergantung pada fondasi.
 **Tujuan:** backend bisa melayani lebih dari satu produk per perusahaan tanpa
 mencampur data.
 
-Sudah selesai:
+Sudah selesai (5 November 2026):
 - `tenant_databases.product`, unik per (perusahaan, produk). Kode akuntansi lama
   tetap memakai tenant akuntansi lewat global scope.
 - Tenant POS terpisah (`..._pos`), folder migrasi `database/migrations/tenant_pos`.
 - Middleware `company.access:pos`, izin `pos.*` di matriks hak akses.
 - Purge perusahaan ikut membuang tenant POS.
 
-Sisa pekerjaan:
-- **Koneksi database POS terpisah** (`pos`, bukan `tenant`). Saat ini model POS
-  memakai koneksi `tenant` yang sama dengan akuntansi, jadi satu request tidak
-  bisa membuka keduanya. Jembatan Fase 5 butuh keduanya terbuka bersamaan.
+Selesai di PR laravel_backend#15 (6 November 2026):
+- **Koneksi database POS terpisah** (`pos`, bukan `tenant`), jadi satu request
+  bisa membuka tenant akuntansi dan tenant POS bersamaan.
 - **Produk pada paket dan langganan**: kolom `product` di `plans` dan
-  `subscriptions`; langganan dicek per produk.
-- **Perusahaan tanpa tenant akuntansi**: pisahkan "buat perusahaan" dari
-  "aktifkan produk". Saat ini membuat perusahaan selalu membuat tenant
-  akuntansi beserta data awalnya.
-- **Daftar perusahaan per produk**: `/companies` mengembalikan produk yang aktif
-  di tiap perusahaan, supaya aplikasi kasir hanya menampilkan toko yang relevan.
+  `subscriptions`; `SubscriptionService` per produk; paket `pos` (harga 0,
+  tempat). `users.plan_id` tetap berarti paket akuntansi.
+- **Perusahaan tanpa tenant akuntansi**: `POST /companies` dengan
+  `product=pos`; kuota per produk; toko POS-only tidak memakan kuota akuntansi.
+- **Aktivasi produk**: `POST /companies/{id}/products/{product}/activate`,
+  hanya pemilik, dan pemilik wajib berlangganan produk itu. Aktivasi POS dari
+  aplikasi kasir memakai aturan yang sama.
+- **Daftar perusahaan per produk**: `/companies` memuat `products`. Finlite
+  Accounting menandai toko "Baru memakai Kasir" dan menawarkan aktivasi;
+  aplikasi kasir langsung membuka toko yang sudah punya POS.
+
+Catatan teknis untuk pengembang ada di `laravel_backend/docs/pos-dan-multi-produk.md`.
+
+Belum (dipindah ke Fase 2): login masih dikunci oleh status langganan
+akuntansi saja; pemilik toko POS-only dibuatkan akun oleh admin.
 
 Kriteria selesai: perusahaan bisa punya hanya tenant POS, hanya tenant
 akuntansi, atau keduanya; test tenant isolation dan izin hijau di CI untuk
