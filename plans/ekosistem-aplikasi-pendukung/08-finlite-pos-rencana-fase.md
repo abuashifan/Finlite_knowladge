@@ -24,7 +24,7 @@ platform (dokumen 07). Setiap fase berisi tujuan, pekerjaan backend
 | --- | --- | --- |
 | 0 | Fondasi platform multi-produk | Selesai (di-merge 6 November 2026) |
 | 1 | MVP kasir | Kode + E2E selesai, belum online |
-| 2 | Berdiri sendiri: daftar, toko, paket POS | Belum |
+| 2 | Berdiri sendiri: daftar, toko, paket POS | Selesai inti (6 Nov 2026); sisa UI admin & paket berbayar |
 | 3 | Operasional toko harian | Belum |
 | 4 | Laporan, kendali, dan keamanan | Belum |
 | 5 | Jembatan ke Finlite Accounting (opsional) | Belum |
@@ -131,6 +131,33 @@ tombol "Aktifkan Akuntansi" yang membuat tenant akuntansi untuk perusahaan itu.
 
 Kriteria selesai: orang baru bisa mendaftar sampai transaksi pertama dalam 5
 menit, tanpa admin dan tanpa tenant akuntansi.
+
+Selesai 6 November 2026 (laravel_backend#17, finlite_pos 790d02e):
+- Daftar mandiri + verifikasi email. Masa coba Kasir 14 hari dimulai saat
+  email terverifikasi; toko baru bisa dibuat setelah itu (email palsu tidak
+  bisa membuat tenant). Nama toko diisi di wizard, bukan di form daftar.
+- Wizard toko pertama (nama, alamat, HP, contoh produk opsional).
+- Langganan habis → toko hanya-baca (lihat data boleh, simpan ditolak).
+  Login aplikasi kasir tidak dikunci langganan akuntansi.
+- Pengguna toko: undang Kasir / Kepala toko (email + tautan WhatsApp), ubah
+  peran, nonaktifkan; jatah pengguna mengikuti paket Kasir pemilik.
+- Lupa/atur ulang kata sandi dan terima undangan di aplikasi kasir.
+- Spanduk masa coba, jatuh tempo, dan hanya-baca.
+- Backend admin: filter klien Kasir, status langganan Kasir, perpanjang dan
+  buka kunci per produk.
+- E2E `daftar.spec.ts`: daftar → verifikasi → buat toko → undang kasir →
+  kasir bergabung dengan izin kasir saja (lulus lokal).
+
+Belum:
+- **Tampilan panel admin** (react_frontend) untuk klien Kasir: backend siap,
+  layarnya belum.
+- **Paket berbayar dan gratis terbatas**: baru ada satu paket `pos` (harga 0,
+  3 pengguna, 1 toko) yang dipakai trial dan langganan. Harga dan tingkatan
+  menunggu keputusan pemilik (Fase 6). Batas jumlah produk belum ditegakkan.
+- Tautan upgrade di spanduk: sekarang hanya teks "hubungi admin".
+- Pengiriman email di Render (MAIL_*) harus jalan, kalau tidak verifikasi
+  tidak sampai. Isi `POS_FRONTEND_URL` bila domain kasir bukan
+  `pos.finlite.my.id`.
 
 ---
 
