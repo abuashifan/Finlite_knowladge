@@ -196,6 +196,19 @@ Frontend:
 Kriteria selesai: koperasi sekolah uji menjalankan satu minggu, termasuk
 barang masuk dan retur, tanpa catatan manual di luar aplikasi.
 
+Progres:
+- **3a selesai 6 November 2026** (laravel_backend#19, finlite_pos 812b57e):
+  retur penjualan sebagian/penuh (uang kembali tunai/transfer/QRIS atau
+  potong kasbon; barang rusak tidak kembali ke stok), pemasok dan barang
+  masuk (modal rata-rata, hutang pemasok dan pelunasannya), stok opname
+  dengan selisih jumlah dan nilai, serta simpan transaksi yang diulang
+  otomatis saat sinyal putus (kunci idempoten). E2E 14/14 lulus.
+- Diskon per baris sudah ada di backend sejak Fase 1; layar kasirnya belum.
+- Berikutnya 3b: harga grosir, pembulatan total, pajak per toko, diskon per
+  baris di layar kasir. 3c: impor produk Excel, foto produk, scan kamera.
+- Butuh perangkat nyata: cetak Bluetooth (spike di HP Android + printer
+  thermal), uji lapangan satuan ganda.
+
 ---
 
 ## Fase 4 — Laporan, kendali, dan keamanan
