@@ -148,16 +148,25 @@ Selesai 6 November 2026 (laravel_backend#17, finlite_pos 790d02e):
 - E2E `daftar.spec.ts`: daftar → verifikasi → buat toko → undang kasir →
   kasir bergabung dengan izin kasir saja (lulus lokal).
 
-Belum:
-- **Tampilan panel admin** (react_frontend) untuk klien Kasir: backend siap,
-  layarnya belum.
-- **Paket berbayar dan gratis terbatas**: baru ada satu paket `pos` (harga 0,
-  3 pengguna, 1 toko) yang dipakai trial dan langganan. Harga dan tingkatan
-  menunggu keputusan pemilik (Fase 6). Batas jumlah produk belum ditegakkan.
-- Tautan upgrade di spanduk: sekarang hanya teks "hubungi admin".
-- Pengiriman email di Render (MAIL_*) harus jalan, kalau tidak verifikasi
-  tidak sampai. Isi `POS_FRONTEND_URL` bila domain kasir bukan
-  `pos.finlite.my.id`.
+Selesai juga 6 November 2026 (laravel_backend#18, react_frontend#10,
+finlite_pos cf48ece):
+- Paket **Kasir** (3 pengguna, 1 toko, produk tanpa batas; dipakai masa coba)
+  dan **Kasir Gratis** (1 pengguna, 1 toko, 30 produk). Batas produk dan
+  pengguna ditegakkan; data lama tidak dihapus saat turun paket.
+- Setelah masa coba habis, pemilik bisa mengambil Kasir Gratis sendiri tanpa
+  admin, atau berlangganan lewat tombol WhatsApp (pembayaran manual).
+- Halaman **Langganan** di aplikasi kasir (paket, masa berlaku, pemakaian);
+  spanduk menautkan ke sana.
+- Panel admin Finlite Accounting: filter client Kasir, kolom status Kasir,
+  tab "Finlite Kasir" untuk mulai/perpanjang/ganti paket dan buka toko.
+- E2E: masa coba habis → hanya-baca → pilih Kasir Gratis (11/11 lulus lokal).
+
+Status: **kode Fase 2 selesai.** Tersisa keputusan dan pengaturan pemilik:
+- **Harga paket Kasir** masih Rp 0 (ubah di `PlanSeeder` setelah diputuskan).
+- Isi env di Render: `MAIL_*` (verifikasi email harus sampai),
+  `POS_SALES_WHATSAPP` (nomor WhatsApp penjual), dan `POS_FRONTEND_URL` bila
+  domain kasir bukan `pos.finlite.my.id`.
+- Pembayaran otomatis (payment gateway) tidak termasuk Fase 2.
 
 ---
 
