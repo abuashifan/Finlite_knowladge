@@ -203,9 +203,14 @@ Progres:
   masuk (modal rata-rata, hutang pemasok dan pelunasannya), stok opname
   dengan selisih jumlah dan nilai, serta simpan transaksi yang diulang
   otomatis saat sinyal putus (kunci idempoten). E2E 14/14 lulus.
-- Diskon per baris sudah ada di backend sejak Fase 1; layar kasirnya belum.
-- Berikutnya 3b: harga grosir, pembulatan total, pajak per toko, diskon per
-  baris di layar kasir. 3c: impor produk Excel, foto produk, scan kamera.
+- **3b selesai 7 November 2026** (laravel_backend#20, finlite_pos f46e8aa):
+  harga grosir per produk (maks 5 tingkat), diskon per baris di keranjang,
+  pajak per toko (tanpa / ditambahkan / sudah termasuk harga), pembulatan
+  total (100/500/1.000; terdekat/bawah/atas), struk memuat pajak dan
+  pembulatan. Sekalian diperbaiki: hari toko mengikuti zona waktu toko
+  (WIB/WITA/WIT); sebelumnya transaksi tengah malam sampai jam 7 pagi WIB
+  masuk tanggal kemarin. E2E 15/15 lulus.
+- Berikutnya 3c: impor produk dari Excel, foto produk, scan barcode kamera.
 - Butuh perangkat nyata: cetak Bluetooth (spike di HP Android + printer
   thermal), uji lapangan satuan ganda.
 
