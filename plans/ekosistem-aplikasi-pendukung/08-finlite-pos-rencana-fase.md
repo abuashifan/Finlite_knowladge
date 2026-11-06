@@ -23,7 +23,7 @@ platform (dokumen 07). Setiap fase berisi tujuan, pekerjaan backend
 | Fase | Isi | Status |
 | --- | --- | --- |
 | 0 | Fondasi platform multi-produk | Selesai (di-merge 6 November 2026) |
-| 1 | MVP kasir | Kode selesai, belum online |
+| 1 | MVP kasir | Kode + E2E selesai, belum online |
 | 2 | Berdiri sendiri: daftar, toko, paket POS | Belum |
 | 3 | Operasional toko harian | Belum |
 | 4 | Laporan, kendali, dan keamanan | Belum |
@@ -86,11 +86,17 @@ Sudah selesai (kode, di-merge ke `main`, diuji lokal di browser ukuran HP):
   nominal cepat, struk WhatsApp/cetak browser, produk, pelanggan, transaksi,
   shift, laporan, pengaturan.
 
+Selesai 6 November 2026:
+- Test E2E Playwright di repo `finlite_pos` (`npm run e2e`, ukuran HP): buka
+  shift, jual tunai, kasbon via scan barcode, tolak stok kurang, batal, tutup
+  shift cocok. Backend sqlite sementara, toko POS-only tanpa langganan
+  akuntansi. 6/6 lulus lokal. (Belum jalan di CI: butuh PHP + repo backend.)
+
 Sisa pekerjaan:
 - Deploy frontend ke Vercel (`pos.finlite.my.id`), isi `VITE_API_BASE_URL`,
-  tambahkan domain ke `CORS_ALLOWED_ORIGINS` di Render.
+  tambahkan domain ke `CORS_ALLOWED_ORIGINS` di Render. (Project Vercel sudah
+  dibuat pemilik; URL dan env belum dicek.)
 - Uji di HP sungguhan (Android Chrome, iOS Safari) dan dengan pemindai barcode USB/Bluetooth.
-- Test E2E Playwright untuk alur jual tunai, kasbon, batal, tutup shift.
 
 Kriteria selesai: pemilik uji menjalankan satu hari jualan nyata di HP tanpa
 bantuan, angka tutup shift cocok dengan uang laci.
