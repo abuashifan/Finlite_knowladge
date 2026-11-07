@@ -210,9 +210,14 @@ Progres:
   pembulatan. Sekalian diperbaiki: hari toko mengikuti zona waktu toko
   (WIB/WITA/WIT); sebelumnya transaksi tengah malam sampai jam 7 pagi WIB
   masuk tanggal kemarin. E2E 15/15 lulus.
-- Berikutnya 3c: impor produk dari Excel, foto produk, scan barcode kamera.
-- Butuh perangkat nyata: cetak Bluetooth (spike di HP Android + printer
-  thermal), uji lapangan satuan ganda.
+- **3c selesai 7 November 2026** (laravel_backend#21, finlite_pos 748c433):
+  impor produk dari Excel/CSV dengan pratinjau (produk lama diperbarui lewat
+  SKU/barcode/nama, stoknya tidak diubah), ekspor dan templat Excel, foto
+  produk (diperkecil di HP, disimpan di database toko, kuota 50 MB per toko),
+  scan barcode dengan kamera HP di layar kasir dan form produk. E2E 16/16 lulus.
+- Sisa Fase 3 butuh perangkat nyata: uji scan kamera di Android dan iPhone,
+  cetak Bluetooth (spike di HP Android + printer thermal), uji lapangan
+  satuan ganda.
 
 ---
 
