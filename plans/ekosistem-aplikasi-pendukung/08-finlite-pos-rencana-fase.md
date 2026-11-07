@@ -239,6 +239,17 @@ Frontend:
 Kriteria selesai: pemilik bisa menjawab "berapa laba minggu ini, kasir mana
 yang selisih, barang apa yang harus dibeli" dari aplikasi.
 
+Progres (Fase 4 dipecah: 4a laporan & dasbor, 4b log audit & batas wewenang
+& PIN, 4c ketahanan beban):
+- **4a selesai 7 November 2026** (laravel_backend#22, finlite_pos 4ff1d12):
+  dasbor pemilik (hari ini vs kemarin, grafik 7 hari, terlaris, stok
+  menipis, shift buka), laporan per kasir (termasuk selisih laci), rekap
+  shift, laba per produk, per kategori, per jam, stok menipis dengan saran
+  beli (rata-rata jual 14 hari), umur kasbon (0-30/31-60/61-90/>90 hari);
+  semua bisa diekspor Excel. Stok minimum per produk. E2E 17/17 lulus.
+- Berikutnya 4b: log audit (batal, ubah harga, ubah stok, buka/tutup shift),
+  diskon maksimum per kasir, PIN kepala toko untuk pembatalan.
+
 ---
 
 ## Fase 5 — Jembatan ke Finlite Accounting (opsional)
