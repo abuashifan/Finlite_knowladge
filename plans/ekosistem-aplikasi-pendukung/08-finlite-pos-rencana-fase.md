@@ -1,6 +1,6 @@
 # 08 — Finlite POS: rencana per fase (Fase 0 sampai rilis)
 
-Status per 5 November 2026. Melengkapi konsep (dokumen 06) dan keputusan
+Status per 13 November 2026. Melengkapi konsep (dokumen 06) dan keputusan
 platform (dokumen 07). Setiap fase berisi tujuan, pekerjaan backend
 (`laravel_backend`, modul `app/Modules/Pos`), pekerjaan frontend (repo
 `finlite_pos`), dan kriteria selesai.
@@ -26,7 +26,7 @@ platform (dokumen 07). Setiap fase berisi tujuan, pekerjaan backend
 | 1 | MVP kasir | Kode + E2E selesai, belum online |
 | 2 | Berdiri sendiri: daftar, toko, paket POS | Selesai inti (6 Nov 2026); sisa UI admin & paket berbayar |
 | 3 | Operasional toko harian | Belum |
-| 4 | Laporan, kendali, dan keamanan | Belum |
+| 4 | Laporan, kendali, dan keamanan | 4a dan 4b selesai; 4c (ketahanan beban) belum |
 | 5 | Jembatan ke Finlite Accounting (opsional) | Belum |
 | 6 | Komersial dan rilis | Belum |
 
@@ -247,8 +247,16 @@ Progres (Fase 4 dipecah: 4a laporan & dasbor, 4b log audit & batas wewenang
   shift, laba per produk, per kategori, per jam, stok menipis dengan saran
   beli (rata-rata jual 14 hari), umur kasbon (0-30/31-60/61-90/>90 hari);
   semua bisa diekspor Excel. Stok minimum per produk. E2E 17/17 lulus.
-- Berikutnya 4b: log audit (batal, ubah harga, ubah stok, buka/tutup shift),
-  diskon maksimum per kasir, PIN kepala toko untuk pembatalan.
+- **4b selesai 13 November 2026** (laravel_backend dan finlite_pos, branch
+  `claude/lucid-mendel-ddotc4`): log audit (buka/tutup shift dengan selisih
+  laci, batal, retur, ubah harga produk, ubah stok dan opname, diskon di atas
+  batas, PIN, pengaturan), batas diskon per kasir (bawaan toko + batas pribadi),
+  PIN kepala toko (hash, kunci 5 menit setelah 5 kali salah) untuk menyetujui
+  diskon di atas batas, dan batal/retur oleh kasir (mati bawaan; pemilik
+  menyalakannya). Izin baru `pos.audit.view` dan `pos.discount.override`.
+  Tes backend 28/28 di folder POS, suite penuh tanpa gagal; E2E 21/21.
+  Belum tercatat di log: perubahan harga lewat impor produk dan stok masuk.
+- Berikutnya 4c: ketahanan beban (indeks, uji 2.000 transaksi per hari).
 
 ---
 
