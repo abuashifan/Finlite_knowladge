@@ -8,7 +8,7 @@ Dokumentasi perencanaan dan knowledge base untuk project Finlite ERP.
 Finlite_knowladge/
   reference/      ← Pengetahuan lengkap aplikasi — MULAI DI SINI
   plans/          ← Dokumen perencanaan implementasi + riwayat keputusan
-  reviews/        ← Catatan review
+  reviews/        ← Catatan review + data uji (reviews/test-data/)
   tutorials/      ← Panduan langkah-demi-langkah untuk pengguna
 ```
 
@@ -40,6 +40,15 @@ Panduan langkah-demi-langkah untuk pengguna dan admin aplikasi.
 | [`tutorial-hapus-dan-restore-perusahaan.md`](tutorials/tutorial-hapus-dan-restore-perusahaan.md) | Menghapus perusahaan (client) dan memulihkannya (super admin): soft delete vs purge, masa pemulihan 30 hari, aturan kuota, `companies:sweep-deleted`, pemecahan masalah |
 | [`tutorial-import.md`](tutorials/tutorial-import.md) | Impor master data & transaksi dari `.xlsx`/CSV |
 | [`tutorial-pengecekan-subscription-tiers.md`](tutorials/tutorial-pengecekan-subscription-tiers.md) | Memeriksa & menegakkan fitur berdasarkan tier langganan |
+
+## Data uji
+
+Berkas siap-impor untuk pengujian manual, dengan README yang menjelaskan asumsi
+dan hasil yang diharapkan.
+
+| Folder | Isi |
+|---|---|
+| [`reviews/test-data/test-c-saldo-awal/`](reviews/test-data/test-c-saldo-awal/README.md) | Test C: saldo awal dan aset tetap awal untuk template COA Perdagangan Umum (2 berkas `.xlsx` + skrip pembuatnya) |
 
 ## Plans
 
