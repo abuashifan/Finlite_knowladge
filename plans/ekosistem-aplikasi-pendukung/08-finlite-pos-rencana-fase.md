@@ -27,7 +27,7 @@ platform (dokumen 07). Setiap fase berisi tujuan, pekerjaan backend
 | 2 | Berdiri sendiri: daftar, toko, paket POS | Selesai inti (6 Nov 2026); sisa UI admin & paket berbayar |
 | 3 | Operasional toko harian | Belum |
 | 4 | Laporan, kendali, dan keamanan | Selesai kode (4a laporan, 4b kendali, 4c beban); belum diuji pemilik toko |
-| 5 | Jembatan ke Finlite Accounting (opsional) | Belum |
+| 5 | Jembatan ke Finlite Accounting (opsional) | 5a selesai (kode): jurnal Rekap Kasir per shift; stok masuk dan sinkron produk belum |
 | 6 | Komersial dan rilis | Belum |
 
 Urutan wajib: 0 → 1 → 2. Fase 3 dan 4 boleh berjalan sejajar setelah Fase 2.
@@ -313,6 +313,26 @@ Frontend (Finlite Accounting):
 Kriteria selesai: satu minggu transaksi kasir masuk ke laba rugi Akuntansi
 dengan angka sama persis dengan laporan POS; memutus dan menyambung ulang
 jembatan tidak menggandakan jurnal.
+
+Progres:
+- **5a selesai 13 November 2026** (laravel_backend dan finlite_pos): jembatan
+  per shift tertutup. Satu jurnal sistem "Rekap Kasir" (`source_type=pos_shift`)
+  berisi penjualan menurut cara bayar, diskon, pajak, pembulatan, retur,
+  pelunasan kasbon, dan opsional HPP/persediaan. Pengaturan per toko (aktif,
+  tanggal mulai, pemetaan akun dengan usulan dari kode template), status kiriman
+  (menunggu, terkirim, gagal, ditahan, tanpa transaksi), kirim ulang, dan
+  halaman "Hubungkan ke Akuntansi" di aplikasi kasir. Idempoten dua lapis
+  (kunci `(jenis, id)` dan pemeriksaan jurnal bersumber di akuntansi): putus-sambung
+  atau kirim ulang tidak menggandakan jurnal. Kegagalan tidak pernah
+  menggagalkan penutupan shift. Periode atau tahun fiskal terkunci -> kiriman
+  ditahan. Opsi "Rekap Kasir" ada di filter Jenis Jurnal aplikasi akuntansi.
+  Temuan penting: guard tanggal akuntansi menolak shift 00.00-07.00 WIB sebagai
+  "transaksi masa depan" (memakai tanggal server UTC), jadi jembatan hanya
+  mengecek kunci periode. Tes: 11 tes backend baru, E2E 25/25 (4 baru).
+- **Belum:** stok masuk dan pembayaran pemasok sebagai jurnal (butuh akun Hutang
+  pemasok), sinkron produk POS dan Akuntansi (opsional), tautan jurnal ke layar
+  shift di aplikasi akuntansi. Kriteria "satu minggu transaksi cocok dengan
+  laporan POS" belum diuji dengan data nyata.
 
 ---
 
