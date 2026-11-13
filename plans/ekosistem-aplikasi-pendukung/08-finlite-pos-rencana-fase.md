@@ -26,7 +26,7 @@ platform (dokumen 07). Setiap fase berisi tujuan, pekerjaan backend
 | 1 | MVP kasir | Kode + E2E selesai, belum online |
 | 2 | Berdiri sendiri: daftar, toko, paket POS | Selesai inti (6 Nov 2026); sisa UI admin & paket berbayar |
 | 3 | Operasional toko harian | Belum |
-| 4 | Laporan, kendali, dan keamanan | 4a dan 4b selesai; 4c (ketahanan beban) belum |
+| 4 | Laporan, kendali, dan keamanan | Selesai kode (4a laporan, 4b kendali, 4c beban); belum diuji pemilik toko |
 | 5 | Jembatan ke Finlite Accounting (opsional) | Belum |
 | 6 | Komersial dan rilis | Belum |
 
@@ -256,7 +256,22 @@ Progres (Fase 4 dipecah: 4a laporan & dasbor, 4b log audit & batas wewenang
   menyalakannya). Izin baru `pos.audit.view` dan `pos.discount.override`.
   Tes backend 28/28 di folder POS, suite penuh tanpa gagal; E2E 21/21.
   Belum tercatat di log: perubahan harga lewat impor produk dan stok masuk.
-- Berikutnya 4c: ketahanan beban (indeks, uji 2.000 transaksi per hari).
+- **4c selesai 13 November 2026** (laravel_backend, branch
+  `claude/lucid-mendel-ddotc4`): uji beban satu toko 30 hari x 2.000 transaksi
+  (60.000 nota) di Postgres 16 lokal, lewat `tests/TenantPgsql/PosLoadTest.php`.
+  Ringkasan 30 hari 15,7 dtk -> 0,24 dtk, laporan per jam 30 hari 20,2 dtk ->
+  0,04 dtk, dasbor 5,3 dtk -> 0,24 dtk, daftar transaksi 0,58 dtk -> 0,03 dtk;
+  semua permintaan baca kini di bawah 250 ms. Penyebabnya: pengelompokan per
+  hari/jam dikerjakan di PHP (kini di SQL), FK baris penjualan tidak
+  berindeks (Postgres tidak mengindeks FK otomatis), dan umur kasbon satu query
+  per pelanggan. Ditemukan dan diperbaiki juga **nomor transaksi bentrok** saat
+  dua kasir menyimpan bersamaan (24 dari 120 transaksi gagal 500 pada uji 8
+  permintaan serentak; kini penghitung atomik, 120/120 dan 200/200 berhasil
+  tanpa nomor kembar atau deadlock). Belum diukur: Neon sungguhan dan beban
+  banyak perangkat sekaligus.
+- **Fase 4 selesai** (4a, 4b, 4c). Kriteria "pemilik bisa menjawab berapa laba
+  minggu ini, kasir mana yang selisih, barang apa yang harus dibeli" sudah
+  tersedia di aplikasi; belum diuji pemilik toko sungguhan.
 
 ---
 
