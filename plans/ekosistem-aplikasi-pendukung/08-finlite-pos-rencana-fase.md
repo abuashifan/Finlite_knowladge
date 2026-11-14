@@ -27,8 +27,8 @@ platform (dokumen 07). Setiap fase berisi tujuan, pekerjaan backend
 | 2 | Berdiri sendiri: daftar, toko, paket POS | Selesai inti (6 Nov 2026); sisa UI admin & paket berbayar |
 | 3 | Operasional toko harian | 3a-3c selesai (kode, E2E); sisa uji perangkat nyata (scan kamera, cetak Bluetooth) dan satuan ganda |
 | 4 | Laporan, kendali, dan keamanan | Selesai kode (4a laporan, 4b kendali, 4c beban); belum diuji pemilik toko |
-| 5 | Jembatan ke Finlite Accounting (opsional) | 5a dan 5b selesai (kode): jurnal Rekap Kasir per shift, stok masuk, bayar hutang pemasok; sinkron produk belum |
-| 6 | Komersial dan rilis | 6a dan 6b selesai (kode): PWA, harga, bantuan, syarat, privasi, pemantauan error; sisa cadangan Neon (konfigurasi), penagihan otomatis, pilot |
+| 5 | Jembatan ke Finlite Accounting (opsional) | Selesai kode (5a-5c): jurnal Rekap Kasir, stok masuk, bayar hutang, selisih opname, ambil produk dari Akuntansi; belum diuji data nyata |
+| 6 | Komersial dan rilis | Selesai kode (6a, 6b); sisa non-kode: cadangan Neon, harga, tinjau syarat, payment gateway (opsional), video bantuan, pilot |
 
 Urutan wajib: 0 → 1 → 2. Fase 3 dan 4 boleh berjalan sejajar setelah Fase 2.
 Fase 5 boleh dimulai setelah Fase 2 karena hanya bergantung pada fondasi.
@@ -344,9 +344,28 @@ Progres:
   E2E `jembatan.spec.ts`. Temuan: laporan Neraca Saldo 500 di Postgres
   (`substr` pada kolom tanggal, hanya muncul di Postgres) diperbaiki dengan
   `whereDate()` dan diberi tes Postgres; tata letak cetak Neraca Saldo dirapikan.
-- **Belum:** opname/penyesuaian stok sebagai jurnal, sinkron produk POS dan Akuntansi (opsional), tautan jurnal ke layar
-  shift di aplikasi akuntansi. Kriteria "satu minggu transaksi cocok dengan
-  laporan POS" belum diuji dengan data nyata.
+- **5c selesai 14 November 2026** (laravel_backend#29, finlite_pos, react_frontend):
+  - **Selisih stok opname** menjadi jurnal `pos_stock_count` ("Selisih Stok
+    Kasir"): lebih = debit Persediaan, kredit Selisih persediaan; kurang =
+    sebaliknya. Kunci pemetaan baru `stock_variance` (usulan akun 5120, jenis
+    beban), hanya bila nilainya muncul. Dikirim bersama HPP seperti stok masuk;
+    opname tanpa selisih nilai tidak dikirim. Filter Jenis Jurnal di aplikasi
+    akuntansi memuat "Selisih Stok Kasir".
+  - **Ambil produk dari Akuntansi** (opsional, sekali jalan, BUKAN sinkron):
+    kartu di halaman Hubungkan ke Akuntansi. Menyalin nama, kode (SKU),
+    kategori, satuan, harga jual, dan harga beli (modal) sebagai produk Kasir
+    baru. Stok tidak disalin (isi lewat stok masuk atau opname, supaya nilai
+    persediaan tidak ganda). SKU yang sudah ada dilewati, batas paket dihormati,
+    tercatat di log aktivitas. Sesudahnya produk Kasir berdiri sendiri.
+  - Tes: 3 tes backend baru (total `PosBridgeTest` 17), E2E 29/29.
+- **Keputusan:** penyesuaian stok manual satu per satu (ubah stok di layar
+  produk) tidak dijurnal: tidak punya dokumen sumber sendiri, dan opname adalah
+  jalur resmi koreksi stok. **Tautan dari jurnal ke layar shift** tidak dibuat
+  karena kedua aplikasi beda situs: jurnal Rekap Kasir memuat "Shift #id - nama
+  kasir" di kolom Nomor Sumber, dan layar Hubungkan ke Akuntansi menampilkan
+  nomor jurnal tiap kiriman (arah sebaliknya).
+- **Belum:** kriteria "satu minggu transaksi kasir cocok dengan laporan POS"
+  belum diuji dengan data nyata (bagian pengujian menyeluruh).
 
 ---
 
