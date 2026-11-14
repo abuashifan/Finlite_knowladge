@@ -25,10 +25,10 @@ platform (dokumen 07). Setiap fase berisi tujuan, pekerjaan backend
 | 0 | Fondasi platform multi-produk | Selesai (di-merge 6 November 2026) |
 | 1 | MVP kasir | Kode + E2E selesai, belum online |
 | 2 | Berdiri sendiri: daftar, toko, paket POS | Selesai inti (6 Nov 2026); sisa UI admin & paket berbayar |
-| 3 | Operasional toko harian | Belum |
+| 3 | Operasional toko harian | 3a-3c selesai (kode, E2E); sisa uji perangkat nyata (scan kamera, cetak Bluetooth) dan satuan ganda |
 | 4 | Laporan, kendali, dan keamanan | Selesai kode (4a laporan, 4b kendali, 4c beban); belum diuji pemilik toko |
 | 5 | Jembatan ke Finlite Accounting (opsional) | 5a dan 5b selesai (kode): jurnal Rekap Kasir per shift, stok masuk, bayar hutang pemasok; sinkron produk belum |
-| 6 | Komersial dan rilis | 6a selesai (kode): PWA, harga, bantuan, syarat, privasi; sisa pemantauan, cadangan, pilot |
+| 6 | Komersial dan rilis | 6a dan 6b selesai (kode): PWA, harga, bantuan, syarat, privasi, pemantauan error; sisa cadangan Neon (konfigurasi), penagihan otomatis, pilot |
 
 Urutan wajib: 0 → 1 → 2. Fase 3 dan 4 boleh berjalan sejajar setelah Fase 2.
 Fase 5 boleh dimulai setelah Fase 2 karena hanya bergantung pada fondasi.
@@ -369,10 +369,20 @@ Progres:
   dan maskable; tombol "Pasang aplikasi di layar utama"), halaman publik
   `/harga`, `/bantuan` (panduan singkat per alur), `/syarat`, `/privasi`,
   tautan di login dan daftar. E2E 27/27.
+- **6b selesai 14 November 2026** (laravel_backend, finlite_pos): pemantauan
+  error tanpa layanan tambahan. Browser melaporkan error (error skrip, promise
+  tak tertangani, error tampilan React) ke `POST /api/pos/client-errors` (publik,
+  throttle 20/menit, hanya dicatat). Backend menulis `pos.client_error` ke log
+  stderr: **cari kata itu di log Render** untuk melihat error di sisi kasir.
+  Isi: pesan, stack, halaman, id toko dan pengguna (bila masuk), user agent.
+  Pesan sama dikirim sekali dan maksimal 10 per sesi. Layar putih diganti layar
+  "Ada yang tidak beres" dengan tombol muat ulang. Error 500 backend sudah masuk
+  log Laravel seperti biasa. Belum ada peringatan otomatis (email/WA); kalau
+  nanti perlu, pasang Sentry atau alert log Render. Tes: 3 tes backend, E2E 28/28.
 - **Perlu keputusan/peninjauan pemilik:** teks syarat layanan dan kebijakan
   privasi adalah draf umum, perlu ditinjau (idealnya oleh ahli hukum) sebelum
   rilis umum; harga rupiah paket Kasir belum dicantumkan (masih lewat WhatsApp).
-- **Belum:** pemantauan error (Sentry atau sejenis), cadangan harian tenant POS
+- **Belum:** cadangan harian tenant POS
   dan uji pemulihan (kondisi Neon dan langkahnya ada di "Daftar periksa sebelum
   rilis production" di bawah), penagihan
   otomatis/payment gateway, video bantuan, uji coba pilot.
@@ -399,7 +409,7 @@ Langkah:
 
 Lain-lain sebelum rilis: teks syarat layanan dan kebijakan privasi (draf umum)
 ditinjau pemilik atau ahli hukum; harga rupiah paket Kasir dicantumkan;
-pemantauan error aktif (minimal log Render dipantau); hapus data uji dan baris
+pastikan log Render dipantau (cari `pos.client_error`; ada di 6b); hapus data uji dan baris
 tenant yatim di Neon (id 2-9 yang memunculkan "Company tidak ditemukan").
 
 ---
