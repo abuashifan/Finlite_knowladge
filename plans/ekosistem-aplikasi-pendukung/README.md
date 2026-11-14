@@ -70,6 +70,9 @@ Urutan ini merupakan hipotesis prioritas, **bukan komitmen jadwal**.
 - [06-finlite-pos-konsep-dan-roadmap.md](06-finlite-pos-konsep-dan-roadmap.md) — konsep POS retail online-only dan Device Bridge dari MVP.
 - [07-keputusan-platform-segmen-dan-model-data.md](07-keputusan-platform-segmen-dan-model-data.md) — keputusan arah 2026-11-01: segmen, dimensi produk, tenant dan skala, urutan implementasi, pilot.
 - [08-finlite-pos-rencana-fase.md](08-finlite-pos-rencana-fase.md) — rencana Fase 0 sampai rilis POS, status per fase, dan jembatan opsional ke Finlite Accounting.
+- [09-rencana-testing-menyeluruh.md](09-rencana-testing-menyeluruh.md) — rencana pengujian menyeluruh Kasir dan jembatan Accounting.
+- [10-finlite-gudang-riset-kebutuhan-dan-fitur.md](10-finlite-gudang-riset-kebutuhan-dan-fitur.md) — riset kebutuhan dan katalog fitur Finlite Gudang (usulan).
+- [11-finlite-gudang-rencana-fase.md](11-finlite-gudang-rencana-fase.md) — rencana pembuatan Finlite Gudang per fase (usulan, belum disetujui).
 
 ## Referensi kondisi saat ini
 
