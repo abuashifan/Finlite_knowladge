@@ -27,7 +27,7 @@ platform (dokumen 07). Setiap fase berisi tujuan, pekerjaan backend
 | 2 | Berdiri sendiri: daftar, toko, paket POS | Selesai inti (6 Nov 2026); sisa UI admin & paket berbayar |
 | 3 | Operasional toko harian | Belum |
 | 4 | Laporan, kendali, dan keamanan | Selesai kode (4a laporan, 4b kendali, 4c beban); belum diuji pemilik toko |
-| 5 | Jembatan ke Finlite Accounting (opsional) | 5a selesai (kode): jurnal Rekap Kasir per shift; stok masuk dan sinkron produk belum |
+| 5 | Jembatan ke Finlite Accounting (opsional) | 5a dan 5b selesai (kode): jurnal Rekap Kasir per shift, stok masuk, bayar hutang pemasok; sinkron produk belum |
 | 6 | Komersial dan rilis | Belum |
 
 Urutan wajib: 0 → 1 → 2. Fase 3 dan 4 boleh berjalan sejajar setelah Fase 2.
@@ -329,8 +329,19 @@ Progres:
   Temuan penting: guard tanggal akuntansi menolak shift 00.00-07.00 WIB sebagai
   "transaksi masa depan" (memakai tanggal server UTC), jadi jembatan hanya
   mengecek kunci periode. Tes: 11 tes backend baru, E2E 25/25 (4 baru).
-- **Belum:** stok masuk dan pembayaran pemasok sebagai jurnal (butuh akun Hutang
-  pemasok), sinkron produk POS dan Akuntansi (opsional), tautan jurnal ke layar
+- **5b selesai 14 November 2026** (di-merge ke `main`): stok masuk menjadi jurnal
+  `pos_purchase` (debit persediaan, kredit hutang pemasok) dan pembayaran
+  pemasok menjadi jurnal `pos_supplier_payment` (debit hutang, kredit kas/bank).
+  Pemetaan akun bertambah kunci `payable` (Hutang Usaha). Opsi "Kirim juga
+  persediaan, HPP, dan hutang pemasok" di halaman Hubungkan ke Akuntansi
+  (`with_cogs`). Kunci idempoten tetap `(jenis, id)` dengan jenis baru
+  shift/purchase/payment; kiriman ditahan bila periode terkunci. Filter Jenis
+  Jurnal di aplikasi akuntansi memuat "Stok Masuk Kasir" dan "Bayar Hutang
+  Kasir". Tes: 14 tes `PosBridgeTest`, uji beban `PosLoadTest` (Postgres),
+  E2E `jembatan.spec.ts`. Temuan: laporan Neraca Saldo 500 di Postgres
+  (`substr` pada kolom tanggal, hanya muncul di Postgres) diperbaiki dengan
+  `whereDate()` dan diberi tes Postgres; tata letak cetak Neraca Saldo dirapikan.
+- **Belum:** opname/penyesuaian stok sebagai jurnal, sinkron produk POS dan Akuntansi (opsional), tautan jurnal ke layar
   shift di aplikasi akuntansi. Kriteria "satu minggu transaksi cocok dengan
   laporan POS" belum diuji dengan data nyata.
 
