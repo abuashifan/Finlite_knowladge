@@ -373,8 +373,34 @@ Progres:
   privasi adalah draf umum, perlu ditinjau (idealnya oleh ahli hukum) sebelum
   rilis umum; harga rupiah paket Kasir belum dicantumkan (masih lewat WhatsApp).
 - **Belum:** pemantauan error (Sentry atau sejenis), cadangan harian tenant POS
-  dan uji pemulihan (Neon: cek retensi point-in-time restore), penagihan
+  dan uji pemulihan (kondisi Neon dan langkahnya ada di "Daftar periksa sebelum
+  rilis production" di bawah), penagihan
   otomatis/payment gateway, video bantuan, uji coba pilot.
+
+### Daftar periksa sebelum rilis production (wajib)
+
+**Cadangan database (Neon).** Dicek 14 November 2026 pada project
+`soft-cloud-02448469`, branch `production` (±100 MB). Kondisi saat itu belum
+layak untuk toko sungguhan:
+
+| Hal | Kondisi 14 Nov 2026 | Target sebelum rilis |
+| --- | --- | --- |
+| Retensi pemulihan titik waktu (PITR) | 6 jam | Beberapa hari (usul 7 hari; tergantung paket dan biaya, putuskan sebelum rilis) |
+| Snapshot terjadwal | Tidak ada | Harian di branch `production` |
+| Branch `production` dilindungi | Belum | Ya (cegah terhapus tak sengaja) |
+| Uji pemulihan | Belum pernah | Sekali: buat branch dari snapshot, cek data tenant dan transaksi utuh |
+
+Langkah:
+1. Pasang snapshot harian di branch `production` dan aktifkan proteksi branch.
+2. Naikkan retensi pemulihan sesuai keputusan (cek biaya penyimpanan).
+3. Uji pemulihan dari snapshot ke branch baru; cek daftar tenant, tabel
+   `pos_*`, dan saldo laporan, lalu hapus branch uji.
+4. Catat hasil uji dan tanggalnya di sini.
+
+Lain-lain sebelum rilis: teks syarat layanan dan kebijakan privasi (draf umum)
+ditinjau pemilik atau ahli hukum; harga rupiah paket Kasir dicantumkan;
+pemantauan error aktif (minimal log Render dipantau); hapus data uji dan baris
+tenant yatim di Neon (id 2-9 yang memunculkan "Company tidak ditemukan").
 
 ---
 
