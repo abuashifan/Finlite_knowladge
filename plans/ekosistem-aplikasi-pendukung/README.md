@@ -73,6 +73,7 @@ Urutan ini merupakan hipotesis prioritas, **bukan komitmen jadwal**.
 - [09-rencana-testing-menyeluruh.md](09-rencana-testing-menyeluruh.md) — rencana pengujian menyeluruh Kasir dan jembatan Accounting.
 - [10-finlite-gudang-riset-kebutuhan-dan-fitur.md](10-finlite-gudang-riset-kebutuhan-dan-fitur.md) — riset kebutuhan dan katalog fitur Finlite Gudang (usulan).
 - [11-finlite-gudang-rencana-fase.md](11-finlite-gudang-rencana-fase.md) — rencana pembuatan Finlite Gudang per fase (usulan, belum disetujui).
+- [12-finlite-gudang-fase0-wawancara-dan-spesifikasi-awal.md](12-finlite-gudang-fase0-wawancara-dan-spesifikasi-awal.md) — Fase 0 Gudang: panduan wawancara, keputusan, dan draf spesifikasi Fase 1.
 
 ## Referensi kondisi saat ini
 

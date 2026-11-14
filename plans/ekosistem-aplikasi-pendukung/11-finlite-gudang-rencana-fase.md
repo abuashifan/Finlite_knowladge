@@ -54,6 +54,8 @@ Fondasi (kode kecil):
 
 **Kriteria selesai:** keputusan terbuka terjawab dan tercatat; wawancara menghasilkan daftar prioritas fitur yang menggantikan tebakan di dokumen 10; pemilik dapat mendaftar, mengaktifkan produk Gudang, dan melihat halaman kosong yang terkunci langganan.
 
+**Status (15 November 2026):** Fase 0 dimulai. Fondasi backend selesai (laravel_backend#30: produk `gudang`, paket, izin, aktivasi). Panduan wawancara, daftar keputusan, dan draf spesifikasi Fase 1 ada di [12](12-finlite-gudang-fase0-wawancara-dan-spesifikasi-awal.md). Menunggu: wawancara, keputusan pemilik, dan repositori frontend baru.
+
 **Risiko:** wawancara menunjukkan pasar utama bukan yang diasumsikan. Mitigasi: fase 1 baru dimulai setelah wawancara, dan rencana ini direvisi.
 
 ---
