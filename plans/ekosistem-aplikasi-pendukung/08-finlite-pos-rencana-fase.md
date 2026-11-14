@@ -28,7 +28,7 @@ platform (dokumen 07). Setiap fase berisi tujuan, pekerjaan backend
 | 3 | Operasional toko harian | Belum |
 | 4 | Laporan, kendali, dan keamanan | Selesai kode (4a laporan, 4b kendali, 4c beban); belum diuji pemilik toko |
 | 5 | Jembatan ke Finlite Accounting (opsional) | 5a dan 5b selesai (kode): jurnal Rekap Kasir per shift, stok masuk, bayar hutang pemasok; sinkron produk belum |
-| 6 | Komersial dan rilis | Belum |
+| 6 | Komersial dan rilis | 6a selesai (kode): PWA, harga, bantuan, syarat, privasi; sisa pemantauan, cadangan, pilot |
 
 Urutan wajib: 0 → 1 → 2. Fase 3 dan 4 boleh berjalan sejajar setelah Fase 2.
 Fase 5 boleh dimulai setelah Fase 2 karena hanya bergantung pada fondasi.
@@ -359,6 +359,22 @@ Progres:
 
 Kriteria selesai: toko pilot membayar langganan dan memakai POS tanpa
 pendampingan selama satu bulan.
+
+Progres:
+- **Sudah ada dari Fase 2:** masa coba 14 hari, paket Kasir Gratis (1 pengguna,
+  30 produk), paket Kasir, mode hanya-baca saat langganan habis, berlangganan
+  lewat WhatsApp (konfirmasi manual oleh admin).
+- **6a selesai 14 November 2026** (finlite_pos): PWA (service worker hanya
+  menyimpan cangkang aplikasi, `/api` tidak pernah di-cache; ikon PNG 192/512
+  dan maskable; tombol "Pasang aplikasi di layar utama"), halaman publik
+  `/harga`, `/bantuan` (panduan singkat per alur), `/syarat`, `/privasi`,
+  tautan di login dan daftar. E2E 27/27.
+- **Perlu keputusan/peninjauan pemilik:** teks syarat layanan dan kebijakan
+  privasi adalah draf umum, perlu ditinjau (idealnya oleh ahli hukum) sebelum
+  rilis umum; harga rupiah paket Kasir belum dicantumkan (masih lewat WhatsApp).
+- **Belum:** pemantauan error (Sentry atau sejenis), cadangan harian tenant POS
+  dan uji pemulihan (Neon: cek retensi point-in-time restore), penagihan
+  otomatis/payment gateway, video bantuan, uji coba pilot.
 
 ---
 
