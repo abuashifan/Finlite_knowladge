@@ -255,7 +255,10 @@ Progres (Fase 4 dipecah: 4a laporan & dasbor, 4b log audit & batas wewenang
   diskon di atas batas, dan batal/retur oleh kasir (mati bawaan; pemilik
   menyalakannya). Izin baru `pos.audit.view` dan `pos.discount.override`.
   Tes backend 28/28 di folder POS, suite penuh tanpa gagal; E2E 21/21.
-  Belum tercatat di log: perubahan harga lewat impor produk dan stok masuk.
+  Dilengkapi 14 November 2026 (laravel_backend#28): impor produk (ringkasan,
+  ubah harga/modal produk lama, stok awal), stok masuk (termasuk perubahan harga
+  modal rata-rata), dan bayar hutang pemasok kini juga tercatat (aksi
+  `product.import`, `stock.in`, `supplier.pay`).
 - **4c selesai 13 November 2026** (laravel_backend, branch
   `claude/lucid-mendel-ddotc4`): uji beban satu toko 30 hari x 2.000 transaksi
   (60.000 nota) di Postgres 16 lokal, lewat `tests/TenantPgsql/PosLoadTest.php`.
