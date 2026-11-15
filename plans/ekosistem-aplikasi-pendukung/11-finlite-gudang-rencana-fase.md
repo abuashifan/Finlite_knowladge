@@ -30,8 +30,7 @@ status, dan satu uji manual oleh pemilik produk.
 | 5 | Skala dan saluran: pemindai Bluetooth, serial, marketplace, API (atas permintaan) | L | Permintaan pelanggan nyata |
 | 6 | Komersial dan rilis | M | Fase 1-4 stabil |
 
-Fase 3 dan 5 sengaja bersyarat: dikerjakan hanya bila wawancara dan pilot
-menunjukkan kebutuhannya.
+Fase 3 dan 5 sengaja bersyarat: dikerjakan hanya bila pilot menunjukkan kebutuhannya.
 
 ---
 
@@ -41,8 +40,8 @@ menunjukkan kebutuhannya.
 sebagai produk ketiga di platform.
 
 Penemuan (tanpa kode):
-- Wawancara 5-8 gudang dengan daftar pertanyaan di dokumen 10 bagian 8, termasuk gudang pemilik produk.
-- Kumpulkan contoh dokumen nyata (surat jalan, DO, form opname) dan data barang untuk uji. Data nyata **tidak** masuk repositori; anonimkan.
+- **Tanpa wawancara** (tidak ada gudang yang bisa diwawancarai): riset meja Indonesia selesai (dokumen 10 bagian 2b); validasi lewat skenario dokumen, agen AI, dan pilot irisan tipis (dokumen 10 bagian 8).
+- Susun contoh dokumen (surat jalan, DO, bukti penerimaan, form opname) dan data barang rekaan untuk uji. Data nyata **tidak** masuk repositori.
 - Putuskan 8 keputusan terbuka di dokumen 10 bagian 9, terutama: batch di MVP atau Fase 2, online-only, dan pemilik angka stok bila tersambung.
 - Tulis "definisi siap dibangun" untuk Fase 1: pemilik domain, user story, matriks izin, diagram status dokumen, skenario gagal, tes penerimaan (dokumen 04).
 
@@ -52,11 +51,11 @@ Fondasi (kode kecil):
 - Paket awal: Gudang Gratis (satu gudang, batas barang) dan Gudang (batas pengguna), dengan masa coba dan mode hanya-baca saat habis, sama seperti Kasir.
 - Kerangka aplikasi: repositori frontend baru (React, Vite, TypeScript, Tailwind, TanStack Query) dari kerangka Kasir, PWA, halaman masuk, pilih perusahaan.
 
-**Kriteria selesai:** keputusan terbuka terjawab dan tercatat; wawancara menghasilkan daftar prioritas fitur yang menggantikan tebakan di dokumen 10; pemilik dapat mendaftar, mengaktifkan produk Gudang, dan melihat halaman kosong yang terkunci langganan.
+**Kriteria selesai:** keputusan terbuka terjawab dan tercatat (usulan bawaan dipakai); riset meja selesai dan celahnya didaftar; pemilik dapat mendaftar, mengaktifkan produk Gudang, dan melihat halaman kosong yang terkunci langganan.
 
-**Status (15 November 2026):** Fase 0 dimulai. Fondasi backend selesai (laravel_backend#30: produk `gudang`, paket, izin, aktivasi). Panduan wawancara, daftar keputusan, dan draf spesifikasi Fase 1 ada di [12](12-finlite-gudang-fase0-wawancara-dan-spesifikasi-awal.md). Menunggu: wawancara, keputusan pemilik, dan repositori frontend baru.
+**Status (15 November 2026):** Fase 0 dimulai. Fondasi backend selesai (laravel_backend#30: produk `gudang`, paket, izin, aktivasi). Panduan wawancara, daftar keputusan, dan draf spesifikasi Fase 1 ada di [12](12-finlite-gudang-fase0-wawancara-dan-spesifikasi-awal.md). Wawancara **dibatalkan** (15 November 2026); diganti riset meja dan pilot. Menunggu: repositori frontend baru dan konfirmasi keputusan.
 
-**Risiko:** wawancara menunjukkan pasar utama bukan yang diasumsikan. Mitigasi: fase 1 baru dimulai setelah wawancara, dan rencana ini direvisi.
+**Risiko:** pasar utama bukan yang diasumsikan, dan tanpa wawancara risiko ini lebih besar. Mitigasi: Fase 1 dibuat sebagai pilot irisan tipis, fitur mahal bersyarat bukti, dan rencana direvisi setelah pilot.
 
 ---
 
@@ -114,7 +113,7 @@ Frontend:
 
 **Tujuan:** untuk gudang dengan banyak pesanan keluar per hari: kurangi salah ambil dan percepat pengeluaran.
 
-Dikerjakan hanya bila wawancara dan pilot Fase 1-2 menunjukkan pengeluaran sebagai titik sakit.
+Dikerjakan hanya bila pilot Fase 1-2 menunjukkan pengeluaran sebagai titik sakit.
 
 - Pesanan keluar (permintaan barang): reservasi stok sehingga tersedia = di tangan - dipesan.
 - Pick list berurutan menurut lokasi; pick dengan scan dan verifikasi jumlah; kekurangan stok dicatat sebagai short pick.
@@ -196,6 +195,6 @@ data (impor barang dan saldo awal), dan tes penerimaan.
 
 ## Yang dibutuhkan darimu sekarang
 
-1. Setuju atau ubah **8 keputusan terbuka** di dokumen 10 bagian 9.
-2. Siapa 5-8 gudang untuk wawancara (satu bisa gudang milikmu sendiri).
+1. Setuju atau ubah **8 keputusan** di dokumen 10 bagian 9 (usulan bawaan dipakai bila tidak diubah).
+2. Siapa 2-3 pengguna bersedia untuk pilot Fase 1 (bisa pemilik Kasir yang punya stok pusat); bisa ditentukan nanti.
 3. Apakah Fase 0 (wawancara dan keputusan) dimulai sekarang, sementara Kasir masih menunggu pengujian, atau menunggu pilot Kasir selesai.

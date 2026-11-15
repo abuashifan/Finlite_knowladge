@@ -11,13 +11,17 @@
 | Pekerjaan | Status |
 | --- | --- |
 | Produk `gudang` di platform: tenant sendiri, paket Gudang dan Gudang Gratis, izin `gudang.*`, aktivasi, bootstrap, admin perpanjang/buka kunci | Selesai di backend (draf PR, menunggu CI) |
-| Wawancara 5-8 gudang | **Menunggu pemilik**: siapa yang diwawancara |
-| Keputusan terbuka (bagian 3) | **Menunggu pemilik**; usulan bawaan dipakai sementara |
+| Wawancara 5-8 gudang | **Dibatalkan** (tidak ada gudang yang bisa diwawancarai). Diganti riset meja (dokumen 10 bagian 2b) dan pilot irisan tipis; panduan di bawah disimpan untuk dipakai bila nanti ada gudang yang mau berbagi |
+| Keputusan (bagian 3) | Usulan bawaan dipakai; pemilik boleh mengubah kapan saja |
 | Draf spesifikasi Fase 1 (bagian 4) | Draf siap, disahkan setelah wawancara |
 | Aplikasi frontend Gudang (repositori baru) | **Perlu repositori baru milik pemilik** (lihat bagian 5) |
 | Pendaftaran mandiri dan masa coba Gudang | Ditunda ke awal Fase 1; sementara paket diberikan admin |
 
-## 2. Panduan wawancara gudang (30-45 menit)
+## 2. Panduan wawancara gudang (cadangan; tidak dipakai sekarang)
+
+> Wawancara dibatalkan karena tidak ada gudang yang bisa dihubungi. Panduan ini disimpan
+> untuk pengguna pilot atau gudang yang nanti mau berbagi cerita. Sampai saat itu,
+> kebutuhan divalidasi lewat riset meja dan pilot (dokumen 10 bagian 2b dan 8).
 
 **Sebelum:** minta izin merekam/mencatat; katakan bahwa ini untuk memahami cara kerja,
 bukan menjual. Jangan memperlihatkan solusi dulu. Jangan minta data sensitif (harga
@@ -72,8 +76,9 @@ repositori ini** atau dianonimkan.
 | Fitur yang paling diminta (urut) | |
 | Kesediaan membayar | |
 
-Setelah 5 gudang, hitung: berapa yang butuh batch, bin, multi-satuan, picking terarah,
-transfer. Angka itu mengunci prioritas Fase 1-3.
+Bila nanti ada cukup banyak jawaban, hitung berapa yang butuh batch, bin, multi-satuan,
+picking terarah, transfer. Angka itu mengunci prioritas Fase 1-3; sampai saat itu fitur
+tersebut bersyarat bukti pilot.
 
 ## 3. Keputusan terbuka (dari dokumen 10 bagian 9)
 
@@ -81,14 +86,14 @@ Usulan bawaan dipakai untuk membangun fondasi; ubah bila pemilik memutuskan lain
 
 | # | Keputusan | Usulan bawaan | Status |
 | --- | --- | --- | --- |
-| 1 | Nama produk | Finlite Gudang | Menunggu |
-| 2 | Segmen awal | Gudang/distributor kecil-menengah dan pemilik Kasir dengan gudang pusat | Menunggu |
-| 3 | Online-only | Ya, dengan antrean ulang singkat | Menunggu (konfirmasi di wawancara: sinyal gudang) |
-| 4 | Batch/kedaluwarsa di MVP? | Fase 2, kecuali wawancara menunjukkan mayoritas menjual makanan/obat | Menunggu data wawancara |
-| 5 | Pemilik angka stok bila tersambung ke Accounting | Gudang: kuantitas; Accounting: nilai | Menunggu |
-| 6 | Pemilik stok outlet bila tersambung ke Kasir | Kasir: outlet; Gudang: gudang; pindah lewat transfer | Menunggu |
-| 7 | Cetak label | Fase 2 | Menunggu |
-| 8 | Harga dan batas paket | Setelah wawancara; saat ini harga 0, Gudang Gratis maks 100 barang, Gudang 3 pengguna | Menunggu |
+| 1 | Nama produk | Finlite Gudang | Dipakai (usulan bawaan) |
+| 2 | Segmen awal | Gudang/distributor kecil-menengah dan pemilik Kasir dengan gudang pusat | Dipakai (usulan bawaan) |
+| 3 | Online-only | Ya, dengan antrean ulang singkat | Dipakai; diuji di pilot (sinyal gudang) |
+| 4 | Batch/kedaluwarsa di MVP? | Fase 2, kecuali wawancara menunjukkan mayoritas menjual makanan/obat | Dipakai: Fase 2; naik ke Fase 1 hanya bila pilot menunjukkan perlu |
+| 5 | Pemilik angka stok bila tersambung ke Accounting | Gudang: kuantitas; Accounting: nilai | Dipakai (usulan bawaan) |
+| 6 | Pemilik stok outlet bila tersambung ke Kasir | Kasir: outlet; Gudang: gudang; pindah lewat transfer | Dipakai (usulan bawaan) |
+| 7 | Cetak label | Fase 2 | Dipakai (usulan bawaan) |
+| 8 | Harga dan batas paket | Harga masih 0 (tempat). Acuan pesaing lokal: Kledo Pro Rp159.900/bulan, Jurnal Essentials Rp359.100, Accurate dasar sekitar Rp277.500-333.000 (dokumen 10 bagian 2b). Usulan: Gudang mulai di sekitar Rp100.000-200.000/bulan per perusahaan, **hipotesis yang harus diuji di pilot**; Gudang Gratis maks 100 barang | Menunggu keputusan pemilik |
 
 ## 4. Draf spesifikasi Fase 1 (disahkan setelah wawancara)
 
@@ -164,6 +169,8 @@ saldo awal sebagai penerimaan awal bertanggal, per lokasi.
 ## 5. Yang dibutuhkan dari pemilik sekarang
 
 1. **Repositori frontend baru**, misalnya `finlite_gudang` (React, Vite, TypeScript, Tailwind), agar saya bisa membuat kerangka aplikasi, PWA, masuk, dan pilih perusahaan. Saya tidak bisa membuat repositori sendiri; setelah repositori ada dan saya diberi akses, kerangkanya saya buat dari Kasir.
-2. **Daftar 5-8 gudang** untuk diwawancara dan siapa yang melakukannya (kamu atau saya menyiapkan lembar rekap dan merangkum catatanmu).
-3. **Persetujuan atau ubahan** delapan keputusan di bagian 3.
-4. Setelah wawancara, saya sahkan draf bagian 4 menjadi spesifikasi Fase 1 dan menyesuaikan prioritas Fase 1-3.
+2. **Konfirmasi atau ubahan keputusan** di bagian 3, terutama harga (nomor 8).
+3. **2-3 calon pengguna pilot** untuk Fase 1, bisa menyusul (misalnya pemilik Kasir yang punya stok pusat).
+
+Sementara itu saya bisa mengerjakan dari sisi backend: spesifikasi Fase 1 (bagian 4) menjadi
+tabel, layanan buku stok, dan tes, tanpa menunggu repositori frontend.
