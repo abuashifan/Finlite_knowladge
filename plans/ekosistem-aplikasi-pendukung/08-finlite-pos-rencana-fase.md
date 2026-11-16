@@ -411,23 +411,29 @@ Progres:
 
 ### Daftar periksa sebelum rilis production (wajib)
 
-**Cadangan database (Neon).** Dicek 14 November 2026 pada project
-`soft-cloud-02448469`, branch `production` (±100 MB). Kondisi saat itu belum
-layak untuk toko sungguhan:
+**Cadangan database (Neon).** Dicek dan diuji 15 November 2026 pada project
+`soft-cloud-02448469`, branch `production` (±110 MB). Paket Neon saat ini **Free**
+(`free_v3`), dan paket ini membatasi hampir semua fitur cadangan:
 
-| Hal | Kondisi 14 Nov 2026 | Target sebelum rilis |
+| Hal | Hasil percobaan 15 Nov 2026 (paket Free) | Syarat rilis production |
 | --- | --- | --- |
-| Retensi pemulihan titik waktu (PITR) | 6 jam | Beberapa hari (usul 7 hari; tergantung paket dan biaya, putuskan sebelum rilis) |
-| Snapshot terjadwal | Tidak ada | Harian di branch `production` |
-| Branch `production` dilindungi | Belum | Ya (cegah terhapus tak sengaja) |
-| Uji pemulihan | Belum pernah | Sekali: buat branch dari snapshot, cek data tenant dan transaksi utuh |
+| Retensi pemulihan titik waktu (PITR) | Maksimal **6 jam**; permintaan 7 hari ditolak | Beberapa hari: butuh paket berbayar |
+| Snapshot terjadwal | **Ditolak** ("backup schedule creation is not enabled") | Harian: butuh paket berbayar |
+| Branch `production` dilindungi | **Ditolak** (batas branch terlindungi paket) | Dilindungi: butuh paket berbayar |
+| Snapshot manual | **Berhasil** (`cadangan-manual-2026-11-15`) | Boleh dipakai sementara |
+| Uji pemulihan dari snapshot | **Berhasil**: dipulihkan ke branch baru, isi sama persis dengan production (3 pengguna, 11 perusahaan, 11 tenant, 11 schema tenant, 831 tabel). Branch uji kedaluwarsa otomatis 16 Nov 2026 | Ulangi sebelum rilis |
 
-Langkah:
-1. Pasang snapshot harian di branch `production` dan aktifkan proteksi branch.
-2. Naikkan retensi pemulihan sesuai keputusan (cek biaya penyimpanan).
-3. Uji pemulihan dari snapshot ke branch baru; cek daftar tenant, tabel
-   `pos_*`, dan saldo laporan, lalu hapus branch uji.
-4. Catat hasil uji dan tanggalnya di sini.
+Kesimpulan: **di paket Free belum ada cadangan otomatis.** Satu-satunya perlindungan adalah
+snapshot manual dan jendela pemulihan 6 jam. Sebelum toko sungguhan dipakai, pilih salah satu:
+1. **Naikkan paket Neon** (Launch atau lebih tinggi; cek harga dan batas di console.neon.tech) lalu pasang snapshot harian, retensi beberapa hari, dan proteksi branch `production`.
+2. **Cadangan logis terjadwal di luar Neon** (tanpa naik paket): tugas terjadwal (misalnya GitHub Actions) menjalankan `pg_dump` ke penyimpanan terpisah dengan retensi sendiri. Butuh connection string Neon disimpan sebagai secret oleh pemilik. Harus diuji pulih sekali.
+3. Selama belum ada keduanya: ambil **snapshot manual** sebelum setiap migrasi besar, rilis, atau pembersihan data, dan jangan undang toko sungguhan.
+
+Langkah sebelum rilis:
+1. Putuskan opsi 1 atau 2 di atas (biaya vs kerja).
+2. Pasang jadwal cadangan dan proteksi sesuai opsi itu.
+3. Ulangi uji pemulihan (snapshot atau dump ke branch/database baru, cek jumlah baris tabel pusat dan schema tenant), lalu hapus branch uji.
+4. Catat hasil dan tanggalnya di sini.
 
 Lain-lain sebelum rilis: teks syarat layanan dan kebijakan privasi (draf umum)
 ditinjau pemilik atau ahli hukum; harga rupiah paket Kasir dicantumkan;

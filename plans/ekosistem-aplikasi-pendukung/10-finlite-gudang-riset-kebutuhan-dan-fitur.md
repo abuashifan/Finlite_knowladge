@@ -9,9 +9,10 @@
 Riset dilakukan lewat pencarian web (14 November 2026) dan membaca kode Finlite
 yang ada. **Hampir semua sumber adalah blog vendor perangkat lunak**, jadi
 klaimnya dipakai sebagai gambaran pola fitur, bukan bukti. Tidak ditemukan data
-pasar independen untuk gudang UKM Indonesia, harga paket vendor lokal, maupun
-patokan angka kesalahan picking yang bisa dipercaya. Hal-hal itu harus dicari
-lewat wawancara (bagian 8), bukan dari internet.
+pasar independen untuk gudang UKM Indonesia dan tidak ada patokan angka kesalahan
+picking yang bisa dipercaya. **Tidak ada gudang yang bisa diwawancarai** (keputusan
+pemilik 15 November 2026), jadi kebutuhan divalidasi dengan riset meja (bagian 2b),
+simulasi, dan pilot kecil (bagian 8), bukan wawancara.
 
 ## 2. Apa yang sudah ada di Finlite
 
@@ -25,6 +26,54 @@ lewat wawancara (bagian 8), bukan dari internet.
 Artinya: Finlite Gudang bukan membangun inventaris dari nol. Nilainya ada di
 **lapisan fisik** yang belum dimiliki: lokasi, kedaluwarsa, alur kerja
 penerimaan dan pengeluaran dengan scan, serta kendali selisih.
+
+## 2b. Temuan riset meja untuk konteks Indonesia (15 November 2026)
+
+**Dokumen gudang yang lazim.** Surat jalan menyertai barang di kendaraan dan menjadi
+acuan pemeriksaan muatan. Delivery Order (DO) adalah perintah dari penjual/pemasok ke
+gudang untuk menyerahkan barang. Goods Receipt Note (GRN/bukti penerimaan) dibuat
+gudang setelah barang tiba **dan dihitung fisik**; isinya harus mencerminkan hasil
+hitung, bukan menyalin surat jalan, dan ditandatangani gudang serta pengantar. Bila
+jumlah berbeda dibuat berita acara ketidaksesuaian. Dalam praktik surat jalan dan DO
+sering tertukar
+([HashMicro: GRN](https://www.hashmicro.com/id/blog/goods-receipt-note/),
+[Jurnal.id: DO](https://www.jurnal.id/id/blog/apa-itu-delivery-order/),
+[HashMicro: receiving](https://www.hashmicro.com/id/blog/pengertian-receiving-gudang/)).
+**Implikasi:** penerimaan dan pengeluaran Finlite Gudang harus punya nomor dan bentuk
+dokumen yang bisa dicetak (surat jalan, bukti penerimaan), dengan kolom "jumlah
+dokumen" vs "jumlah diterima" dan catatan selisih.
+
+**Kedaluwarsa dan batch.** Untuk distribusi obat, standar CDOB mensyaratkan rotasi
+stok FEFO dan ketertelusuran (kartu stok manual atau elektronik); sumber menyebut
+rujukan Peraturan BPOM 20/2025 atau 9/2024, jadi **versi yang berlaku harus dicek
+langsung di situs BPOM** sebelum menjanjikan kepatuhan. Studi lama menemukan sebagian
+gudang pedagang besar farmasi tidak menerapkan FEFO dan mencampur barang recall di
+gudang biasa; ini mendukung lokasi "karantina" dan telusur batch
+([jurnal Unpad](https://journals.unpad.ac.id/farmasetika/article/download/70330/27768)).
+Finlite Gudang membantu proses, **bukan sertifikasi** CDOB atau CPOB.
+
+**Pesaing lokal (harga indikatif per bulan, wajib dicek ulang).** Kledo: Free, Pro
+Rp159.900, tingkat lebih tinggi menambah multi-gudang; Mekari Jurnal: Essentials
+Rp359.100, Plus Rp809.100 (multi-gudang di Plus); Accurate Online: sekitar Rp277.500-333.000
+dasar, tambahan cabang Rp99.900/cabang; Jubelio: berbasis jumlah pesanan, mulai
+Rp150/pesanan, rincian paket WMS tidak ditemukan
+([Kledo](https://kledo.com/?p=14284), [Jurnal.id](https://www.jurnal.id/id/harga/plus),
+[HashMicro: Accurate](https://www.hashmicro.com/id/blog/sistem-akuntansi-accurate),
+[Jubelio](https://jubelio.com/pricing/)). Tidak ada sumber yang memastikan batch,
+serial, atau transfer dua langkah di produk-produk itu; jangan mengklaim "lebih lengkap",
+klaim hanya "sederhana dan satu keluarga dengan Kasir dan Accounting".
+
+**Ukuran pasar.** Jumlah UMKM Indonesia sekitar 56-65 juta (Kementerian UMKM dan
+Kemenkop UKM, angka berbeda antar tahun dan sumber), sebagian besar mikro; sekitar 38%
+sudah onboarding digital; tidak ada angka khusus pencatatan stok per sektor
+([CNBC Indonesia](https://www.cnbcindonesia.com/news/20250827192011-4-661938/digitalisasi-pendampingan-mainkan-peran-penting-agar-umkm-naik-kelas),
+[Detik](https://finance.detik.com/berita-ekonomi-bisnis/d-8083800/kemen-umkm-digitalisasi-pendampingan-berperan-penting-agar-umkm-naik-kelas)).
+Mayoritas usaha mikro tidak butuh bin dan alur terarah (bagian 3); target realistis
+adalah gudang kecil-menengah dan pemilik Kasir yang punya stok pusat.
+
+**Celah riset yang tidak bisa ditutup dari internet:** frekuensi transfer antar
+gudang, kebutuhan batch per jenis usaha, kecepatan scan yang cukup, dan kesediaan
+membayar. Ditutup lewat pilot (bagian 8).
 
 ## 3. Inventaris vs WMS: kapan UKM butuh gudang
 
@@ -169,23 +218,25 @@ Peluang Finlite yang masuk akal (hipotesis):
 Yang bukan peluang awal: bersaing di omnichannel marketplace melawan vendor yang
 sudah mapan, dan WMS otomasi besar (konveyor, AGV).
 
-## 8. Yang harus dikonfirmasi sebelum membangun (wawancara 5-8 gudang)
+## 8. Cara memvalidasi tanpa wawancara
 
-Pertanyaan untuk gudang nyata, termasuk gudang milik pemilik produk:
-1. Berapa SKU, berapa lokasi/rak, berapa orang, berapa transaksi keluar-masuk per hari?
-2. Barang apa yang punya kedaluwarsa atau nomor batch? Apakah wajib telusur batch?
-3. Siapa yang menerima barang, siapa yang mengeluarkan, siapa yang menyetujui selisih?
-4. Dokumen apa yang dipakai hari ini (surat jalan, DO, BAST, faktur pemasok)? Bentuk dan nomornya?
-5. Apakah ada transfer antar gudang atau ke toko? Berapa lama barang dalam perjalanan?
-6. Seberapa sering opname, dan bagaimana menyelesaikan selisih sekarang?
-7. Perangkat: HP Android, iPhone, laptop, pemindai? Sinyal di gudang bagaimana (**online-only cukup?**).
-8. Sistem yang dipakai sekarang (Excel, Accurate, Jurnal, lainnya) dan apa yang paling dikeluhkan?
-9. Bersedia membayar berapa per bulan dan untuk apa?
+Tidak ada gudang yang bisa diwawancarai, jadi kebutuhan diuji dengan cara lain,
+berurutan dari yang paling murah:
 
-Hasil wawancara menentukan prioritas bagian 5, terutama batch/FEFO, picking
-terarah, dan multi-satuan.
+1. **Riset meja** (bagian 2 dan 2b): sudah dilakukan; diulang bila ada keputusan baru.
+2. **Skenario berbasis dokumen nyata yang umum**: alur surat jalan, DO, GRN, transfer, opname, retur ditulis sebagai skenario uji (dokumen 12 bagian 4) dan dipakai sebagai tes penerimaan.
+3. **Agen AI memerankan pengguna** (pola dokumen 07 bagian 9): staf gudang, kepala gudang, pemilik, dan auditor menjalankan skrip normal dan gagal (barang terakhir diambil bersamaan, kiriman diterima kurang, salah scan, simpan ulang). Membuktikan alur, **bukan** kemudahan pakai.
+4. **Pilot irisan tipis** (Fase 1 sebagai pilot): rilis fitur inti ke 2-3 pengguna yang bersedia, bisa pemilik Kasir yang punya stok pusat, dengan umpan balik di dalam aplikasi.
+5. **Data pemakaian**: tabel `gudang_audit_logs` dan laporan akurasi opname dipakai membaca perilaku nyata (berapa dokumen per hari, berapa selisih), bukan opini.
 
-## 9. Keputusan terbuka untuk pemilik produk
+Batas yang harus diingat: agen berperilaku rapi dan satu sampel kecil tidak mewakili
+pasar. Pilihan fitur yang mahal (batch, picking terarah, multi-satuan, marketplace)
+**dibuat bersyarat** pada bukti dari pilot, bukan asumsi. Pertanyaan yang tetap harus
+dijawab pilot: berapa SKU/lokasi/transaksi per hari, apakah ada batch/kedaluwarsa,
+siapa menyetujui selisih, perangkat dan sinyal di gudang, sistem yang dipakai sekarang,
+dan kesediaan membayar.
+
+## 9. Keputusan (usulan bawaan dipakai sampai pemilik mengubah)
 
 | # | Pertanyaan | Usulan bawaan |
 | --- | --- | --- |
