@@ -163,4 +163,3 @@ Simpan laporan CI dan Playwright, SHA penuh semua repositori, tautan run, konfig
 Catat setiap temuan dengan tanggal, SHA, skenario, langkah reproduksi, harapan dan hasil, tingkat dampak, tautan bukti, pemilik dan status. Temuan kehilangan atau salah stok, pelanggaran izin, duplikasi atau salah jurnal diperlakukan sebagai tingkat tinggi. Setelah perbaikan, jalankan ulang skenario terkait dan regresi yang terdampak pada pasangan SHA baru.
 
 Penerimaan simulasi Fase 6 lulus bila seluruh fitur wajib dalam cakupan telah siap dan seluruh skenario wajib lulus pada pasangan SHA yang tercatat, rekonsiliasi dan ekspor cocok dengan buku harapan, tes PostgreSQL dan keamanan lulus, serta tidak ada temuan tinggi terbuka. Integrasi yang dipilih wajib lulus rekonsiliasi masing-masing. Catat fitur di luar cakupan dan keterbatasan simulasi secara eksplisit. Pilot fisik dijadwalkan setelah gudang tersedia. Penerimaan program mengikuti kriteria simulasi di atas.
-
