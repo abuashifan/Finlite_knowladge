@@ -14,7 +14,7 @@
 | Produk `gudang` di platform: tenant sendiri, paket Gudang dan Gudang Gratis, izin `gudang.*`, aktivasi, bootstrap, admin perpanjang/buka kunci | Selesai di backend ([PR #30](https://github.com/abuashifan/laravel_backend/pull/30) sudah digabung) |
 | Wawancara 5-8 gudang | **Dibatalkan** karena gudang belum tersedia. Pengembangan memakai riset meja dan skenario sintetis. Pengujian simulasi dijalankan pada Fase 6 mengikuti dokumen 13 |
 | Keputusan (bagian 3) | Usulan bawaan dipakai; pemilik boleh mengubah kapan saja |
-| Spesifikasi Fase 1 (bagian 4) | Menjadi dasar implementasi. Revisi kendali kondisi, koreksi dan jadwal penerimaan mengikuti dokumen 11 |
+| Spesifikasi Fase 1 (bagian 4) | Implementasi termasuk kendali kondisi dan dokumen balik sudah digabung. Jadwal penerimaan mengikuti simulasi Fase 6 dalam dokumen 11 dan 13 |
 | Aplikasi frontend Gudang (repositori baru) | Kerangka Fase 0 tersedia di [finlite-gudang](https://github.com/abuashifan/finlite-gudang) |
 | Pendaftaran mandiri dan masa coba Gudang | Diimplementasikan pada PR Fase 1 dengan kode verifikasi email dan masa coba 14 hari |
 
