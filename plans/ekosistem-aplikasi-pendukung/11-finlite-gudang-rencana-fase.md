@@ -1,6 +1,6 @@
 # 11 — Finlite Gudang: rencana pembuatan per fase
 
-> **Status per 18 November 2026.** Fondasi produk dan kerangka frontend Fase 0 sudah tersedia. Bagian pertama Fase 1 sedang ditinjau. Fase berikutnya tetap mengikuti hasil pilot.
+> **Status per 18 November 2026.** Fondasi produk dan kerangka frontend Fase 0 sudah tersedia. Implementasi inventaris Fase 1 sedang ditinjau di PR. Pilot fisik belum dimulai. Fase berikutnya tetap mengikuti hasil pilot.
 > Dasar kebutuhan dan fitur: [10-finlite-gudang-riset-kebutuhan-dan-fitur.md](10-finlite-gudang-riset-kebutuhan-dan-fitur.md).
 > Pola kerja mengikuti [08-finlite-pos-rencana-fase.md](08-finlite-pos-rencana-fase.md), yang sudah terbukti
 > untuk Kasir. Ukuran usaha memakai S/M/L (kecil/sedang/besar), **bukan jadwal**.
@@ -61,7 +61,7 @@ Fondasi (kode kecil):
 
 ## Fase 1 — MVP inventaris gudang
 
-**Implementasi pertama, 18 November 2026.** Draft PR mencakup master barang dan lokasi, penerimaan langsung tanpa PO, saldo serta kartu stok per lokasi. Pilot dimulai dengan satu gudang dan beberapa lokasi per perusahaan. Status pengiriman mengikuti [PR backend #33](https://github.com/abuashifan/laravel_backend/pull/33) dan [PR aplikasi #1](https://github.com/abuashifan/finlite-gudang/pull/1).
+**Implementasi, 18 November 2026.** PR Fase 1 mencakup master barang, foto/barcode, mitra, banyak gudang dan lokasi, penerimaan langsung atau bertahap dengan bukti tiap kiriman, surat jalan, putaway, transfer dua langkah, penyelesaian selisih, serta persetujuan penyesuaian. Aplikasi menyediakan scan kamera, akses per gudang, pencarian, laporan, log aktivitas, ekspor dan pratinjau impor Excel/CSV, pendaftaran dan masa coba. Status pengiriman mengikuti [PR backend #33](https://github.com/abuashifan/laravel_backend/pull/33) dan [PR aplikasi #1](https://github.com/abuashifan/finlite-gudang/pull/1).
 
 **Hubungan dengan Finlite Project.** Permintaan atau pemakaian material proyek kelak dapat merujuk dokumen fisik lewat perusahaan, produk, jenis dokumen, dan UUID. Gudang memiliki kuantitas fisik. Penerimaan barang sendiri belum membuktikan material dipakai proyek. Pembebanan proyek dan jurnal mengikuti dokumen pemakaian serta kontrak integrasi antaraplikasi. Identitas proyek, otorisasi, dan pemetaan dokumen disepakati saat alur itu dibangun.
 
@@ -83,6 +83,8 @@ Frontend (HP lebih dulu, tablet/laptop untuk backoffice):
 - Layar terima, keluarkan, transfer, putaway dengan scan kamera barang dan lokasi.
 - Pencarian stok cepat (scan atau ketik) menampilkan "barang ini ada di mana".
 - Halaman Bantuan, harga, syarat, privasi (salin dari Kasir).
+
+**Penerimaan lapangan masih terbuka.** Pemilik mengonfirmasi bahwa hasil pilot belum tersedia. Saat pilot dimulai, catat tanggal mulai/selesai dan gudang uji. Pastikan semua dokumen masuk, keluar dan transfer selama tujuh hari tersedia di aplikasi. Pilih sampel barang yang bergerak, hitung fisik per lokasi, cocokkan dengan saldo pada waktu yang sama, dan telusuri selisih ke nomor dokumen. Simpan bukti bisnis di luar repositori. Uji otomatis memakai data sintetis.
 
 **Kriteria selesai:** satu gudang uji menjalankan satu minggu dengan semua barang masuk, keluar, dan transfer lewat aplikasi, tanpa catatan di luar aplikasi; stok fisik hasil hitung acak cocok dengan sistem untuk barang yang disentuh minggu itu; tes beban satu gudang 5.000 barang dan 500 mutasi per hari (usulan, sesuaikan hasil wawancara) di bawah 250 ms untuk baca.
 

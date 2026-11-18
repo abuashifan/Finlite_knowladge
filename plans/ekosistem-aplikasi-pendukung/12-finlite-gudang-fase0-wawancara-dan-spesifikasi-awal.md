@@ -15,7 +15,7 @@
 | Keputusan (bagian 3) | Usulan bawaan dipakai; pemilik boleh mengubah kapan saja |
 | Draf spesifikasi Fase 1 (bagian 4) | Draf siap, disahkan setelah wawancara |
 | Aplikasi frontend Gudang (repositori baru) | Kerangka Fase 0 tersedia di [finlite-gudang](https://github.com/abuashifan/finlite-gudang) |
-| Pendaftaran mandiri dan masa coba Gudang | Ditunda ke awal Fase 1; sementara paket diberikan admin |
+| Pendaftaran mandiri dan masa coba Gudang | Diimplementasikan pada PR Fase 1 dengan kode verifikasi email dan masa coba 14 hari |
 
 ## 2. Panduan wawancara gudang (cadangan; tidak dipakai sekarang)
 
