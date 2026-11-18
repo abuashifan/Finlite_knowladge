@@ -34,6 +34,21 @@ Fase 3 dan 5 sengaja bersyarat: dikerjakan hanya bila pilot menunjukkan kebutuha
 
 ---
 
+## Usulan penyesuaian prioritas, 18 November 2026
+
+**Status usulan untuk tinjauan pemilik.** Perbandingan dengan [riset audit ekosistem Gudang](https://chatgpt.com/s/t_6afd86cec344819183704db0bf9e9bc2) menunjukkan kebutuhan untuk memperjelas kendali dasar dan urutan fitur. Finlite masih dalam pengembangan dan memakai PostgreSQL Neon. Prioritas P0 dalam riset menunjukkan tingkat risiko suatu kemampuan pada alur yang memakainya. Pembagian fase mengikuti kesiapan alur Finlite.
+
+Urutan pekerjaan yang diusulkan setelah implementasi dan CI Fase 1:
+
+1. **Verifikasi aplikasi terpasang di lingkungan uji.** Tinjau PR backend dan aplikasi sebagai satu pasangan versi. Jalankan alur penerimaan, pengeluaran, transfer, putaway dan persetujuan pada deployment uji. Lengkapi Playwright dengan akun staf yang dibatasi per fitur dan gudang. Catat bukti versi, hasil, dan temuan. Pengujian CI delapan skenario saat ini memakai akun pemilik.
+2. **Periksa kendali kondisi dan koreksi barang.** Jenis lokasi karantina/rusak perlu diikuti aturan pengeluaran dan pemindahan dengan otorisasi yang jelas. Periksa koreksi dokumen terposting melalui dokumen balik yang merujuk dokumen awal, alasan, aktor dan idempotensi. Catat hasil sebagai sudah tersedia, perlu perbaikan, atau perlu implementasi setelah pemeriksaan kode dan tes. Prioritaskan celah yang memengaruhi alur uji yang tersedia.
+3. **Majukan retur dan multi-satuan ke awal Fase 2.** Retur pelanggan/pemasok merujuk dokumen asal dan kondisi barang. Konversi satuan menyimpan jumlah input, faktor konversi pada dokumen, dan jumlah dasar agar perubahan master dapat ditelusuri. Fitur ini dapat mendukung distributor dan material proyek. Picking, packing dan reservasi tetap mengikuti kebutuhan pesanan keluar yang ditemukan saat pilot. Pemindahan prioritas ini menunggu keputusan pemilik.
+4. **Rinci kontrak ekosistem sebelum membangun jembatan Fase 4.** Catat pemilik kuantitas, nilai dan biaya proyek, pemetaan barang, identitas sumber dokumen, idempotensi, koreksi, serta rekonsiliasi. Alur Project perlu membedakan permintaan, pengiriman, penerimaan, pemakaian dan pengembalian material. Accounting menggunakan rata-rata sesuai rencana saat ini. FIFO memerlukan keputusan metode biaya tersendiri.
+
+Pilot fisik tujuh hari dan pencocokan stok tetap tercatat sebagai penerimaan lapangan yang menunggu gudang uji. Kesiapan pemulihan Neon mengikuti daftar periksa rilis yang sudah berlaku. Hasil CI dan pengujian deployment dicatat bersama bukti pilot saat tersedia.
+
+---
+
 ## Fase 0 — Penemuan dan fondasi
 
 **Tujuan:** memastikan kita membangun yang dibutuhkan, dan menyiapkan Gudang
