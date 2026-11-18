@@ -2,26 +2,27 @@
 
 > **STATUS:** Fase 0 dimulai 15 November 2026. Fondasi platform di backend selesai
 > (laravel_backend#30). Dokumen ini berisi bahan yang dibutuhkan untuk menutup Fase 0:
-> panduan wawancara, daftar keputusan, dan **draf** spesifikasi Fase 1 untuk disahkan
-> setelah wawancara. Konteks: [10](10-finlite-gudang-riset-kebutuhan-dan-fitur.md) dan
+> panduan wawancara, daftar keputusan, dan spesifikasi awal Fase 1. Pada 18 November
+> pemilik menetapkan pengujian program dengan simulasi pada fase akhir. Pilot fisik
+> ditunda sampai gudang tersedia. Konteks: [10](10-finlite-gudang-riset-kebutuhan-dan-fitur.md) dan
 > [11](11-finlite-gudang-rencana-fase.md).
 
 ## 1. Status Fase 0
 
 | Pekerjaan | Status |
 | --- | --- |
-| Produk `gudang` di platform: tenant sendiri, paket Gudang dan Gudang Gratis, izin `gudang.*`, aktivasi, bootstrap, admin perpanjang/buka kunci | Selesai di backend (draf PR, menunggu CI) |
-| Wawancara 5-8 gudang | **Dibatalkan** (tidak ada gudang yang bisa diwawancarai). Diganti riset meja (dokumen 10 bagian 2b) dan pilot irisan tipis; panduan di bawah disimpan untuk dipakai bila nanti ada gudang yang mau berbagi |
+| Produk `gudang` di platform: tenant sendiri, paket Gudang dan Gudang Gratis, izin `gudang.*`, aktivasi, bootstrap, admin perpanjang/buka kunci | Selesai di backend ([PR #30](https://github.com/abuashifan/laravel_backend/pull/30) sudah digabung) |
+| Wawancara 5-8 gudang | **Dibatalkan** karena gudang belum tersedia. Pengembangan memakai riset meja dan skenario sintetis. Pengujian simulasi dijalankan pada Fase 6 mengikuti dokumen 13 |
 | Keputusan (bagian 3) | Usulan bawaan dipakai; pemilik boleh mengubah kapan saja |
-| Draf spesifikasi Fase 1 (bagian 4) | Draf siap, disahkan setelah wawancara |
-| Aplikasi frontend Gudang (repositori baru) | **Perlu repositori baru milik pemilik** (lihat bagian 5) |
-| Pendaftaran mandiri dan masa coba Gudang | Ditunda ke awal Fase 1; sementara paket diberikan admin |
+| Spesifikasi Fase 1 (bagian 4) | Menjadi dasar implementasi. Revisi kendali kondisi, koreksi dan jadwal penerimaan mengikuti dokumen 11 |
+| Aplikasi frontend Gudang (repositori baru) | Kerangka Fase 0 tersedia di [finlite-gudang](https://github.com/abuashifan/finlite-gudang) |
+| Pendaftaran mandiri dan masa coba Gudang | Diimplementasikan pada PR Fase 1 dengan kode verifikasi email dan masa coba 14 hari |
 
 ## 2. Panduan wawancara gudang (cadangan; tidak dipakai sekarang)
 
 > Wawancara dibatalkan karena tidak ada gudang yang bisa dihubungi. Panduan ini disimpan
 > untuk pengguna pilot atau gudang yang nanti mau berbagi cerita. Sampai saat itu,
-> kebutuhan divalidasi lewat riset meja dan pilot (dokumen 10 bagian 2b dan 8).
+> pengembangan mengikuti riset meja dan penerimaan program melalui simulasi pada Fase 6 (dokumen 13).
 
 **Sebelum:** minta izin merekam/mencatat; katakan bahwa ini untuk memahami cara kerja,
 bukan menjual. Jangan memperlihatkan solusi dulu. Jangan minta data sensitif (harga
@@ -77,8 +78,7 @@ repositori ini** atau dianonimkan.
 | Kesediaan membayar | |
 
 Bila nanti ada cukup banyak jawaban, hitung berapa yang butuh batch, bin, multi-satuan,
-picking terarah, transfer. Angka itu mengunci prioritas Fase 1-3; sampai saat itu fitur
-tersebut bersyarat bukti pilot.
+picking terarah, transfer. Jawaban tersebut dapat menjadi bahan revisi produk pada masa berikutnya. Prioritas pengembangan saat ini mengikuti keputusan pemilik dalam dokumen 11, termasuk retur dan multi-satuan di awal Fase 2.
 
 ## 3. Keputusan terbuka (dari dokumen 10 bagian 9)
 
@@ -88,14 +88,14 @@ Usulan bawaan dipakai untuk membangun fondasi; ubah bila pemilik memutuskan lain
 | --- | --- | --- | --- |
 | 1 | Nama produk | Finlite Gudang | Dipakai (usulan bawaan) |
 | 2 | Segmen awal | Gudang/distributor kecil-menengah dan pemilik Kasir dengan gudang pusat | Dipakai (usulan bawaan) |
-| 3 | Online-only | Ya, dengan antrean ulang singkat | Dipakai; diuji di pilot (sinyal gudang) |
-| 4 | Batch/kedaluwarsa di MVP? | Fase 2, kecuali wawancara menunjukkan mayoritas menjual makanan/obat | Dipakai: Fase 2; naik ke Fase 1 hanya bila pilot menunjukkan perlu |
+| 3 | Online-only | Ya, dengan antrean ulang singkat | Dipakai. Simulasi jaringan putus dan retry dijadwalkan pada Fase 6 |
+| 4 | Batch/kedaluwarsa di MVP? | Fase 2 | Dipakai sesuai roadmap revisi 18 November |
 | 5 | Pemilik angka stok bila tersambung ke Accounting | Gudang: kuantitas; Accounting: nilai | Dipakai (usulan bawaan) |
 | 6 | Pemilik stok outlet bila tersambung ke Kasir | Kasir: outlet; Gudang: gudang; pindah lewat transfer | Dipakai (usulan bawaan) |
 | 7 | Cetak label | Fase 2 | Dipakai (usulan bawaan) |
 | 8 | Harga dan batas paket | Harga masih 0 (tempat). Acuan pesaing lokal: Kledo Pro Rp159.900/bulan, Jurnal Essentials Rp359.100, Accurate dasar sekitar Rp277.500-333.000 (dokumen 10 bagian 2b). Usulan: Gudang mulai di sekitar Rp100.000-200.000/bulan per perusahaan, **hipotesis yang harus diuji di pilot**; Gudang Gratis maks 100 barang | Menunggu keputusan pemilik |
 
-## 4. Draf spesifikasi Fase 1 (disahkan setelah wawancara)
+## 4. Spesifikasi awal Fase 1
 
 ### 4.1 Pemilik domain dan prinsip
 
@@ -137,6 +137,8 @@ Penyesuaian:  Draf -> Menunggu persetujuan -> Disetujui (stok berubah) | Ditolak
 
 Aturan: dokumen yang sudah memengaruhi stok tidak dihapus; koreksi lewat dokumen lawan.
 
+Revisi kendali 18 November menambahkan pembatasan pengeluaran normal dari lokasi karantina/rusak, tindakan pelepasan kondisi berizin dan keterkaitan koreksi dengan dokumen awal. Jadwal implementasi mengikuti dokumen 11. Seluruh skenario penerimaan dijalankan bersama simulasi Fase 6.
+
 ### 4.5 Skenario gagal yang harus lulus tes
 
 - Dua staf mengeluarkan barang terakhir bersamaan: yang kedua ditolak, saldo tidak negatif.
@@ -166,11 +168,10 @@ saldo awal sebagai penerimaan awal bertanggal, per lokasi.
 (buku stok), `gudang_stock_balances` (saldo per barang per lokasi), `gudang_number_sequences`,
 `gudang_audit_logs`, `gudang_settings` (sudah ada).
 
-## 5. Yang dibutuhkan dari pemilik sekarang
+## 5. Status keputusan berikutnya
 
-1. **Repositori frontend baru**, misalnya `finlite_gudang` (React, Vite, TypeScript, Tailwind), agar saya bisa membuat kerangka aplikasi, PWA, masuk, dan pilih perusahaan. Saya tidak bisa membuat repositori sendiri; setelah repositori ada dan saya diberi akses, kerangkanya saya buat dari Kasir.
+1. Repositori frontend `finlite-gudang` sudah tersedia dan berisi kerangka Fase 0.
 2. **Konfirmasi atau ubahan keputusan** di bagian 3, terutama harga (nomor 8).
-3. **2-3 calon pengguna pilot** untuk Fase 1, bisa menyusul (misalnya pemilik Kasir yang punya stok pusat).
+3. Pilot fisik menunggu gudang tersedia. Pengujian program memakai AI sub-agent dan Playwright dengan data sintetis pada Fase 6 sesuai [dokumen 13](13-finlite-gudang-rencana-uji-simulasi.md).
 
-Sementara itu saya bisa mengerjakan dari sisi backend: spesifikasi Fase 1 (bagian 4) menjadi
-tabel, layanan buku stok, dan tes, tanpa menunggu repositori frontend.
+Spesifikasi awal ini dibaca bersama status implementasi dan revisi prioritas di dokumen 11. Bukti CI terdahulu terikat pada commit yang tercatat. Kampanye penerimaan versi final mengikuti dokumen 13.
