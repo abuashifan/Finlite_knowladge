@@ -1,6 +1,6 @@
 # 11 — Finlite Gudang: rencana pembuatan per fase
 
-> **STATUS: USULAN, BELUM DISETUJUI, BELUM ADA KODE.** Dibuat 14 November 2026.
+> **Status per 18 November 2026.** Fondasi produk dan kerangka frontend Fase 0 sudah tersedia. Bagian pertama Fase 1 sedang ditinjau. Fase berikutnya tetap mengikuti hasil pilot.
 > Dasar kebutuhan dan fitur: [10-finlite-gudang-riset-kebutuhan-dan-fitur.md](10-finlite-gudang-riset-kebutuhan-dan-fitur.md).
 > Pola kerja mengikuti [08-finlite-pos-rencana-fase.md](08-finlite-pos-rencana-fase.md), yang sudah terbukti
 > untuk Kasir. Ukuran usaha memakai S/M/L (kecil/sedang/besar), **bukan jadwal**.
@@ -53,13 +53,17 @@ Fondasi (kode kecil):
 
 **Kriteria selesai:** keputusan terbuka terjawab dan tercatat (usulan bawaan dipakai); riset meja selesai dan celahnya didaftar; pemilik dapat mendaftar, mengaktifkan produk Gudang, dan melihat halaman kosong yang terkunci langganan.
 
-**Status (15 November 2026):** Fase 0 dimulai. Fondasi backend selesai (laravel_backend#30: produk `gudang`, paket, izin, aktivasi). Panduan wawancara, daftar keputusan, dan draf spesifikasi Fase 1 ada di [12](12-finlite-gudang-fase0-wawancara-dan-spesifikasi-awal.md). Wawancara **dibatalkan** (15 November 2026); diganti riset meja dan pilot. Menunggu: repositori frontend baru dan konfirmasi keputusan.
+**Status (15 November 2026):** Fase 0 dimulai. Fondasi backend selesai (laravel_backend#30: produk `gudang`, paket, izin, aktivasi). Panduan wawancara, daftar keputusan, dan draf spesifikasi Fase 1 ada di [12](12-finlite-gudang-fase0-wawancara-dan-spesifikasi-awal.md). Wawancara **dibatalkan** (15 November 2026); diganti riset meja dan pilot. Frontend tersedia di repo `finlite-gudang` sejak 17 November. Harga final dan calon pengguna pilot masih terbuka.
 
 **Risiko:** pasar utama bukan yang diasumsikan, dan tanpa wawancara risiko ini lebih besar. Mitigasi: Fase 1 dibuat sebagai pilot irisan tipis, fitur mahal bersyarat bukti, dan rencana direvisi setelah pilot.
 
 ---
 
 ## Fase 1 — MVP inventaris gudang
+
+**Implementasi pertama, 18 November 2026.** Draft PR mencakup master barang dan lokasi, penerimaan langsung tanpa PO, saldo serta kartu stok per lokasi. Pilot dimulai dengan satu gudang dan beberapa lokasi per perusahaan. Status pengiriman mengikuti [PR backend #33](https://github.com/abuashifan/laravel_backend/pull/33) dan [PR aplikasi #1](https://github.com/abuashifan/finlite-gudang/pull/1).
+
+**Hubungan dengan Finlite Project.** Permintaan atau pemakaian material proyek kelak dapat merujuk dokumen fisik lewat perusahaan, produk, jenis dokumen, dan UUID. Gudang memiliki kuantitas fisik. Penerimaan barang sendiri belum membuktikan material dipakai proyek. Pembebanan proyek dan jurnal mengikuti dokumen pemakaian serta kontrak integrasi antaraplikasi. Identitas proyek, otorisasi, dan pemetaan dokumen disepakati saat alur itu dibangun.
 
 **Tujuan:** gudang kecil-menengah berhenti mencatat di kertas dan Excel; semua barang masuk, keluar, dan pindah punya dokumen, dan stok per gudang/lokasi bisa dipercaya.
 

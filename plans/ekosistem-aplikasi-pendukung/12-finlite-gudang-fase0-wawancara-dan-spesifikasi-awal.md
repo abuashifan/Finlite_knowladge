@@ -10,11 +10,11 @@
 
 | Pekerjaan | Status |
 | --- | --- |
-| Produk `gudang` di platform: tenant sendiri, paket Gudang dan Gudang Gratis, izin `gudang.*`, aktivasi, bootstrap, admin perpanjang/buka kunci | Selesai di backend (draf PR, menunggu CI) |
+| Produk `gudang` di platform: tenant sendiri, paket Gudang dan Gudang Gratis, izin `gudang.*`, aktivasi, bootstrap, admin perpanjang/buka kunci | Selesai di backend ([PR #30](https://github.com/abuashifan/laravel_backend/pull/30) sudah digabung) |
 | Wawancara 5-8 gudang | **Dibatalkan** (tidak ada gudang yang bisa diwawancarai). Diganti riset meja (dokumen 10 bagian 2b) dan pilot irisan tipis; panduan di bawah disimpan untuk dipakai bila nanti ada gudang yang mau berbagi |
 | Keputusan (bagian 3) | Usulan bawaan dipakai; pemilik boleh mengubah kapan saja |
 | Draf spesifikasi Fase 1 (bagian 4) | Draf siap, disahkan setelah wawancara |
-| Aplikasi frontend Gudang (repositori baru) | **Perlu repositori baru milik pemilik** (lihat bagian 5) |
+| Aplikasi frontend Gudang (repositori baru) | Kerangka Fase 0 tersedia di [finlite-gudang](https://github.com/abuashifan/finlite-gudang) |
 | Pendaftaran mandiri dan masa coba Gudang | Ditunda ke awal Fase 1; sementara paket diberikan admin |
 
 ## 2. Panduan wawancara gudang (cadangan; tidak dipakai sekarang)
@@ -168,7 +168,7 @@ saldo awal sebagai penerimaan awal bertanggal, per lokasi.
 
 ## 5. Yang dibutuhkan dari pemilik sekarang
 
-1. **Repositori frontend baru**, misalnya `finlite_gudang` (React, Vite, TypeScript, Tailwind), agar saya bisa membuat kerangka aplikasi, PWA, masuk, dan pilih perusahaan. Saya tidak bisa membuat repositori sendiri; setelah repositori ada dan saya diberi akses, kerangkanya saya buat dari Kasir.
+1. Repositori frontend `finlite-gudang` sudah tersedia dan berisi kerangka Fase 0.
 2. **Konfirmasi atau ubahan keputusan** di bagian 3, terutama harga (nomor 8).
 3. **2-3 calon pengguna pilot** untuk Fase 1, bisa menyusul (misalnya pemilik Kasir yang punya stok pusat).
 
