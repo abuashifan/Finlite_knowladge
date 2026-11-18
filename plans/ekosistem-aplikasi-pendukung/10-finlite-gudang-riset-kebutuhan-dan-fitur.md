@@ -3,6 +3,8 @@
 > **STATUS: RISET DAN USULAN, BELUM DISETUJUI.** Dibuat 14 November 2026. Nama
 > "Finlite Gudang" sementara (di dokumen lama disebut WMS). Rencana kerja per fase
 > ada di [11-finlite-gudang-rencana-fase.md](11-finlite-gudang-rencana-fase.md).
+>
+> **Pembaruan keputusan, 18 November 2026.** Pemilik menetapkan pengembangan dengan data sintetis dan seluruh pengujian program pada fase akhir. Pilot fisik ditunda sampai gudang tersedia. Prioritas implementasi mengikuti revisi dokumen 11. Rencana eksekusi AI sub-agent dan Playwright ada di [13](13-finlite-gudang-rencana-uji-simulasi.md).
 
 ## 1. Cara membaca riset ini
 
@@ -11,8 +13,7 @@ yang ada. **Hampir semua sumber adalah blog vendor perangkat lunak**, jadi
 klaimnya dipakai sebagai gambaran pola fitur, bukan bukti. Tidak ditemukan data
 pasar independen untuk gudang UKM Indonesia dan tidak ada patokan angka kesalahan
 picking yang bisa dipercaya. **Tidak ada gudang yang bisa diwawancarai** (keputusan
-pemilik 15 November 2026), jadi kebutuhan divalidasi dengan riset meja (bagian 2b),
-simulasi, dan pilot kecil (bagian 8), bukan wawancara.
+pemilik 15 November 2026). Pengembangan memakai riset meja (bagian 2b) dan skenario sintetis. Pengujian program melalui simulasi dijadwalkan pada Fase 6 mengikuti keputusan 18 November.
 
 ## 2. Apa yang sudah ada di Finlite
 
@@ -73,7 +74,7 @@ adalah gudang kecil-menengah dan pemilik Kasir yang punya stok pusat.
 
 **Celah riset yang tidak bisa ditutup dari internet:** frekuensi transfer antar
 gudang, kebutuhan batch per jenis usaha, kecepatan scan yang cukup, dan kesediaan
-membayar. Ditutup lewat pilot (bagian 8).
+membayar. Hal tersebut dicatat untuk dipelajari saat pengguna dan gudang tersedia. Penerimaan program saat ini memakai simulasi pada fase akhir.
 
 ## 3. Inventaris vs WMS: kapan UKM butuh gudang
 
@@ -226,15 +227,10 @@ berurutan dari yang paling murah:
 1. **Riset meja** (bagian 2 dan 2b): sudah dilakukan; diulang bila ada keputusan baru.
 2. **Skenario berbasis dokumen nyata yang umum**: alur surat jalan, DO, GRN, transfer, opname, retur ditulis sebagai skenario uji (dokumen 12 bagian 4) dan dipakai sebagai tes penerimaan.
 3. **Agen AI memerankan pengguna** (pola dokumen 07 bagian 9): staf gudang, kepala gudang, pemilik, dan auditor menjalankan skrip normal dan gagal (barang terakhir diambil bersamaan, kiriman diterima kurang, salah scan, simpan ulang). Membuktikan alur, **bukan** kemudahan pakai.
-4. **Pilot irisan tipis** (Fase 1 sebagai pilot): rilis fitur inti ke 2-3 pengguna yang bersedia, bisa pemilik Kasir yang punya stok pusat, dengan umpan balik di dalam aplikasi.
-5. **Data pemakaian**: tabel `gudang_audit_logs` dan laporan akurasi opname dipakai membaca perilaku nyata (berapa dokumen per hari, berapa selisih), bukan opini.
+4. **Kampanye simulasi pada Fase 6** sesuai keputusan 18 November. AI sub-agent dan Playwright menjalankan alur dari saldo awal dan penerimaan sampai ekspor laporan pada data sintetis. Saldo, mutasi, izin, integrasi dan isi ekspor dibandingkan dengan perhitungan independen dalam dokumen 13.
+5. **Pilot fisik dan data pemakaian** dijadwalkan saat gudang tersedia. Log aktivitas dan laporan opname dapat dipakai untuk mempelajari perilaku operasional pada tahap itu.
 
-Batas yang harus diingat: agen berperilaku rapi dan satu sampel kecil tidak mewakili
-pasar. Pilihan fitur yang mahal (batch, picking terarah, multi-satuan, marketplace)
-**dibuat bersyarat** pada bukti dari pilot, bukan asumsi. Pertanyaan yang tetap harus
-dijawab pilot: berapa SKU/lokasi/transaksi per hari, apakah ada batch/kedaluwarsa,
-siapa menyetujui selisih, perangkat dan sinyal di gudang, sistem yang dipakai sekarang,
-dan kesediaan membayar.
+Simulasi menyediakan bukti perilaku program dan konsistensi angka pada skenario yang ditetapkan. Prioritas fitur mengikuti keputusan pemilik pada dokumen 11, termasuk retur dan multi-satuan di awal Fase 2. Kesesuaian pasar, perangkat, kondisi sinyal dan kesediaan membayar dicatat untuk evaluasi saat pemakaian nyata tersedia.
 
 ## 9. Keputusan (usulan bawaan dipakai sampai pemilik mengubah)
 
