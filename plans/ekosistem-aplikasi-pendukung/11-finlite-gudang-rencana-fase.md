@@ -1,6 +1,6 @@
 # 11 — Finlite Gudang: rencana pembuatan per fase
 
-> **Status per 18 November 2026.** Fondasi produk dan kerangka frontend Fase 0 sudah tersedia. Implementasi inventaris Fase 1 sedang ditinjau di PR. Pemilik menetapkan pengembangan dilanjutkan dengan data simulasi. Seluruh pengujian program dijadwalkan pada Fase 6, mengikuti [rencana uji simulasi](13-finlite-gudang-rencana-uji-simulasi.md). Pilot fisik ditunda sampai gudang tersedia.
+> **Status per 18 November 2026.** Implementasi Fase 1 beserta pelengkap kendali kondisi dan dokumen balik sudah digabung ke repositori backend dan frontend. Pengujian penerimaan pelengkap dijadwalkan pada Fase 6 dengan simulasi, mengikuti [rencana uji simulasi](13-finlite-gudang-rencana-uji-simulasi.md). Tahap pengembangan berikutnya adalah Fase 2. Pilot fisik dijadwalkan saat gudang tersedia.
 > Dasar kebutuhan dan fitur: [10-finlite-gudang-riset-kebutuhan-dan-fitur.md](10-finlite-gudang-riset-kebutuhan-dan-fitur.md).
 > Pola kerja mengikuti [08-finlite-pos-rencana-fase.md](08-finlite-pos-rencana-fase.md), yang sudah terbukti
 > untuk Kasir. Ukuran usaha memakai S/M/L (kecil/sedang/besar), **bukan jadwal**.
@@ -74,6 +74,8 @@ Fondasi (kode kecil):
 ---
 
 ## Fase 1 — MVP inventaris gudang
+
+**Implementasi Fase 1 selesai pada 18 November 2026.** Fondasi inventaris tersedia melalui backend #33 dan aplikasi #1. Pelengkap kondisi dan koreksi sudah digabung melalui [backend #34](https://github.com/abuashifan/laravel_backend/pull/34) dan [aplikasi #2](https://github.com/abuashifan/finlite-gudang/pull/2). Pengeluaran normal menegakkan kondisi lokasi. Dokumen PLS melepas barang dari karantina/rusak dengan alasan, izin persetujuan dan akses kedua lokasi. Dokumen KOR membalik mutasi bersih aktual, menyimpan referensi serta alasan dan membuka kembali sisa penerimaan bertahap bila bukti kirimannya dikoreksi. Laporan lokasi dan pergerakan memuat kondisi barang. Eksekusi tes program untuk pelengkap ini dijadwalkan pada Fase 6. Commit pelengkap memakai penanda penundaan CI sesuai keputusan pemilik.
 
 **Bukti CI historis, 18 November 2026, sebelum revisi jadwal pengujian.** [CI backend](https://github.com/abuashifan/laravel_backend/actions/runs/44238190640) lulus pada commit `2a4660633cd401525cf0bc169f440af1d1e64fbf`, termasuk PostgreSQL, pengeluaran bersamaan, serta beban 5.000 barang dan 3.500 mutasi sintetis. Waktu baca tertinggi pada endpoint yang diukur adalah 50,4 ms di runner CI. [CI aplikasi](https://github.com/abuashifan/finlite-gudang/actions/runs/44292130240) lulus pada commit `c1029cef517194ac60fe4636641afcf0084c5afd` dengan lint, build, dan delapan skenario Playwright ukuran HP. Skenario mencakup penerimaan ulang setelah respons hilang, impor saldo awal, surat jalan, penerimaan bertahap, saldo transfer setelah penyelesaian selisih, putaway, persetujuan penyesuaian, dan scan kamera simulasi. Pengujian browser memakai akun pemilik. Izin staf diuji di backend. Kampanye penerimaan versi final dijadwalkan pada Fase 6 dengan simulasi. Evaluasi kamera fisik mengikuti ketersediaan perangkat dan gudang pada tahap penggunaan nyata.
 
@@ -224,5 +226,5 @@ data (impor barang dan saldo awal), dan tes penerimaan.
 ## Keputusan dan pekerjaan berikutnya
 
 1. Jadwal pengujian ditetapkan pada Fase 6 dengan simulasi, AI sub-agent dan Playwright. Rencana rinci ada di dokumen 13.
-2. Pengembangan berikutnya melengkapi kendali dasar Fase 1, kemudian retur dan multi-satuan pada Fase 2.
+2. Implementasi kendali dasar Fase 1 sudah selesai. Pengembangan berikutnya adalah retur dan multi-satuan pada Fase 2.
 3. Harga final dan cakupan integrasi komersial dicatat sebagai keputusan produk saat dibutuhkan. Pilot fisik menunggu ketersediaan gudang.
