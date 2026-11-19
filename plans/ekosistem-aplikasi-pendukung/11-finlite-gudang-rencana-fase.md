@@ -1,6 +1,6 @@
 # 11 — Finlite Gudang: rencana pembuatan per fase
 
-> **Status per 18 November 2026.** Implementasi Fase 1 beserta pelengkap kendali kondisi dan dokumen balik sudah digabung ke repositori backend dan frontend. Pengujian penerimaan pelengkap dijadwalkan pada Fase 6 dengan simulasi, mengikuti [rencana uji simulasi](13-finlite-gudang-rencana-uji-simulasi.md). Tahap pengembangan berikutnya adalah Fase 2. Pilot fisik dijadwalkan saat gudang tersedia.
+> **Status per 19 November 2026.** Implementasi Fase 1 dan Fase 2 sudah digabung ke repositori backend dan frontend. Pengujian penerimaan dijadwalkan pada Fase 6 dengan simulasi, mengikuti [rencana uji simulasi](13-finlite-gudang-rencana-uji-simulasi.md); belum ada hasil penerimaan Fase 2. Tahap implementasi berikutnya Fase 3. Pilot fisik dijadwalkan saat gudang tersedia.
 > Dasar kebutuhan dan fitur: [10-finlite-gudang-riset-kebutuhan-dan-fitur.md](10-finlite-gudang-riset-kebutuhan-dan-fitur.md).
 > Pola kerja mengikuti [08-finlite-pos-rencana-fase.md](08-finlite-pos-rencana-fase.md), yang sudah terbukti
 > untuk Kasir. Ukuran usaha memakai S/M/L (kecil/sedang/besar), **bukan jadwal**.
@@ -115,21 +115,18 @@ Frontend (HP lebih dulu, tablet/laptop untuk backoffice):
 
 **Tujuan:** mengurangi selisih dan barang kedaluwarsa, dan membuat opname tidak menghentikan operasi.
 
-Backend:
-- Retur pelanggan dan retur pemasok merujuk dokumen asal, membatasi jumlah terhadap sisa yang dapat diretur, mencatat alasan dan kondisi, serta menempatkan barang ke simpan/karantina/rusak sesuai keputusan berizin. Pengulangan permintaan menghasilkan satu posting.
-- Multi-satuan (dus, pak, pcs) dengan konversi ke satuan dasar di penerimaan, pengeluaran, transfer, retur dan impor. Dokumen menyimpan satuan input, faktor saat transaksi dan jumlah dasar. Tentukan pembulatan, batas desimal dan perilaku perubahan faktor pada transaksi berikutnya.
-- Opname penuh dan cycle count: sesi hitung per gudang/zona/kelas, hitung buta (penghitung tidak melihat angka sistem), hitung ulang untuk selisih besar, persetujuan sebelum penyesuaian; jadwal cycle count berdasar kelas ABC (A paling sering).
-- Klasifikasi ABC dari pergerakan 90 hari, dihitung otomatis dan bisa ditimpa.
-- Batch/lot dan tanggal kedaluwarsa per barang (opsional per barang): dicatat saat terima, saldo per batch, FEFO saat keluar (kedaluwarsa terdekat disarankan lebih dulu), peringatan N hari sebelum kedaluwarsa, karantina batch, telusur batch maju-mundur untuk recall.
-- Stok minimum/maksimum dan titik pesan per barang atau gudang; daftar saran pembelian (permintaan selama lead time + stok pengaman) yang ditandai kapan terakhir diperbarui supaya tidak basi.
-- Laporan: barang akan kedaluwarsa, kedaluwarsa, barang lambat dan stok mati, akurasi stok (hasil cycle count), selisih per penghitung dan per lokasi.
-- Cetak label barcode barang dan bin (PDF ukuran label) dengan kode yang bisa dipindai kamera. GS1-128 untuk lot dan kedaluwarsa mengikuti pilihan kebutuhan pemilik.
+**Implementasi Fase 2 selesai dan digabung pada 19 November 2026:** [backend #35](https://github.com/abuashifan/laravel_backend/pull/35) dan [aplikasi #3](https://github.com/abuashifan/finlite-gudang/pull/3). Backend kontrak `66582bba24436b7e5e7ed12f1b47c9762b04a15b` dipasangkan dalam konfigurasi CI frontend; perubahan aplikasi `abc3e7e58056009f8e94d6c1577d74696d868d66`. Pemeriksaan saat implementasi terbatas pada pembacaan kode, perapihan format dan pemeriksaan whitespace. Belum ada hasil pengujian atau penerimaan Fase 2. Seluruh lint, build, suite backend, Playwright dan PostgreSQL dijalankan pada Fase 6; commit serta merge memakai `[skip ci]` mengikuti keputusan pemilik. Status merge bukan bukti kelulusan atau verifikasi deployment. Pilot fisik menunggu gudang tersedia.
 
-Frontend:
-- Layar retur dan kondisi barang, pilihan satuan serta pratinjau hasil konversi pada dokumen.
-- Layar hitung (scan lokasi, scan barang, isi jumlah), daftar tugas hitung hari ini.
-- Layar peringatan: kedaluwarsa dan stok menipis di beranda.
-- Cetak label dari daftar barang dan lokasi.
+Backend dan frontend:
+- Retur pelanggan dan pemasok mendukung sebagian, merujuk dokumen asal dan membatasi kuota tersisa, termasuk batch asal; kondisi dan alasan tercatat. Permintaan ulang idempoten menghasilkan satu efek.
+- Multi-satuan memakai jumlah dasar tepat sampai 3 desimal. Dokumen menyimpan snapshot jumlah input, satuan, faktor dan jumlah dasar yang tidak berubah saat master berubah; retry idempoten tidak menggandakan posting.
+- Batch dan kedaluwarsa opsional per barang: saldo per batch, alokasi FEFO, karantina dan telusur maju-mundur. Saat pelacakan diaktifkan untuk barang dengan histori, saldo dan mutasi lama dipetakan ke batch `HIST-<id barang>` sebagai karantina untuk ditinjau. Migrasi skema sendiri tidak mengaktifkan pelacakan.
+- Opname buta memakai snapshot pada cutoff: input hitung mewakili kondisi pada cutoff dan mutasi setelah cutoff tetap dipertahankan. Selisih lebih dari maksimum 1 satuan atau 10% memerlukan hitung ulang oleh penghitung kedua. Tersedia persetujuan, pembatalan, histori dan dokumen balik.
+- ABC dihitung dari volume keluar 90 hari, dapat ditimpa; jadwal A setiap 7 hari, B 30 hari dan C 90 hari.
+- Minimum, maksimum dan titik pesan per barang per gudang; saran pembelian memperhitungkan lead time (bawaan 7 hari) dan stok pengaman, dengan waktu perhitungan.
+- Laporan kedaluwarsa 30 hari, barang lambat 30 hari, stok mati 90 hari dan akurasi opname; ekspor XLSX lengkap.
+- Label barang dan lokasi menghasilkan PDF Code128B ASCII berbasis vektor asli, ukuran dapat diatur 30–150 × 20–100 mm (bawaan 60 × 35 mm); nama ditransliterasi ke ASCII. GS1-128 tetap pilihan kebutuhan berikutnya.
+- Aplikasi menyediakan alur retur, satuan, opname, batch, saran, laporan dan label. Perusahaan dan pengguna bersama memakai produk `gudang`. Jembatan Accounting dan Project belum tersedia; referensi lintas produk mendatang memakai UUID dokumen stabil.
 
 **Kriteria implementasi selesai:** kontrak retur, satuan, opname, batch dan layar terkait tersedia. Pada Fase 6, simulasi membuktikan konversi dan retur konsisten, opname dengan transaksi bersamaan memakai snapshot/cut-off yang terdokumentasi, selisih terlacak dan FEFO benar. Gambar barcode sintetis serta kamera simulasi dipakai untuk menguji pembacaan dan penanganan kegagalan.
 
