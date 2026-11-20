@@ -148,6 +148,14 @@ Dikerjakan bila pemilik memilih kebutuhan pesanan keluar. Cakupan yang dipilih m
 
 **Kriteria implementasi selesai:** reservasi, picking dan packing yang dipilih tersedia beserta aturan status dan sisa pesanan. Pada Fase 6, pesanan sintetis melewati pick-pack-kirim, pengiriman sebagian, pembatalan dan pelepasan reservasi dengan saldo yang sesuai.
 
+**Perubahan Fase 3a (20 November 2026, branch kerja):** satu pesanan dapat menahan stok
+barang tanpa batch dalam satu lokasi simpan atau terima, lalu dikirim sebagian atau
+seluruhnya dengan surat jalan. Pembatalan melepas sisa reservasi dengan alasan. Saldo
+fisik dan tersedia ditampilkan terpisah, dan pengurangan stok lain menjaga jumlah yang
+dipesan. Koreksi surat jalan tetap lewat dokumen balik dan tidak mengaktifkan ulang
+pesanan. Pick list, verifikasi scan, packing dan reservasi per batch masih tersisa.
+Penerimaan mengikuti jadwal simulasi Fase 6.
+
 ---
 
 ## Fase 4 — Jembatan opsional
@@ -223,5 +231,5 @@ data (impor barang dan saldo awal), dan tes penerimaan.
 ## Keputusan dan pekerjaan berikutnya
 
 1. Jadwal pengujian ditetapkan pada Fase 6 dengan simulasi, AI sub-agent dan Playwright. Rencana rinci ada di dokumen 13.
-2. Implementasi kendali dasar Fase 1 sudah selesai. Pengembangan berikutnya adalah retur dan multi-satuan pada Fase 2.
+2. Implementasi Fase 1 dan Fase 2 sudah digabung. Lanjutkan Fase 3 dari reservasi pesanan, lalu picking dan packing menurut cakupan yang dipilih.
 3. Harga final dan cakupan integrasi komersial dicatat sebagai keputusan produk saat dibutuhkan. Pilot fisik menunggu ketersediaan gudang.
