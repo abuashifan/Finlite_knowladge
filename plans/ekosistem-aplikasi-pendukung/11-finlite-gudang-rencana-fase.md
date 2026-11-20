@@ -1,6 +1,6 @@
 # 11 — Finlite Gudang: rencana pembuatan per fase
 
-> **Status per 19 November 2026.** Implementasi Fase 1 dan Fase 2 sudah digabung ke repositori backend dan frontend. Pengujian penerimaan dijadwalkan pada Fase 6 dengan simulasi, mengikuti [rencana uji simulasi](13-finlite-gudang-rencana-uji-simulasi.md); belum ada hasil penerimaan Fase 2. Tahap implementasi berikutnya Fase 3. Pilot fisik dijadwalkan saat gudang tersedia.
+> **Status per 20 November 2026.** Implementasi Fase 1 dan Fase 2 sudah digabung. Implementasi Fase 3 tersedia untuk tinjauan draf di backend dan aplikasi. Pengujian penerimaan dijadwalkan pada Fase 6 sesuai [rencana uji simulasi](13-finlite-gudang-rencana-uji-simulasi.md). Pilot fisik dijadwalkan saat gudang tersedia.
 > Dasar kebutuhan dan fitur: [10-finlite-gudang-riset-kebutuhan-dan-fitur.md](10-finlite-gudang-riset-kebutuhan-dan-fitur.md).
 > Pola kerja mengikuti [08-finlite-pos-rencana-fase.md](08-finlite-pos-rencana-fase.md), yang sudah terbukti
 > untuk Kasir. Ukuran usaha memakai S/M/L (kecil/sedang/besar), **bukan jadwal**.
@@ -148,6 +148,16 @@ Dikerjakan bila pemilik memilih kebutuhan pesanan keluar. Cakupan yang dipilih m
 
 **Kriteria implementasi selesai:** reservasi, picking dan packing yang dipilih tersedia beserta aturan status dan sisa pesanan. Pada Fase 6, pesanan sintetis melewati pick-pack-kirim, pengiriman sebagian, pembatalan dan pelepasan reservasi dengan saldo yang sesuai.
 
+**Implementasi Fase 3 (20 November 2026, draf):** reservasi per pesanan mendukung banyak
+lokasi simpan/terima dalam satu gudang, multi-satuan dengan faktor tetap, dan batch
+FEFO. Daftar ambil urut lokasi memeriksa kode rak, barang, batch, dan jumlah aktual.
+Kekurangan dicatat dengan alasan. Packing menyimpan daftar kemasan bernomor dengan
+berat dan catatan, serta menyediakan label PDF Code 128. Pengiriman mengurangi
+saldo fisik dan reservasi secara atomik dengan surat jalan per lokasi asal. Pembatalan
+sesi mempertahankan reservasi; pembatalan sisa melepasnya. Putaway menyarankan lokasi
+dari barang sama, kategori dan kapasitas slot SKU. Picking gelombang dan per zona
+di luar cakupan implementasi ini. Penerimaan mengikuti jadwal simulasi Fase 6.
+
 ---
 
 ## Fase 4 — Jembatan opsional
@@ -223,5 +233,5 @@ data (impor barang dan saldo awal), dan tes penerimaan.
 ## Keputusan dan pekerjaan berikutnya
 
 1. Jadwal pengujian ditetapkan pada Fase 6 dengan simulasi, AI sub-agent dan Playwright. Rencana rinci ada di dokumen 13.
-2. Implementasi kendali dasar Fase 1 sudah selesai. Pengembangan berikutnya adalah retur dan multi-satuan pada Fase 2.
+2. Implementasi Fase 1 dan Fase 2 sudah digabung. Fase 3 tersedia untuk tinjauan draf. Tahap berikutnya mengikuti cakupan integrasi Fase 4 yang dipilih.
 3. Harga final dan cakupan integrasi komersial dicatat sebagai keputusan produk saat dibutuhkan. Pilot fisik menunggu ketersediaan gudang.
