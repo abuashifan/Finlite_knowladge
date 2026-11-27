@@ -1,9 +1,22 @@
 # 11 — Finlite Gudang: rencana pembuatan per fase
 
-> **Status per 19 November 2026.** Implementasi Fase 1 dan Fase 2 sudah digabung ke repositori backend dan frontend. Pengujian penerimaan dijadwalkan pada Fase 6 dengan simulasi, mengikuti [rencana uji simulasi](13-finlite-gudang-rencana-uji-simulasi.md); belum ada hasil penerimaan Fase 2. Tahap implementasi berikutnya Fase 3. Pilot fisik dijadwalkan saat gudang tersedia.
+> **Status per 27 November 2026.** Implementasi Fase 1, 2, 3, dan 4a sudah digabung ke repositori backend dan frontend; Fase 4b siap digabung. Pengujian penerimaan tetap dijadwalkan pada Fase 6 dengan simulasi, mengikuti [rencana uji simulasi](13-finlite-gudang-rencana-uji-simulasi.md). Pilot fisik dijadwalkan saat gudang tersedia. Rincian per fase ada di bagian Status implementasi.
 > Dasar kebutuhan dan fitur: [10-finlite-gudang-riset-kebutuhan-dan-fitur.md](10-finlite-gudang-riset-kebutuhan-dan-fitur.md).
 > Pola kerja mengikuti [08-finlite-pos-rencana-fase.md](08-finlite-pos-rencana-fase.md), yang sudah terbukti
 > untuk Kasir. Ukuran usaha memakai S/M/L (kecil/sedang/besar), **bukan jadwal**.
+
+## Status implementasi
+
+| Fase | Status | Catatan |
+| --- | --- | --- |
+| 1–2 | Digabung | Dasar inventaris dan kendali stok. Penerimaan program pada Fase 6. |
+| 3 | Digabung (27 Nov 2026) | Pesanan keluar, reservasi, pick-pack-kirim, saran rak. Surat jalan pesanan keluar tidak bisa dikoreksi dengan KOR; barang kembali dicatat sebagai retur pelanggan. Laporan rapi dengan Excel, PDF, dan Cetak seluruh baris. |
+| 4a Gudang → Kasir | Digabung (27 Nov 2026) | Surat jalan yang sudah dicatat dikirim ke kotak masuk Kasir (aksi eksplisit). Stok toko bertambah saat petugas toko mengisi jumlah diterima; selisih wajib beralasan dan kembali ke Gudang sebagai pengecualian tanpa mengubah stok gudang. Barang dicocokkan lewat barcode lalu SKU; barang yang belum ada di Kasir menahan kiriman dan bisa diimpor. Surat jalan yang sudah sampai ke Kasir tidak bisa dikoreksi. |
+| 4b Gudang → Accounting | Siap digabung | Penerimaan menjadi **Goods Receipt Accounting** yang langsung diterima (persediaan lawan barang diterima belum ditagih), sehingga tagihan vendor dibuat "Dari Goods Receipt" dan stok tidak tercatat dua kali. Harga beli di penerimaan Gudang opsional dan dipakai hanya bila GR tidak punya PO; nilai tetap milik Accounting (rata-rata). Penyesuaian dan selisih opname yang disetujui menjadi penyesuaian stok Accounting. Surat jalan, transfer, dan retur tidak dikirim. Produk dicocokkan lewat SKU = kode produk; pemasok lewat nama asal barang lalu pemasok bawaan; semua masuk ke satu gudang Accounting. Transfer antar entitas belum ada karena Gudang belum punya konsep entitas. |
+
+Keterbatasan yang diketahui: penjaga tanggal Accounting memakai tanggal server (UTC), jadi dokumen
+Gudang pukul 00.00–07.00 WIB bisa ditahan sebagai tanggal masa depan dan berhasil dikirim ulang
+setelah pukul 07.00 WIB.
 
 ## Prinsip
 
